@@ -126,7 +126,7 @@ export default function Sidebar() {
               {!isCollapsed && <span>{item.title}</span>}
             </Link>
           </CollapsibleTrigger>
-          {!isCollapsed && (
+          {!isCollapsed && item.submenu && (
             <CollapsibleContent className="space-y-1">
               {item.submenu.map((subitem) => (
                 <Link
