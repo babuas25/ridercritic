@@ -1,0 +1,141 @@
+"use client"
+
+import { useState } from 'react'
+import { useTheme } from 'next-themes'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Moon, Sun, Search, Menu, LogOut } from 'lucide-react'
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
+import Link from 'next/link'
+import { useAuth } from '@/contexts/AuthContext'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+export default function Header() {
+  const { theme, setTheme } = useTheme()
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const { user, logout } = useAuth()
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+    } catch (error) {
+      console.error('Failed to logout:', error)
+    }
+  }
+
+  return (
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-14 md:h-16 items-center justify-between">
+        <div className="flex items-center gap-2 md:gap-6">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="sm" className="md:hidden">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[280px] sm:w-[350px]">
+              <SheetHeader>
+                <SheetTitle>Navigation Menu</SheetTitle>
+              </SheetHeader>
+              <nav className="flex flex-col gap-4 mt-4">
+                <Link href="/" className="text-sm font-medium hover:text-primary">Motorcycle</Link>
+                <Link href="/types" className="text-sm font-medium hover:text-primary">Types</Link>
+                <Link href="/official-brands" className="text-sm font-medium hover:text-primary">Official Brands</Link>
+                <Link href="/unofficial-brands" className="text-sm font-medium hover:text-primary">Unofficial Brands</Link>
+                <Link href="/safety" className="text-sm font-medium hover:text-primary">Safety</Link>
+                <Link href="/specification" className="text-sm font-medium hover:text-primary">Specification</Link>
+                <Link href="/new-critics" className="text-sm font-medium hover:text-primary">New Critics</Link>
+                <Link href="/product" className="text-sm font-medium hover:text-primary">Product</Link>
+                <Link href="/upcoming" className="text-sm font-medium hover:text-primary">Upcoming</Link>
+                <Link href="/legend" className="text-sm font-medium hover:text-primary">Legend</Link>
+                <Link href="/forums" className="text-sm font-medium hover:text-primary">Forums</Link>
+                <Link href="/dealers" className="text-sm font-medium hover:text-primary">Dealers</Link>
+              </nav>
+            </SheetContent>
+          </Sheet>
+          <Link href="/" className="flex items-center">
+            <span className="font-nordique text-lg md:text-xl font-bold">Raider Critic</span>
+          </Link>
+        </div>
+
+        <div className="flex items-center gap-2 md:gap-4">
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 md:hidden"
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+            >
+              <Search className="h-4 w-4" />
+              <span className="sr-only">Toggle search</span>
+            </Button>
+            <div className={`absolute right-0 top-full mt-2 w-[280px] ${isSearchOpen ? 'block' : 'hidden'} md:relative md:block md:mt-0 md:w-auto`}>
+              <Input
+                type="search"
+                placeholder="Search..."
+                className="w-full md:w-[200px] lg:w-[300px]"
+              />
+              <Search className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
+            </div>
+          </div>
+
+          <nav className="flex items-center gap-1 md:gap-4">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            >
+              <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+              <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              <span className="sr-only">Toggle theme</span>
+            </Button>
+            
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.photoURL || undefined} alt={user.displayName || ''} />
+                      <AvatarFallback>
+                        {user.displayName?.charAt(0) || user.email?.charAt(0) || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Logout</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Link href="/auth/login">
+                  <Button variant="ghost" size="sm" className="text-xs md:text-sm">Sign in</Button>
+                </Link>
+                <Link href="/auth/register">
+                  <Button size="sm" className="text-xs md:text-sm">Sign up</Button>
+                </Link>
+              </>
+            )}
+          </nav>
+        </div>
+      </div>
+    </header>
+  )
+}
