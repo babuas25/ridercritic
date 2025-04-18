@@ -8,10 +8,18 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
+  NavigationMenuViewport,
 } from "@/components/ui/navigation-menu"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+import { ChevronDown } from "lucide-react"
 import Link from 'next/link'
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { cn } from "@/lib/utils"
+import { useState, useEffect } from "react"
 
 const types = [
   "Commuter", "Naked", "Cruiser", "Chopper", "Sport Bike", "Touring Motorcycle",
@@ -34,16 +42,178 @@ const unofficialBrands = [
 
 export default function MainNav() {
   const isDesktop = useMediaQuery("(min-width: 768px)")
+  const [isMounted, setIsMounted] = useState(false)
+  const [openSections, setOpenSections] = useState<string[]>([])
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  const toggleSection = (section: string) => {
+    setOpenSections(prev => 
+      prev.includes(section) 
+        ? prev.filter(s => s !== section)
+        : [...prev, section]
+    )
+  }
+
+  // Don't render anything during SSR or before hydration
+  if (!isMounted) {
+    return null
+  }
 
   if (!isDesktop) {
-    return null
+    return (
+      <div className="grid gap-4">
+        <Link href="/new-critics" className="text-sm font-medium hover:text-primary">
+          New Critics
+        </Link>
+        
+        <Collapsible open={openSections.includes('motorcycle')} onOpenChange={() => toggleSection('motorcycle')}>
+          <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-medium hover:text-primary">
+            Motorcycle
+            <ChevronDown className={cn(
+              "h-4 w-4 transition-transform duration-200",
+              openSections.includes('motorcycle') ? "rotate-180" : ""
+            )} />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pl-4 pt-2">
+            <div className="grid gap-2">
+              <Link href="/latest-reviews" className="text-sm text-muted-foreground hover:text-primary">
+                Latest Reviews
+              </Link>
+              <Link href="/top-rated" className="text-sm text-muted-foreground hover:text-primary">
+                Top Rated
+              </Link>
+              <Link href="/compare" className="text-sm text-muted-foreground hover:text-primary">
+                Compare Models
+              </Link>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+
+        <Collapsible open={openSections.includes('types')} onOpenChange={() => toggleSection('types')}>
+          <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-medium hover:text-primary">
+            Types
+            <ChevronDown className={cn(
+              "h-4 w-4 transition-transform duration-200",
+              openSections.includes('types') ? "rotate-180" : ""
+            )} />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pl-4 pt-2">
+            <div className="grid grid-cols-2 gap-2">
+              {types.map((type) => (
+                <Link
+                  key={type}
+                  href={`/types/${type.toLowerCase().replace(/\s+/g, '-')}`}
+                  className="text-sm text-muted-foreground hover:text-primary"
+                >
+                  {type}
+                </Link>
+              ))}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+
+        <Collapsible open={openSections.includes('official-brands')} onOpenChange={() => toggleSection('official-brands')}>
+          <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-medium hover:text-primary">
+            Official Brands
+            <ChevronDown className={cn(
+              "h-4 w-4 transition-transform duration-200",
+              openSections.includes('official-brands') ? "rotate-180" : ""
+            )} />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pl-4 pt-2">
+            <div className="grid grid-cols-2 gap-2">
+              {officialBrands.map((brand) => (
+                <Link
+                  key={brand}
+                  href={`/brands/${brand.toLowerCase().replace(/\s+/g, '-')}`}
+                  className="text-sm text-muted-foreground hover:text-primary"
+                >
+                  {brand}
+                </Link>
+              ))}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+
+        <Collapsible open={openSections.includes('unofficial-brands')} onOpenChange={() => toggleSection('unofficial-brands')}>
+          <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-medium hover:text-primary">
+            Unofficial Brands
+            <ChevronDown className={cn(
+              "h-4 w-4 transition-transform duration-200",
+              openSections.includes('unofficial-brands') ? "rotate-180" : ""
+            )} />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pl-4 pt-2">
+            <div className="grid grid-cols-2 gap-2">
+              {unofficialBrands.map((brand) => (
+                <Link
+                  key={brand}
+                  href={`/brands/${brand.toLowerCase().replace(/\s+/g, '-')}`}
+                  className="text-sm text-muted-foreground hover:text-primary"
+                >
+                  {brand}
+                </Link>
+              ))}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+
+        <Link href="/safety" className="text-sm font-medium hover:text-primary">
+          Safety
+        </Link>
+
+        <Link href="/specification" className="text-sm font-medium hover:text-primary">
+          Specification
+        </Link>
+
+        <Collapsible open={openSections.includes('more')} onOpenChange={() => toggleSection('more')}>
+          <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-medium hover:text-primary">
+            More
+            <ChevronDown className={cn(
+              "h-4 w-4 transition-transform duration-200",
+              openSections.includes('more') ? "rotate-180" : ""
+            )} />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pl-4 pt-2">
+            <div className="grid gap-2">
+              <Link href="/product" className="text-sm text-muted-foreground hover:text-primary">
+                Product
+              </Link>
+              <Link href="/upcoming" className="text-sm text-muted-foreground hover:text-primary">
+                Upcoming
+              </Link>
+              <Link href="/legend" className="text-sm text-muted-foreground hover:text-primary">
+                Legend
+              </Link>
+              <Link href="/forums" className="text-sm text-muted-foreground hover:text-primary">
+                Forums
+              </Link>
+              <Link href="/dealers" className="text-sm text-muted-foreground hover:text-primary">
+                Dealers
+              </Link>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
+    )
   }
 
   return (
     <div className="border-b bg-background">
       <div className="container flex h-14 items-center">
         <NavigationMenu>
-          <NavigationMenuList>
+          <NavigationMenuList className="gap-2">
+            <NavigationMenuItem>
+              <Link href="/new-critics" legacyBehavior passHref>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  New Critics
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+
             <NavigationMenuItem>
               <NavigationMenuTrigger>Motorcycle</NavigationMenuTrigger>
               <NavigationMenuContent>
@@ -136,14 +306,11 @@ export default function MainNav() {
               </Link>
             </NavigationMenuItem>
 
-            <NavigationMenuItem>
+            <NavigationMenuItem className="hidden lg:flex relative">
               <NavigationMenuTrigger>More</NavigationMenuTrigger>
               <NavigationMenuContent>
-                <div className="w-[200px] p-4 md:w-[300px]">
+                <div className="w-[200px] p-4">
                   <div className="grid gap-2">
-                    <Link href="/new-critics" className="block p-2 hover:bg-accent rounded-md">
-                      New Critics
-                    </Link>
                     <Link href="/product" className="block p-2 hover:bg-accent rounded-md">
                       Product
                     </Link>
@@ -164,6 +331,7 @@ export default function MainNav() {
               </NavigationMenuContent>
             </NavigationMenuItem>
           </NavigationMenuList>
+          <NavigationMenuViewport className="origin-top-right" />
         </NavigationMenu>
       </div>
     </div>

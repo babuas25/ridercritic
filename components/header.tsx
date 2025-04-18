@@ -4,13 +4,14 @@ import { useState } from 'react'
 import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Moon, Sun, Search, Menu, LogOut } from 'lucide-react'
+import { Moon, Sun, Search, Menu } from 'lucide-react'
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
   SheetHeader,
   SheetTitle,
+  SheetClose,
 } from "@/components/ui/sheet"
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
@@ -48,26 +49,36 @@ export default function Header() {
             </SheetTrigger>
             <SheetContent side="left" className="w-[280px] sm:w-[350px]">
               <SheetHeader>
-                <SheetTitle>Navigation Menu</SheetTitle>
+                <SheetTitle>Menu</SheetTitle>
               </SheetHeader>
-              <nav className="flex flex-col gap-4 mt-4">
-                <Link href="/" className="text-sm font-medium hover:text-primary">Motorcycle</Link>
-                <Link href="/types" className="text-sm font-medium hover:text-primary">Types</Link>
-                <Link href="/official-brands" className="text-sm font-medium hover:text-primary">Official Brands</Link>
-                <Link href="/unofficial-brands" className="text-sm font-medium hover:text-primary">Unofficial Brands</Link>
-                <Link href="/safety" className="text-sm font-medium hover:text-primary">Safety</Link>
-                <Link href="/specification" className="text-sm font-medium hover:text-primary">Specification</Link>
-                <Link href="/new-critics" className="text-sm font-medium hover:text-primary">New Critics</Link>
-                <Link href="/product" className="text-sm font-medium hover:text-primary">Product</Link>
-                <Link href="/upcoming" className="text-sm font-medium hover:text-primary">Upcoming</Link>
-                <Link href="/legend" className="text-sm font-medium hover:text-primary">Legend</Link>
-                <Link href="/forums" className="text-sm font-medium hover:text-primary">Forums</Link>
-                <Link href="/dealers" className="text-sm font-medium hover:text-primary">Dealers</Link>
-              </nav>
+              <div className="mt-4">
+                <SheetClose asChild>
+                  <Link href="/" className="block py-2 text-sm font-medium hover:text-primary">
+                    Home
+                  </Link>
+                </SheetClose>
+                {user && (
+                  <SheetClose asChild>
+                    <Link href="/dashboard" className="block py-2 text-sm font-medium hover:text-primary">
+                      Dashboard
+                    </Link>
+                  </SheetClose>
+                )}
+                <SheetClose asChild>
+                  <Link href="/about" className="block py-2 text-sm font-medium hover:text-primary">
+                    About
+                  </Link>
+                </SheetClose>
+                <SheetClose asChild>
+                  <Link href="/contact" className="block py-2 text-sm font-medium hover:text-primary">
+                    Contact
+                  </Link>
+                </SheetClose>
+              </div>
             </SheetContent>
           </Sheet>
           <Link href="/" className="flex items-center">
-            <span className="font-nordique text-lg md:text-xl font-bold">Raider Critic</span>
+            <span className="font-nordique text-lg md:text-xl font-bold">ridercritic</span>
           </Link>
         </div>
 
@@ -118,8 +129,7 @@ export default function Header() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Logout</span>
+                    Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

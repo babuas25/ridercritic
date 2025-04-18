@@ -1,4 +1,4 @@
-# RiderCritic
+# ridercritic
 
 A modern web application for motorcycle enthusiasts to share and review their riding experiences.
 

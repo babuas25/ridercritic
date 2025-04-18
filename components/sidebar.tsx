@@ -89,7 +89,7 @@ const sidebarNavItems: SidebarItem[] = [
 ]
 
 export default function Sidebar() {
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(true)
   const [openSubmenus, setOpenSubmenus] = useState<string[]>([])
   const pathname = usePathname()
   const { user } = useAuth()

@@ -1,3 +1,5 @@
+import { Facebook, Instagram, Users } from "lucide-react"
+
 export default function Footer() {
   return (
     <footer className="border-t">
@@ -8,11 +10,32 @@ export default function Footer() {
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <a href="https://twitter.com" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground">
-            Twitter
+          <a 
+            href="https://www.facebook.com/RiderCritic/" 
+            target="_blank" 
+            rel="noreferrer" 
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Facebook className="h-5 w-5" />
+            <span className="sr-only">Facebook Page</span>
           </a>
-          <a href="https://github.com" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground">
-            GitHub
+          <a 
+            href="https://www.instagram.com/ridercritic/" 
+            target="_blank" 
+            rel="noreferrer" 
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Instagram className="h-5 w-5" />
+            <span className="sr-only">Instagram</span>
+          </a>
+          <a 
+            href="https://www.facebook.com/groups/ridercritic" 
+            target="_blank" 
+            rel="noreferrer" 
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Users className="h-5 w-5" />
+            <span className="sr-only">Facebook Group</span>
           </a>
         </div>
       </div>

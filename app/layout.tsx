@@ -10,8 +10,8 @@ import Footer from '@/components/footer';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Modern Web App',
-  description: 'A beautiful and responsive web application',
+  title: 'ridercritic',
+  description: 'Your ultimate guide to motorcycles and riding culture',
 };
 
 export default function RootLayout({
