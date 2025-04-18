@@ -9,6 +9,7 @@ A modern web application for motorcycle enthusiasts to share and review their ri
 - Modern UI with Tailwind CSS
 - Real-time Updates
 - Responsive Design
+- Secure Environment Configuration
 
 ## Tech Stack
 
@@ -17,6 +18,7 @@ A modern web application for motorcycle enthusiasts to share and review their ri
 - Tailwind CSS
 - Shadcn/ui Components
 - Vercel Deployment
+- GitHub Actions CI/CD
 
 ## Development
 
@@ -35,4 +37,4 @@ The application is automatically deployed to Vercel through GitHub Actions CI/CD
 
 ## Environment Variables
 
-Required environment variables are managed through GitHub Secrets and automatically deployed to Vercel. 
+Required environment variables are securely managed through GitHub Secrets and automatically deployed to Vercel. 
