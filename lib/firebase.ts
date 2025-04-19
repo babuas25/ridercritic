@@ -17,4 +17,7 @@ const firebaseConfig = {
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 const auth = getAuth(app);
 
+// Configure auth persistence
+auth.useDeviceLanguage();
+
 export { app, auth }; 

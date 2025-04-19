@@ -64,7 +64,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       provider.addScope('public_profile');
       
       provider.setCustomParameters({
-        'auth_type': 'rerequest'
+        'auth_type': 'rerequest',
+        'display': 'popup',
+        'redirect_uri': typeof window !== 'undefined' 
+          ? `${window.location.origin}/__/auth/handler`
+          : 'https://ridercritic.com/__/auth/handler'
       });
 
       const result = await signInWithPopup(auth, provider);
@@ -78,6 +82,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       if (error.code === 'auth/popup-closed-by-user') {
         throw new Error('Sign-in was cancelled. Please try again.');
+      }
+      if (error.code === 'auth/operation-not-allowed') {
+        throw new Error('Facebook authentication is not enabled. Please contact support.');
       }
       throw error;
     }
