@@ -26,7 +26,7 @@ export default function RootLayout({
           <AuthProvider>
             <div className="min-h-screen flex flex-col">
               <Header />
-              <div className="flex-1 flex">
+              <div className="flex flex-1">
                 <div className="md:block hidden">
                   <Sidebar />
                 </div>
