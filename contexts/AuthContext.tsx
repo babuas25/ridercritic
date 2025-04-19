@@ -27,36 +27,38 @@ interface AuthContextType {
   resetPassword: (email: string) => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const getErrorMessage = (error: AuthError): string => {
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
+
+function getErrorMessage(error: AuthError): string {
   switch (error.code) {
+    case 'auth/email-already-in-use':
+      return 'This email is already registered.';
     case 'auth/invalid-email':
       return 'Invalid email address.';
+    case 'auth/operation-not-allowed':
+      return 'Operation not allowed.';
+    case 'auth/weak-password':
+      return 'Password is too weak.';
     case 'auth/user-disabled':
       return 'This account has been disabled.';
     case 'auth/user-not-found':
       return 'No account found with this email.';
     case 'auth/wrong-password':
       return 'Incorrect password.';
-    case 'auth/email-already-in-use':
-      return 'This email is already in use.';
-    case 'auth/weak-password':
-      return 'Password is too weak.';
-    case 'auth/operation-not-allowed':
-      return 'This operation is not allowed.';
-    case 'auth/account-exists-with-different-credential':
-      return 'An account already exists with the same email address but different sign-in credentials.';
     case 'auth/popup-closed-by-user':
-      return 'Sign-in popup was closed before completing the sign-in.';
-    case 'auth/cancelled-popup-request':
-      return 'Another sign-in popup is already open.';
-    case 'auth/popup-blocked':
-      return 'Sign-in popup was blocked by the browser.';
+      return 'Sign-in popup was closed before completion.';
     default:
-      return 'An error occurred. Please try again.';
+      return 'An error occurred during authentication.';
   }
-};
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -92,6 +94,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithGoogle = async () => {
     try {
       const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({
+        prompt: 'select_account',
+        login_hint: '',
+      });
       await signInWithPopup(auth, provider);
     } catch (error) {
       const authError = error as AuthError;
@@ -102,6 +108,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithFacebook = async () => {
     try {
       const provider = new FacebookAuthProvider();
+      provider.addScope('email');
+      provider.addScope('public_profile');
+      provider.setCustomParameters({
+        'display': 'popup',
+        'auth_type': 'rerequest'
+      });
       await signInWithPopup(auth, provider);
     } catch (error) {
       const authError = error as AuthError;
@@ -139,12 +151,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 } 
