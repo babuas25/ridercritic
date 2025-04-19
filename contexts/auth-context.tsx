@@ -66,17 +66,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       provider.setCustomParameters({
         'auth_type': 'rerequest',
         'display': 'popup',
-        'redirect_uri': typeof window !== 'undefined' 
-          ? `${window.location.origin}/__/auth/handler`
-          : 'https://ridercritic.com/__/auth/handler'
+        'client_id': process.env.NEXT_PUBLIC_FACEBOOK_APP_ID as string,
+        'response_type': 'code',
+        'return_scopes': 'true'
       });
 
-      const result = await signInWithPopup(auth, provider);
-      if (!result.user) {
+      console.log('Attempting Facebook sign-in...');
+      
+      const result = await signInWithPopup(auth, provider).catch((error) => {
+        console.error('Popup error:', error);
+        throw error;
+      });
+
+      if (!result?.user) {
+        console.error('No user data returned');
         throw new Error('No user data returned from Facebook sign-in');
       }
+
+      console.log('Sign-in successful');
     } catch (error: any) {
-      console.error('Error signing in with Facebook:', error);
+      console.error('Facebook sign-in error:', error);
+      
       if (error.code === 'auth/account-exists-with-different-credential') {
         throw new Error('An account already exists with the same email address but different sign-in credentials.');
       }
@@ -85,6 +95,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       if (error.code === 'auth/operation-not-allowed') {
         throw new Error('Facebook authentication is not enabled. Please contact support.');
+      }
+      if (error.code === 'auth/popup-blocked') {
+        throw new Error('The sign-in popup was blocked by your browser. Please allow popups and try again.');
       }
       throw error;
     }
