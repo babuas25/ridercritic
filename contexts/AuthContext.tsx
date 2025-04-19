@@ -95,12 +95,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({
-        prompt: 'select_account',
-        login_hint: '',
+        client_id: '636450919079-7fadrkhf6kdsmqfij66bk5glepl5rl5n.apps.googleusercontent.com',
+        prompt: 'select_account'
       });
+      console.log('Attempting Google sign-in...');
       await signInWithPopup(auth, provider);
+      console.log('Google sign-in successful');
     } catch (error) {
       const authError = error as AuthError;
+      console.error('Google sign-in error:', error);
       throw new Error(getErrorMessage(authError));
     }
   };
