@@ -24,6 +24,13 @@
           }
         ]
       }
+    ],
+    "redirects": [
+      {
+        "source": "https://www.ridercritic.com/:path*",
+        "destination": "https://ridercritic.com/:path*",
+        "type": 301
+      }
     ]
   }
 }
