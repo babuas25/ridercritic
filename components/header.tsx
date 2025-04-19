@@ -54,24 +54,24 @@ export default function Header() {
               </SheetHeader>
               <div className="mt-4">
                 <SheetClose asChild>
-                  <Link href="/" className="block py-2 text-sm font-medium hover:text-primary">
+                  <Link href="/" className="block py-2 text-sm font-[600] hover:text-primary">
                     Home
                   </Link>
                 </SheetClose>
                 {user && (
                   <SheetClose asChild>
-                    <Link href="/dashboard" className="block py-2 text-sm font-medium hover:text-primary">
+                    <Link href="/dashboard" className="block py-2 text-sm font-[600] hover:text-primary">
                       Dashboard
                     </Link>
                   </SheetClose>
                 )}
                 <SheetClose asChild>
-                  <Link href="/about" className="block py-2 text-sm font-medium hover:text-primary">
+                  <Link href="/about" className="block py-2 text-sm font-[600] hover:text-primary">
                     About
                   </Link>
                 </SheetClose>
                 <SheetClose asChild>
-                  <Link href="/contact" className="block py-2 text-sm font-medium hover:text-primary">
+                  <Link href="/contact" className="block py-2 text-sm font-[600] hover:text-primary">
                     Contact
                   </Link>
                 </SheetClose>
@@ -79,7 +79,7 @@ export default function Header() {
             </SheetContent>
           </Sheet>
           <Link href="/" className="flex items-center">
-            <span className="font-nordique text-lg md:text-xl font-bold">ridercritic</span>
+            <span className="text-lg md:text-xl font-bold font-nordique">ridercritic</span>
           </Link>
         </div>
 
@@ -130,19 +130,19 @@ export default function Header() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="flex items-center">
+                    <Link href="/dashboard" className="flex items-center font-[600]">
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Dashboard</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/account/delete" className="flex items-center text-destructive">
+                    <Link href="/account/delete" className="flex items-center text-destructive font-[600]">
                       <Trash2 className="mr-2 h-4 w-4" />
                       <span>Delete Account</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="flex items-center">
+                  <DropdownMenuItem onClick={handleLogout} className="flex items-center font-[600]">
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Logout</span>
                   </DropdownMenuItem>

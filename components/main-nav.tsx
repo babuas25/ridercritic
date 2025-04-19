@@ -65,12 +65,12 @@ export default function MainNav() {
   if (!isDesktop) {
     return (
       <div className="grid gap-4">
-        <Link href="/new-critics" className="text-sm font-medium hover:text-primary">
+        <Link href="/new-critics" className="text-sm font-[600] hover:text-primary">
           New Critics
         </Link>
         
         <Collapsible open={openSections.includes('motorcycle')} onOpenChange={() => toggleSection('motorcycle')}>
-          <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-medium hover:text-primary">
+          <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-[600] hover:text-primary">
             Motorcycle
             <ChevronDown className={cn(
               "h-4 w-4 transition-transform duration-200",
@@ -79,13 +79,13 @@ export default function MainNav() {
           </CollapsibleTrigger>
           <CollapsibleContent className="pl-4 pt-2">
             <div className="grid gap-2">
-              <Link href="/latest-reviews" className="text-sm text-muted-foreground hover:text-primary">
+              <Link href="/latest-reviews" className="text-sm font-[600] text-muted-foreground hover:text-primary">
                 Latest Reviews
               </Link>
-              <Link href="/top-rated" className="text-sm text-muted-foreground hover:text-primary">
+              <Link href="/top-rated" className="text-sm font-[600] text-muted-foreground hover:text-primary">
                 Top Rated
               </Link>
-              <Link href="/compare" className="text-sm text-muted-foreground hover:text-primary">
+              <Link href="/compare" className="text-sm font-[600] text-muted-foreground hover:text-primary">
                 Compare Models
               </Link>
             </div>
@@ -93,7 +93,7 @@ export default function MainNav() {
         </Collapsible>
 
         <Collapsible open={openSections.includes('types')} onOpenChange={() => toggleSection('types')}>
-          <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-medium hover:text-primary">
+          <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-[600] hover:text-primary">
             Types
             <ChevronDown className={cn(
               "h-4 w-4 transition-transform duration-200",
@@ -106,7 +106,7 @@ export default function MainNav() {
                 <Link
                   key={type}
                   href={`/types/${type.toLowerCase().replace(/\s+/g, '-')}`}
-                  className="text-sm text-muted-foreground hover:text-primary"
+                  className="text-sm font-[600] text-muted-foreground hover:text-primary"
                 >
                   {type}
                 </Link>
@@ -116,7 +116,7 @@ export default function MainNav() {
         </Collapsible>
 
         <Collapsible open={openSections.includes('official-brands')} onOpenChange={() => toggleSection('official-brands')}>
-          <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-medium hover:text-primary">
+          <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-[600] hover:text-primary">
             Official Brands
             <ChevronDown className={cn(
               "h-4 w-4 transition-transform duration-200",
@@ -129,7 +129,7 @@ export default function MainNav() {
                 <Link
                   key={brand}
                   href={`/brands/${brand.toLowerCase().replace(/\s+/g, '-')}`}
-                  className="text-sm text-muted-foreground hover:text-primary"
+                  className="text-sm font-[600] text-muted-foreground hover:text-primary"
                 >
                   {brand}
                 </Link>
@@ -139,7 +139,7 @@ export default function MainNav() {
         </Collapsible>
 
         <Collapsible open={openSections.includes('unofficial-brands')} onOpenChange={() => toggleSection('unofficial-brands')}>
-          <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-medium hover:text-primary">
+          <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-[600] hover:text-primary">
             Unofficial Brands
             <ChevronDown className={cn(
               "h-4 w-4 transition-transform duration-200",
@@ -152,7 +152,7 @@ export default function MainNav() {
                 <Link
                   key={brand}
                   href={`/brands/${brand.toLowerCase().replace(/\s+/g, '-')}`}
-                  className="text-sm text-muted-foreground hover:text-primary"
+                  className="text-sm font-[600] text-muted-foreground hover:text-primary"
                 >
                   {brand}
                 </Link>
@@ -161,16 +161,16 @@ export default function MainNav() {
           </CollapsibleContent>
         </Collapsible>
 
-        <Link href="/safety" className="text-sm font-medium hover:text-primary">
+        <Link href="/safety" className="text-sm font-[600] hover:text-primary">
           Safety
         </Link>
 
-        <Link href="/specification" className="text-sm font-medium hover:text-primary">
+        <Link href="/specification" className="text-sm font-[600] hover:text-primary">
           Specification
         </Link>
 
         <Collapsible open={openSections.includes('more')} onOpenChange={() => toggleSection('more')}>
-          <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-medium hover:text-primary">
+          <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-[600] hover:text-primary">
             More
             <ChevronDown className={cn(
               "h-4 w-4 transition-transform duration-200",
@@ -179,19 +179,19 @@ export default function MainNav() {
           </CollapsibleTrigger>
           <CollapsibleContent className="pl-4 pt-2">
             <div className="grid gap-2">
-              <Link href="/product" className="text-sm text-muted-foreground hover:text-primary">
+              <Link href="/product" className="text-sm font-[600] text-muted-foreground hover:text-primary">
                 Product
               </Link>
-              <Link href="/upcoming" className="text-sm text-muted-foreground hover:text-primary">
+              <Link href="/upcoming" className="text-sm font-[600] text-muted-foreground hover:text-primary">
                 Upcoming
               </Link>
-              <Link href="/legend" className="text-sm text-muted-foreground hover:text-primary">
+              <Link href="/legend" className="text-sm font-[600] text-muted-foreground hover:text-primary">
                 Legend
               </Link>
-              <Link href="/forums" className="text-sm text-muted-foreground hover:text-primary">
+              <Link href="/forums" className="text-sm font-[600] text-muted-foreground hover:text-primary">
                 Forums
               </Link>
-              <Link href="/dealers" className="text-sm text-muted-foreground hover:text-primary">
+              <Link href="/dealers" className="text-sm font-[600] text-muted-foreground hover:text-primary">
                 Dealers
               </Link>
             </div>
@@ -225,13 +225,13 @@ export default function MainNav() {
                     </p>
                   </div>
                   <div className="grid gap-2">
-                    <Link href="/latest-reviews" className="block p-2 hover:bg-accent rounded-md">
+                    <Link href="/latest-reviews" className="block p-2 hover:bg-accent rounded-md font-[600]">
                       Latest Reviews
                     </Link>
-                    <Link href="/top-rated" className="block p-2 hover:bg-accent rounded-md">
+                    <Link href="/top-rated" className="block p-2 hover:bg-accent rounded-md font-[600]">
                       Top Rated
                     </Link>
-                    <Link href="/compare" className="block p-2 hover:bg-accent rounded-md">
+                    <Link href="/compare" className="block p-2 hover:bg-accent rounded-md font-[600]">
                       Compare Models
                     </Link>
                   </div>
@@ -247,7 +247,7 @@ export default function MainNav() {
                     <Link
                       key={type}
                       href={`/types/${type.toLowerCase().replace(/\s+/g, '-')}`}
-                      className="block p-2 hover:bg-accent rounded-md"
+                      className="block p-2 hover:bg-accent rounded-md font-[600]"
                     >
                       {type}
                     </Link>
@@ -264,7 +264,7 @@ export default function MainNav() {
                     <Link
                       key={brand}
                       href={`/brands/${brand.toLowerCase().replace(/\s+/g, '-')}`}
-                      className="block p-2 hover:bg-accent rounded-md"
+                      className="block p-2 hover:bg-accent rounded-md font-[600]"
                     >
                       {brand}
                     </Link>
@@ -281,7 +281,7 @@ export default function MainNav() {
                     <Link
                       key={brand}
                       href={`/brands/${brand.toLowerCase().replace(/\s+/g, '-')}`}
-                      className="block p-2 hover:bg-accent rounded-md"
+                      className="block p-2 hover:bg-accent rounded-md font-[600]"
                     >
                       {brand}
                     </Link>
@@ -311,19 +311,19 @@ export default function MainNav() {
               <NavigationMenuContent>
                 <div className="w-[200px] p-4">
                   <div className="grid gap-2">
-                    <Link href="/product" className="block p-2 hover:bg-accent rounded-md">
+                    <Link href="/product" className="block p-2 hover:bg-accent rounded-md font-[600]">
                       Product
                     </Link>
-                    <Link href="/upcoming" className="block p-2 hover:bg-accent rounded-md">
+                    <Link href="/upcoming" className="block p-2 hover:bg-accent rounded-md font-[600]">
                       Upcoming
                     </Link>
-                    <Link href="/legend" className="block p-2 hover:bg-accent rounded-md">
+                    <Link href="/legend" className="block p-2 hover:bg-accent rounded-md font-[600]">
                       Legend
                     </Link>
-                    <Link href="/forums" className="block p-2 hover:bg-accent rounded-md">
+                    <Link href="/forums" className="block p-2 hover:bg-accent rounded-md font-[600]">
                       Forums
                     </Link>
-                    <Link href="/dealers" className="block p-2 hover:bg-accent rounded-md">
+                    <Link href="/dealers" className="block p-2 hover:bg-accent rounded-md font-[600]">
                       Dealers
                     </Link>
                   </div>

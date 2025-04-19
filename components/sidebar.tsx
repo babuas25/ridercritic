@@ -118,7 +118,7 @@ export default function Sidebar() {
             <Link
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-[600] hover:bg-accent hover:text-accent-foreground",
                 isActive && "bg-accent text-accent-foreground"
               )}
             >
@@ -133,7 +133,7 @@ export default function Sidebar() {
                   key={subitem.title}
                   href={subitem.href}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-[600] hover:bg-accent hover:text-accent-foreground",
                     pathname === subitem.href && "bg-accent text-accent-foreground"
                   )}
                 >
@@ -152,7 +152,7 @@ export default function Sidebar() {
         key={item.title}
         href={item.href}
         className={cn(
-          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-[600] hover:bg-accent hover:text-accent-foreground",
           isActive && "bg-accent text-accent-foreground"
         )}
       >
@@ -169,7 +169,7 @@ export default function Sidebar() {
       "transition-all duration-300"
     )}>
       <div className="flex h-16 items-center justify-between px-3 border-b">
-        {!isCollapsed && <span className="font-nordique text-xl">Navigation</span>}
+        {!isCollapsed && <span className="font-nordique text-xl">ridercritic</span>}
         <Button
           variant="ghost"
           size="icon"
