@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Moon, Sun, Search, Menu } from 'lucide-react'
+import { Moon, Sun, Search, Menu, Settings, LogOut, Trash2 } from 'lucide-react'
 import {
   Sheet,
   SheetContent,
@@ -21,6 +21,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 
 export default function Header() {
@@ -127,9 +128,23 @@ export default function Header() {
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={handleLogout}>
-                    Logout
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard" className="flex items-center">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Dashboard</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/account/delete" className="flex items-center text-destructive">
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      <span>Delete Account</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="flex items-center">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Logout</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
