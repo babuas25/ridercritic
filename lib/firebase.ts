@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApps } from 'firebase/app';
-import { getAuth, setPersistence, browserLocalPersistence } from 'firebase/auth';
+import { getAuth, setPersistence, browserLocalPersistence, GoogleAuthProvider, FacebookAuthProvider } from 'firebase/auth';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -22,6 +22,16 @@ setPersistence(auth, browserLocalPersistence).catch((error) => {
   console.error('Error setting auth persistence:', error);
 });
 
+// Initialize providers
+const googleProvider = new GoogleAuthProvider();
+const facebookProvider = new FacebookAuthProvider();
+
+// Configure providers
+googleProvider.addScope('email');
+googleProvider.addScope('profile');
+facebookProvider.addScope('email');
+facebookProvider.addScope('public_profile');
+
 auth.useDeviceLanguage();
 
-export { app, auth }; 
+export { app, auth, googleProvider, facebookProvider }; 

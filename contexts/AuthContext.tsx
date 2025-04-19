@@ -7,13 +7,11 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  GoogleAuthProvider,
-  FacebookAuthProvider,
   signInWithPopup,
   sendPasswordResetEmail,
   AuthError
 } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, googleProvider, facebookProvider } from '@/lib/firebase';
 import { toast } from 'sonner';
 
 interface AuthContextType {
@@ -38,6 +36,9 @@ export function useAuth() {
 }
 
 function getErrorMessage(error: AuthError): string {
+  console.error('Auth error code:', error.code);
+  console.error('Auth error message:', error.message);
+  
   switch (error.code) {
     case 'auth/email-already-in-use':
       return 'This email is already registered.';
@@ -55,8 +56,14 @@ function getErrorMessage(error: AuthError): string {
       return 'Incorrect password.';
     case 'auth/popup-closed-by-user':
       return 'Sign-in popup was closed before completion.';
+    case 'auth/cancelled-popup-request':
+      return 'Another popup is already open.';
+    case 'auth/popup-blocked':
+      return 'Sign-in popup was blocked by your browser.';
+    case 'auth/account-exists-with-different-credential':
+      return 'An account already exists with this email using a different sign-in method.';
     default:
-      return 'An error occurred during authentication.';
+      return `Authentication error: ${error.message}`;
   }
 }
 
@@ -66,6 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log('Auth state changed:', user ? 'User logged in' : 'User logged out');
       setUser(user);
       setLoading(false);
     });
@@ -75,8 +83,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithEmail = async (email: string, password: string) => {
     try {
+      console.log('Attempting email sign-in...');
       await signInWithEmailAndPassword(auth, email, password);
+      console.log('Email sign-in successful');
     } catch (error) {
+      console.error('Email sign-in error:', error);
       const authError = error as AuthError;
       throw new Error(getErrorMessage(authError));
     }
@@ -84,8 +95,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUpWithEmail = async (email: string, password: string) => {
     try {
+      console.log('Attempting email sign-up...');
       await createUserWithEmailAndPassword(auth, email, password);
+      console.log('Email sign-up successful');
     } catch (error) {
+      console.error('Email sign-up error:', error);
       const authError = error as AuthError;
       throw new Error(getErrorMessage(authError));
     }
@@ -93,32 +107,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithGoogle = async () => {
     try {
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({
-        client_id: '636450919079-7fadrkhf6kdsmqfij66bk5glepl5rl5n.apps.googleusercontent.com',
-        prompt: 'select_account'
-      });
       console.log('Attempting Google sign-in...');
-      await signInWithPopup(auth, provider);
-      console.log('Google sign-in successful');
+      const result = await signInWithPopup(auth, googleProvider);
+      console.log('Google sign-in successful:', result.user.email);
     } catch (error) {
-      const authError = error as AuthError;
       console.error('Google sign-in error:', error);
+      const authError = error as AuthError;
       throw new Error(getErrorMessage(authError));
     }
   };
 
   const signInWithFacebook = async () => {
     try {
-      const provider = new FacebookAuthProvider();
-      provider.addScope('email');
-      provider.addScope('public_profile');
-      provider.setCustomParameters({
-        'display': 'popup',
-        'auth_type': 'rerequest'
-      });
-      await signInWithPopup(auth, provider);
+      console.log('Attempting Facebook sign-in...');
+      const result = await signInWithPopup(auth, facebookProvider);
+      console.log('Facebook sign-in successful:', result.user.email);
     } catch (error) {
+      console.error('Facebook sign-in error:', error);
       const authError = error as AuthError;
       throw new Error(getErrorMessage(authError));
     }
@@ -126,7 +131,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
+      console.log('Attempting logout...');
       await signOut(auth);
+      console.log('Logout successful');
     } catch (error) {
       console.error('Logout error:', error);
       throw new Error('Failed to logout. Please try again.');
@@ -135,8 +142,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const resetPassword = async (email: string) => {
     try {
+      console.log('Attempting password reset...');
       await sendPasswordResetEmail(auth, email);
+      console.log('Password reset email sent');
     } catch (error) {
+      console.error('Password reset error:', error);
       const authError = error as AuthError;
       throw new Error(getErrorMessage(authError));
     }
