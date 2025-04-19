@@ -65,13 +65,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       provider.setCustomParameters({
         'auth_type': 'rerequest',
-        'display': 'popup',
-        'client_id': process.env.NEXT_PUBLIC_FACEBOOK_APP_ID as string,
-        'response_type': 'code',
-        'return_scopes': 'true'
+        'display': 'popup'
       });
 
-      console.log('Attempting Facebook sign-in...');
+      console.log('Attempting Facebook sign-in with Firebase...');
       
       const result = await signInWithPopup(auth, provider).catch((error) => {
         console.error('Popup error:', error);
