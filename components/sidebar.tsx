@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/collapsible"
 import { useAuth } from '@/contexts/AuthContext'
 import { usePathname } from 'next/navigation'
+import { Logo } from "@/components/ui/logo"
 
 interface SidebarItem {
   title: string
@@ -169,7 +170,9 @@ export default function Sidebar() {
       "transition-all duration-300"
     )}>
       <div className="flex h-16 items-center justify-between px-3 border-b">
-        {!isCollapsed && <span className="font-nordique text-xl">ridercritic</span>}
+        {!isCollapsed && (
+          <Logo className="text-xl" />
+        )}
         <Button
           variant="ghost"
           size="icon"

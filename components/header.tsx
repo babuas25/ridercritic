@@ -23,6 +23,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
+import { Logo } from '@/components/ui/logo'
 
 export default function Header() {
   const { theme, setTheme } = useTheme()
@@ -79,7 +80,7 @@ export default function Header() {
             </SheetContent>
           </Sheet>
           <Link href="/" className="flex items-center">
-            <span className="text-lg md:text-xl font-bold font-nordique">ridercritic</span>
+            <Logo className="text-lg md:text-xl" />
           </Link>
         </div>
 

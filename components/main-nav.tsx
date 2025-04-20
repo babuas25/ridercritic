@@ -208,14 +208,14 @@ export default function MainNav() {
           <NavigationMenuList className="gap-2">
             <NavigationMenuItem>
               <Link href="/new-critics" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "font-normal")}>
                   New Critics
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <NavigationMenuTrigger>Motorcycle</NavigationMenuTrigger>
+              <NavigationMenuTrigger className="font-normal">Motorcycle</NavigationMenuTrigger>
               <NavigationMenuContent>
                 <div className="w-[400px] p-4">
                   <div className="mb-4">
@@ -225,13 +225,13 @@ export default function MainNav() {
                     </p>
                   </div>
                   <div className="grid gap-2">
-                    <Link href="/latest-reviews" className="block p-2 hover:bg-accent rounded-md font-[600]">
+                    <Link href="/latest-reviews" className="block p-2 hover:bg-accent rounded-md font-normal">
                       Latest Reviews
                     </Link>
-                    <Link href="/top-rated" className="block p-2 hover:bg-accent rounded-md font-[600]">
+                    <Link href="/top-rated" className="block p-2 hover:bg-accent rounded-md font-normal">
                       Top Rated
                     </Link>
-                    <Link href="/compare" className="block p-2 hover:bg-accent rounded-md font-[600]">
+                    <Link href="/compare" className="block p-2 hover:bg-accent rounded-md font-normal">
                       Compare Models
                     </Link>
                   </div>
@@ -240,14 +240,14 @@ export default function MainNav() {
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <NavigationMenuTrigger>Types</NavigationMenuTrigger>
+              <NavigationMenuTrigger className="font-normal">Types</NavigationMenuTrigger>
               <NavigationMenuContent>
                 <div className="grid w-[600px] grid-cols-2 p-4 md:grid-cols-3 gap-3">
                   {types.map((type) => (
                     <Link
                       key={type}
                       href={`/types/${type.toLowerCase().replace(/\s+/g, '-')}`}
-                      className="block p-2 hover:bg-accent rounded-md font-[600]"
+                      className="block p-2 hover:bg-accent rounded-md font-normal"
                     >
                       {type}
                     </Link>
@@ -257,14 +257,14 @@ export default function MainNav() {
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <NavigationMenuTrigger>Official Brands</NavigationMenuTrigger>
+              <NavigationMenuTrigger className="font-normal">Official Brands</NavigationMenuTrigger>
               <NavigationMenuContent>
                 <div className="grid w-[500px] grid-cols-2 p-4 md:grid-cols-3 gap-3">
                   {officialBrands.map((brand) => (
                     <Link
                       key={brand}
                       href={`/brands/${brand.toLowerCase().replace(/\s+/g, '-')}`}
-                      className="block p-2 hover:bg-accent rounded-md font-[600]"
+                      className="block p-2 hover:bg-accent rounded-md font-normal"
                     >
                       {brand}
                     </Link>
@@ -274,14 +274,14 @@ export default function MainNav() {
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <NavigationMenuTrigger>Unofficial Brands</NavigationMenuTrigger>
+              <NavigationMenuTrigger className="font-normal">Unofficial Brands</NavigationMenuTrigger>
               <NavigationMenuContent>
                 <div className="grid w-[500px] grid-cols-2 p-4 md:grid-cols-3 gap-3">
                   {unofficialBrands.map((brand) => (
                     <Link
                       key={brand}
                       href={`/brands/${brand.toLowerCase().replace(/\s+/g, '-')}`}
-                      className="block p-2 hover:bg-accent rounded-md font-[600]"
+                      className="block p-2 hover:bg-accent rounded-md font-normal"
                     >
                       {brand}
                     </Link>
@@ -292,7 +292,7 @@ export default function MainNav() {
 
             <NavigationMenuItem>
               <Link href="/safety" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "font-normal")}>
                   Safety
                 </NavigationMenuLink>
               </Link>
@@ -300,30 +300,30 @@ export default function MainNav() {
 
             <NavigationMenuItem>
               <Link href="/specification" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "font-normal")}>
                   Specification
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
 
             <NavigationMenuItem className="hidden lg:flex relative">
-              <NavigationMenuTrigger>More</NavigationMenuTrigger>
+              <NavigationMenuTrigger className="font-normal">More</NavigationMenuTrigger>
               <NavigationMenuContent>
                 <div className="w-[200px] p-4">
                   <div className="grid gap-2">
-                    <Link href="/product" className="block p-2 hover:bg-accent rounded-md font-[600]">
+                    <Link href="/product" className="block p-2 hover:bg-accent rounded-md font-normal">
                       Product
                     </Link>
-                    <Link href="/upcoming" className="block p-2 hover:bg-accent rounded-md font-[600]">
+                    <Link href="/upcoming" className="block p-2 hover:bg-accent rounded-md font-normal">
                       Upcoming
                     </Link>
-                    <Link href="/legend" className="block p-2 hover:bg-accent rounded-md font-[600]">
+                    <Link href="/legend" className="block p-2 hover:bg-accent rounded-md font-normal">
                       Legend
                     </Link>
-                    <Link href="/forums" className="block p-2 hover:bg-accent rounded-md font-[600]">
+                    <Link href="/forums" className="block p-2 hover:bg-accent rounded-md font-normal">
                       Forums
                     </Link>
-                    <Link href="/dealers" className="block p-2 hover:bg-accent rounded-md font-[600]">
+                    <Link href="/dealers" className="block p-2 hover:bg-accent rounded-md font-normal">
                       Dealers
                     </Link>
                   </div>
