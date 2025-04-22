@@ -69,29 +69,6 @@ export default function MainNav() {
           New Critics
         </Link>
         
-        <Collapsible open={openSections.includes('motorcycle')} onOpenChange={() => toggleSection('motorcycle')}>
-          <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-[600] hover:text-primary">
-            Motorcycle
-            <ChevronDown className={cn(
-              "h-4 w-4 transition-transform duration-200",
-              openSections.includes('motorcycle') ? "rotate-180" : ""
-            )} />
-          </CollapsibleTrigger>
-          <CollapsibleContent className="pl-4 pt-2">
-            <div className="grid gap-2">
-              <Link href="/latest-reviews" className="text-sm font-[600] text-muted-foreground hover:text-primary">
-                Latest Reviews
-              </Link>
-              <Link href="/top-rated" className="text-sm font-[600] text-muted-foreground hover:text-primary">
-                Top Rated
-              </Link>
-              <Link href="/compare" className="text-sm font-[600] text-muted-foreground hover:text-primary">
-                Compare Models
-              </Link>
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
-
         <Collapsible open={openSections.includes('types')} onOpenChange={() => toggleSection('types')}>
           <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-[600] hover:text-primary">
             Types
@@ -101,16 +78,7 @@ export default function MainNav() {
             )} />
           </CollapsibleTrigger>
           <CollapsibleContent className="pl-4 pt-2">
-            <div className="grid grid-cols-2 gap-2">
-              {types.map((type) => (
-                <Link
-                  key={type}
-                  href={`/types/${type.toLowerCase().replace(/\s+/g, '-')}`}
-                  className="text-sm font-[600] text-muted-foreground hover:text-primary"
-                >
-                  {type}
-                </Link>
-              ))}
+            <div className="grid gap-2">
             </div>
           </CollapsibleContent>
         </Collapsible>
@@ -169,6 +137,10 @@ export default function MainNav() {
           Specification
         </Link>
 
+        <Link href="/motorcycle" className="text-sm font-[600] hover:text-primary">
+          Motorcycle
+        </Link>
+
         <Collapsible open={openSections.includes('more')} onOpenChange={() => toggleSection('more')}>
           <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-[600] hover:text-primary">
             More
@@ -179,21 +151,6 @@ export default function MainNav() {
           </CollapsibleTrigger>
           <CollapsibleContent className="pl-4 pt-2">
             <div className="grid gap-2">
-              <Link href="/product" className="text-sm font-[600] text-muted-foreground hover:text-primary">
-                Product
-              </Link>
-              <Link href="/upcoming" className="text-sm font-[600] text-muted-foreground hover:text-primary">
-                Upcoming
-              </Link>
-              <Link href="/legend" className="text-sm font-[600] text-muted-foreground hover:text-primary">
-                Legend
-              </Link>
-              <Link href="/forums" className="text-sm font-[600] text-muted-foreground hover:text-primary">
-                Forums
-              </Link>
-              <Link href="/dealers" className="text-sm font-[600] text-muted-foreground hover:text-primary">
-                Dealers
-              </Link>
             </div>
           </CollapsibleContent>
         </Collapsible>
@@ -212,31 +169,6 @@ export default function MainNav() {
                   New Critics
                 </NavigationMenuLink>
               </Link>
-            </NavigationMenuItem>
-
-            <NavigationMenuItem>
-              <NavigationMenuTrigger className="font-normal">Motorcycle</NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <div className="w-[400px] p-4">
-                  <div className="mb-4">
-                    <h4 className="text-sm font-medium leading-none mb-2">Featured</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Explore the latest motorcycles and reviews
-                    </p>
-                  </div>
-                  <div className="grid gap-2">
-                    <Link href="/latest-reviews" className="block p-2 hover:bg-accent rounded-md font-normal">
-                      Latest Reviews
-                    </Link>
-                    <Link href="/top-rated" className="block p-2 hover:bg-accent rounded-md font-normal">
-                      Top Rated
-                    </Link>
-                    <Link href="/compare" className="block p-2 hover:bg-accent rounded-md font-normal">
-                      Compare Models
-                    </Link>
-                  </div>
-                </div>
-              </NavigationMenuContent>
             </NavigationMenuItem>
 
             <NavigationMenuItem>
@@ -306,26 +238,25 @@ export default function MainNav() {
               </Link>
             </NavigationMenuItem>
 
+            <NavigationMenuItem>
+              <Link href="/motorcycle" legacyBehavior passHref>
+                <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "font-normal")}>
+                  Motorcycle
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+
             <NavigationMenuItem className="hidden lg:flex relative">
               <NavigationMenuTrigger className="font-normal">More</NavigationMenuTrigger>
               <NavigationMenuContent>
-                <div className="w-[200px] p-4">
+                <div className="w-[400px] p-4">
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium leading-none mb-2">Featured</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Explore the latest motorcycles and reviews
+                    </p>
+                  </div>
                   <div className="grid gap-2">
-                    <Link href="/product" className="block p-2 hover:bg-accent rounded-md font-normal">
-                      Product
-                    </Link>
-                    <Link href="/upcoming" className="block p-2 hover:bg-accent rounded-md font-normal">
-                      Upcoming
-                    </Link>
-                    <Link href="/legend" className="block p-2 hover:bg-accent rounded-md font-normal">
-                      Legend
-                    </Link>
-                    <Link href="/forums" className="block p-2 hover:bg-accent rounded-md font-normal">
-                      Forums
-                    </Link>
-                    <Link href="/dealers" className="block p-2 hover:bg-accent rounded-md font-normal">
-                      Dealers
-                    </Link>
                   </div>
                 </div>
               </NavigationMenuContent>
