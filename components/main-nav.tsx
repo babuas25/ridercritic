@@ -29,24 +29,37 @@ const types = [
   "Pocket Bike / Mini Moto", "Power Cruiser"
 ]
 
-const officialBrands = [
-  "Honda", "Yamaha", "Suzuki", "Hero", "TVS", "Bajaj", "Runner", "Roadmaster",
-  "Lifan", "Haojue", "Speeder", "Dayang", "Zontes", "Benelli", "Aprilia",
-  "Keeway", "Vespa", "KTM", "Mahindra", "GPX"
-]
-
-const unofficialBrands = [
-  "Kawasaki", "Royal Enfield", "CFMoto", "Loncin", "Motocross / XCross",
-  "SYM", "Zongshen", "Rieju", "Lexmoto", "BMW", "Ducati", "Harley-Davidson"
-]
+interface Brand {
+  id: number;
+  name: string;
+}
 
 export default function MainNav() {
   const isDesktop = useMediaQuery("(min-width: 768px)")
   const [isMounted, setIsMounted] = useState(false)
   const [openSections, setOpenSections] = useState<string[]>([])
 
+  // Brand state
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [loadingBrands, setLoadingBrands] = useState(true);
+  const [brandError, setBrandError] = useState<string | null>(null);
+
   useEffect(() => {
     setIsMounted(true)
+    // Fetch brands from API
+    fetch("https://babuas25-ridercritic-api.onrender.com/api/brands/")
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to fetch brands");
+        return res.json();
+      })
+      .then(data => {
+        setBrands(data);
+        setLoadingBrands(false);
+      })
+      .catch(err => {
+        setBrandError("Could not load brands");
+        setLoadingBrands(false);
+      });
   }, [])
 
   const toggleSection = (section: string) => {
@@ -83,46 +96,28 @@ export default function MainNav() {
           </CollapsibleContent>
         </Collapsible>
 
-        <Collapsible open={openSections.includes('official-brands')} onOpenChange={() => toggleSection('official-brands')}>
+        <Collapsible open={openSections.includes('brands')} onOpenChange={() => toggleSection('brands')}>
           <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-[600] hover:text-primary">
-            Official Brands
+            Brand
             <ChevronDown className={cn(
               "h-4 w-4 transition-transform duration-200",
-              openSections.includes('official-brands') ? "rotate-180" : ""
+              openSections.includes('brands') ? "rotate-180" : ""
             )} />
           </CollapsibleTrigger>
           <CollapsibleContent className="pl-4 pt-2">
             <div className="grid grid-cols-2 gap-2">
-              {officialBrands.map((brand) => (
+              {loadingBrands && <span className="text-xs text-muted-foreground">Loading...</span>}
+              {brandError && <span className="text-xs text-destructive">{brandError}</span>}
+              {!loadingBrands && !brandError && brands.length === 0 && (
+                <span className="text-xs text-muted-foreground">No brands found</span>
+              )}
+              {!loadingBrands && !brandError && brands.map((brand) => (
                 <Link
-                  key={brand}
-                  href={`/brands/${brand.toLowerCase().replace(/\s+/g, '-')}`}
+                  key={brand.id}
+                  href={`/brands/${brand.id}`}
                   className="text-sm font-[600] text-muted-foreground hover:text-primary"
                 >
-                  {brand}
-                </Link>
-              ))}
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
-
-        <Collapsible open={openSections.includes('unofficial-brands')} onOpenChange={() => toggleSection('unofficial-brands')}>
-          <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-[600] hover:text-primary">
-            Unofficial Brands
-            <ChevronDown className={cn(
-              "h-4 w-4 transition-transform duration-200",
-              openSections.includes('unofficial-brands') ? "rotate-180" : ""
-            )} />
-          </CollapsibleTrigger>
-          <CollapsibleContent className="pl-4 pt-2">
-            <div className="grid grid-cols-2 gap-2">
-              {unofficialBrands.map((brand) => (
-                <Link
-                  key={brand}
-                  href={`/brands/${brand.toLowerCase().replace(/\s+/g, '-')}`}
-                  className="text-sm font-[600] text-muted-foreground hover:text-primary"
-                >
-                  {brand}
+                  {brand.name}
                 </Link>
               ))}
             </div>
@@ -189,33 +184,21 @@ export default function MainNav() {
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <NavigationMenuTrigger className="font-normal">Official Brands</NavigationMenuTrigger>
+              <NavigationMenuTrigger className="font-normal">Brand</NavigationMenuTrigger>
               <NavigationMenuContent>
                 <div className="grid w-[500px] grid-cols-2 p-4 md:grid-cols-3 gap-3">
-                  {officialBrands.map((brand) => (
+                  {loadingBrands && <span className="text-xs text-muted-foreground">Loading...</span>}
+                  {brandError && <span className="text-xs text-destructive">{brandError}</span>}
+                  {!loadingBrands && !brandError && brands.length === 0 && (
+                    <span className="text-xs text-muted-foreground">No brands found</span>
+                  )}
+                  {!loadingBrands && !brandError && brands.map((brand) => (
                     <Link
-                      key={brand}
-                      href={`/brands/${brand.toLowerCase().replace(/\s+/g, '-')}`}
+                      key={brand.id}
+                      href={`/brands/${brand.id}`}
                       className="block p-2 hover:bg-accent rounded-md font-normal"
                     >
-                      {brand}
-                    </Link>
-                  ))}
-                </div>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-
-            <NavigationMenuItem>
-              <NavigationMenuTrigger className="font-normal">Unofficial Brands</NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <div className="grid w-[500px] grid-cols-2 p-4 md:grid-cols-3 gap-3">
-                  {unofficialBrands.map((brand) => (
-                    <Link
-                      key={brand}
-                      href={`/brands/${brand.toLowerCase().replace(/\s+/g, '-')}`}
-                      className="block p-2 hover:bg-accent rounded-md font-normal"
-                    >
-                      {brand}
+                      {brand.name}
                     </Link>
                   ))}
                 </div>
