@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -25,10 +25,32 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Logo } from '@/components/ui/logo'
 
+function useSuperadmin() {
+  const [superadmin, setSuperadmin] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
+    if (token) {
+      fetch("https://babuas25-ridercritic-api.onrender.com/api/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data && data.is_superuser) setSuperadmin(data);
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
+    }
+  }, []);
+  return { superadmin, loading };
+}
+
 export default function Header() {
   const { theme, setTheme } = useTheme()
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const { user, logout } = useAuth()
+  const { superadmin, loading } = useSuperadmin()
 
   const handleLogout = async () => {
     try {
@@ -37,6 +59,8 @@ export default function Header() {
       console.error('Failed to logout:', error)
     }
   }
+
+  if (loading) return null;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -84,7 +108,7 @@ export default function Header() {
           </Link>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-2 md:gap-4 ml-auto md:ml-0">
           <div className="relative">
             <Button
               variant="ghost"
@@ -117,7 +141,31 @@ export default function Header() {
               <span className="sr-only">Toggle theme</span>
             </Button>
             
-            {user ? (
+            {superadmin ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={undefined} alt={superadmin.username || superadmin.email || 'Superadmin'} />
+                      <AvatarFallback>
+                        {superadmin.username?.charAt(0) || superadmin.email?.charAt(0) || 'S'}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="px-4 py-2 font-bold text-primary">Superadmin</div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => {
+                    localStorage.removeItem("admin_token");
+                    window.location.href = "/admin";
+                  }} className="flex items-center font-[600]">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Logout</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">

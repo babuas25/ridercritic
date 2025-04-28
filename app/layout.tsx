@@ -4,6 +4,7 @@ import { fonts } from './fonts';
 import { ThemeProvider } from '@/components/theme-provider';
 import { AuthProvider } from '@/contexts/AuthContext';
 import Header from '@/components/header';
+import MainNav from '@/components/main-nav';
 import Sidebar from '@/components/sidebar';
 import Footer from '@/components/footer';
 import { cn } from '@/lib/utils';
@@ -33,6 +34,7 @@ export default function RootLayout({
           <AuthProvider>
             <div className="min-h-screen flex flex-col">
               <Header />
+              <MainNav />
               <div className="flex flex-1">
                 <div className="md:block hidden">
                   <Sidebar />
