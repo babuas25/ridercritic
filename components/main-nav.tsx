@@ -21,17 +21,15 @@ import { useMediaQuery } from "@/hooks/use-media-query"
 import { cn } from "@/lib/utils"
 import { useState, useEffect } from "react"
 
-const types = [
-  "Commuter", "Naked", "Cruiser", "Chopper", "Sport Bike", "Touring Motorcycle",
-  "Sport Touring Motorcycle", "Adventure (ADV) / Dual-Sport", "Dirt Bike / Motocross",
-  "Enduro", "Supermoto / Supermotard", "Cafe Racer", "Scrambler", "Bobber",
-  "Mini Bike", "Scooter", "Moped", "Electric Motorcycle", "Trike",
-  "Pocket Bike / Mini Moto", "Power Cruiser"
-]
-
 interface Brand {
   id: number;
   name: string;
+}
+
+interface Type {
+  id: number;
+  name: string;
+  description?: string | null;
 }
 
 export default function MainNav() {
@@ -43,6 +41,11 @@ export default function MainNav() {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loadingBrands, setLoadingBrands] = useState(true);
   const [brandError, setBrandError] = useState<string | null>(null);
+
+  // Type state
+  const [types, setTypes] = useState<Type[]>([]);
+  const [loadingTypes, setLoadingTypes] = useState(true);
+  const [typeError, setTypeError] = useState<string | null>(null);
 
   useEffect(() => {
     setIsMounted(true)
@@ -59,6 +62,21 @@ export default function MainNav() {
       .catch(err => {
         setBrandError("Could not load brands");
         setLoadingBrands(false);
+      });
+
+    // Fetch types from API
+    fetch("https://babuas25-ridercritic-api.onrender.com/api/types/")
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to fetch types");
+        return res.json();
+      })
+      .then(data => {
+        setTypes(data);
+        setLoadingTypes(false);
+      })
+      .catch(err => {
+        setTypeError("Could not load types");
+        setLoadingTypes(false);
       });
   }, [])
 
@@ -170,13 +188,18 @@ export default function MainNav() {
               <NavigationMenuTrigger className="font-normal">Types</NavigationMenuTrigger>
               <NavigationMenuContent>
                 <div className="grid w-[600px] grid-cols-2 p-4 md:grid-cols-3 gap-3">
-                  {types.map((type) => (
+                  {loadingTypes && <span className="text-xs text-muted-foreground">Loading...</span>}
+                  {typeError && <span className="text-xs text-destructive">{typeError}</span>}
+                  {!loadingTypes && !typeError && types.length === 0 && (
+                    <span className="text-xs text-muted-foreground">No types found</span>
+                  )}
+                  {!loadingTypes && !typeError && types.map((type) => (
                     <Link
-                      key={type}
-                      href={`/types/${type.toLowerCase().replace(/\s+/g, '-')}`}
+                      key={type.id}
+                      href={`/types/${type.id}`}
                       className="block p-2 hover:bg-accent rounded-md font-normal"
                     >
-                      {type}
+                      {type.name}
                     </Link>
                   ))}
                 </div>
