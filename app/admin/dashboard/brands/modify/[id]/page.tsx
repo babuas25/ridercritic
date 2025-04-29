@@ -7,7 +7,7 @@ interface Brand {
   id: number;
   name: string;
   logo_url?: string;
-  origin_country?: string;
+  country?: string;
   founded_year?: number;
   authorization_status?: string;
   distributor?: string;
@@ -52,10 +52,11 @@ export default function EditBrandPage() {
     setSaving(true);
     setError(null);
     try {
+      const fullData = { ...brand, ...form };
       const res = await fetch(`https://babuas25-ridercritic-api.onrender.com/api/brands/${brandId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(fullData),
       });
       if (!res.ok) throw new Error("Failed to update brand");
       router.push("/admin/dashboard/brands");
@@ -83,8 +84,8 @@ export default function EditBrandPage() {
           <input name="logo_url" value={form.logo_url || ""} onChange={handleChange} className="w-full border rounded px-3 py-2" />
         </div>
         <div>
-          <label className="block mb-1 font-semibold">Origin Country</label>
-          <input name="origin_country" value={form.origin_country || ""} onChange={handleChange} className="w-full border rounded px-3 py-2" />
+          <label className="block mb-1 font-semibold">Country</label>
+          <input name="country" value={form.country || ""} onChange={handleChange} className="w-full border rounded px-3 py-2" />
         </div>
         <div>
           <label className="block mb-1 font-semibold">Founded Year</label>

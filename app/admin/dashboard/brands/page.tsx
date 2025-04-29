@@ -8,7 +8,7 @@ interface Brand {
   id: number;
   name: string;
   logo_url?: string;
-  origin_country?: string;
+  country?: string;
   founded_year?: number;
   authorization_status?: string;
   distributor?: string;
@@ -156,7 +156,7 @@ export default function AdminAllBrandsPage() {
                 <th className="border px-4 py-2 text-left cursor-pointer" onClick={() => handleSort('id')}>ID {sortBy === 'id' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}</th>
                 <th className="border px-4 py-2 text-left">Logo</th>
                 <th className="border px-4 py-2 text-left cursor-pointer" onClick={() => handleSort('name')}>Name {sortBy === 'name' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}</th>
-                <th className="border px-4 py-2 text-left cursor-pointer" onClick={() => handleSort('origin_country')}>Origin Country {sortBy === 'origin_country' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}</th>
+                <th className="border px-4 py-2 text-left cursor-pointer" onClick={() => handleSort('country')}>Country {sortBy === 'country' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}</th>
                 <th className="border px-4 py-2 text-left cursor-pointer" onClick={() => handleSort('founded_year')}>Founded Year {sortBy === 'founded_year' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}</th>
                 <th className="border px-4 py-2 text-left cursor-pointer" onClick={() => handleSort('distributor')}>Distributor {sortBy === 'distributor' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}</th>
                 <th className="border px-4 py-2 text-left cursor-pointer" onClick={() => handleSort('authorization_status')}>Authorization Status {sortBy === 'authorization_status' ? (sortOrder === 'asc' ? '▲' : '▼') : ''}</th>
@@ -188,7 +188,7 @@ export default function AdminAllBrandsPage() {
                       {brand.name}
                     </Link>
                   </td>
-                  <td className="border px-4 py-2">{brand.origin_country || '-'}</td>
+                  <td className="border px-4 py-2">{brand.country || '-'}</td>
                   <td className="border px-4 py-2">{brand.founded_year || '-'}</td>
                   <td className="border px-4 py-2">{brand.distributor || '-'}</td>
                   <td className="border px-4 py-2">{brand.authorization_status || '-'}</td>
@@ -216,7 +216,7 @@ export default function AdminAllBrandsPage() {
                     {brand.name}
                   </Link>
                 </span></div>
-                <div className="text-xs text-muted-foreground">Origin Country: <span className="text-black">{brand.origin_country || '-'}</span></div>
+                <div className="text-xs text-muted-foreground">Country: <span className="text-black">{brand.country || '-'}</span></div>
                 <div className="text-xs text-muted-foreground">Founded Year: <span className="text-black">{brand.founded_year || '-'}</span></div>
                 <div className="text-xs text-muted-foreground">Distributor: <span className="text-black">{brand.distributor || '-'}</span></div>
                 <div className="text-xs text-muted-foreground">Authorization Status: <span className="text-black">{brand.authorization_status || '-'}</span></div>
