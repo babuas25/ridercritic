@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -13,7 +14,11 @@ import {
   ChevronDown,
   ChevronRight,
   Menu,
-  LayoutDashboard
+  LayoutDashboard,
+  Bike,
+  Star,
+  ShoppingBag,
+  Package
 } from "lucide-react"
 import { useState } from "react"
 import {
@@ -32,7 +37,7 @@ interface SidebarItem {
   submenu?: SidebarItem[]
 }
 
-const sidebarNavItems: SidebarItem[] = [
+const generalSidebarItems: SidebarItem[] = [
   {
     title: "Home",
     icon: Home,
@@ -66,26 +71,74 @@ const sidebarNavItems: SidebarItem[] = [
     href: "/documents",
   },
   {
-    title: "Users",
-    icon: Users,
-    href: "/users",
+    title: "Settings",
+    icon: Settings,
+    href: "/settings",
+  },
+]
+
+const adminSidebarItems: SidebarItem[] = [
+  {
+    title: "Dashboard",
+    icon: LayoutDashboard,
+    href: "/admin/dashboard",
+  },
+  {
+    title: "Brands",
+    icon: FileText,
+    href: "/admin/dashboard/brands",
+  },
+  {
+    title: "Types",
+    icon: FileText,
+    href: "/admin/types",
     submenu: [
       {
-        title: "All Users",
-        icon: Users,
-        href: "/users/all",
+        title: "All Types",
+        icon: FileText,
+        href: "/admin/types",
       },
       {
-        title: "Add User",
-        icon: Users,
-        href: "/users/add",
+        title: "Add Type",
+        icon: FileText,
+        href: "/admin/types/new",
+      },
+      {
+        title: "Type details",
+        icon: FileText,
+        href: "/admin/types/details",
+      },
+      {
+        title: "Modify",
+        icon: FileText,
+        href: "/admin/types/modify",
+      },
+      {
+        title: "Delete",
+        icon: FileText,
+        href: "/admin/types/delete",
       },
     ],
   },
   {
-    title: "Settings",
-    icon: Settings,
-    href: "/settings",
+    title: "Motorcycles",
+    icon: Bike,
+    href: "/admin/motorcycles",
+  },
+  {
+    title: "Reviews",
+    icon: Star,
+    href: "/admin/reviews",
+  },
+  {
+    title: "Products",
+    icon: ShoppingBag,
+    href: "/admin/products",
+  },
+  {
+    title: "Accessories",
+    icon: Package,
+    href: "/admin/accessories",
   },
 ]
 
@@ -94,6 +147,21 @@ export default function Sidebar() {
   const [openSubmenus, setOpenSubmenus] = useState<string[]>([])
   const pathname = usePathname()
   const { user } = useAuth()
+  const [superadmin, setSuperadmin] = useState<any>(null)
+
+  // Check if user is superadmin
+  React.useEffect(() => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
+    if (token) {
+      fetch("https://babuas25-ridercritic-api.onrender.com/api/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data && data.is_superuser) setSuperadmin(data);
+        });
+    }
+  }, []);
 
   const toggleSubmenu = (title: string) => {
     setOpenSubmenus(prev => 
@@ -119,12 +187,21 @@ export default function Sidebar() {
             <Link
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-[600] hover:bg-accent hover:text-accent-foreground",
+                "flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm font-[600] hover:bg-accent hover:text-accent-foreground",
                 isActive && "bg-accent text-accent-foreground"
               )}
             >
-              <item.icon className="h-4 w-4" />
-              {!isCollapsed && <span>{item.title}</span>}
+              <span className="flex items-center gap-3">
+                <item.icon className="h-4 w-4" />
+                {!isCollapsed && <span>{item.title}</span>}
+              </span>
+              {!isCollapsed && (
+                isSubmenuOpen ? (
+                  <ChevronDown className="h-4 w-4 ml-auto" />
+                ) : (
+                  <ChevronRight className="h-4 w-4 ml-auto" />
+                )
+              )}
             </Link>
           </CollapsibleTrigger>
           {!isCollapsed && item.submenu && (
@@ -163,6 +240,9 @@ export default function Sidebar() {
     )
   }
 
+  // Determine which sidebar items to show
+  const sidebarItems = superadmin ? adminSidebarItems : generalSidebarItems
+
   return (
     <div className={cn(
       "hidden border-r bg-background md:block",
@@ -185,12 +265,7 @@ export default function Sidebar() {
         <div className="space-y-4 py-4">
           <div className="px-3 py-2">
             <div className="space-y-1">
-              {sidebarNavItems.map((item) => {
-                if (item.href === "/dashboard" && !user) {
-                  return null
-                }
-                return renderNavItem(item)
-              })}
+              {sidebarItems.map((item) => renderNavItem(item))}
             </div>
           </div>
         </div>
