@@ -95,13 +95,13 @@ export default function MainNav() {
 
   if (!isDesktop) {
     return (
-      <div className="grid gap-4">
-        <Link href="/new-critics" className="text-sm font-[600] hover:text-primary">
+      <div className="grid gap-0">
+        <Link href="/new-critics" className="bg-card rounded-lg shadow p-4 text-sm font-[600] hover:bg-accent transition border">
           New Critics
         </Link>
         
         <Collapsible open={openSections.includes('types')} onOpenChange={() => toggleSection('types')}>
-          <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-[600] hover:text-primary">
+          <CollapsibleTrigger className="bg-card rounded-lg shadow p-4 flex w-full items-center justify-between text-sm font-[600] hover:bg-accent transition border">
             Types
             <ChevronDown className={cn(
               "h-4 w-4 transition-transform duration-200",
@@ -115,7 +115,7 @@ export default function MainNav() {
         </Collapsible>
 
         <Collapsible open={openSections.includes('brands')} onOpenChange={() => toggleSection('brands')}>
-          <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-[600] hover:text-primary">
+          <CollapsibleTrigger className="bg-card rounded-lg shadow p-4 flex w-full items-center justify-between text-sm font-[600] hover:bg-accent transition border">
             Brand
             <ChevronDown className={cn(
               "h-4 w-4 transition-transform duration-200",
@@ -133,7 +133,7 @@ export default function MainNav() {
                 <Link
                   key={brand.id}
                   href={`/brands/${brand.id}`}
-                  className="text-sm font-[600] text-muted-foreground hover:text-primary"
+                  className="bg-muted rounded shadow p-2 text-sm font-[600] text-muted-foreground hover:bg-accent hover:text-primary transition border"
                 >
                   {brand.name}
                 </Link>
@@ -142,20 +142,20 @@ export default function MainNav() {
           </CollapsibleContent>
         </Collapsible>
 
-        <Link href="/safety" className="text-sm font-[600] hover:text-primary">
+        <Link href="/safety" className="bg-card rounded-lg shadow p-4 text-sm font-[600] hover:bg-accent transition border">
           Safety
         </Link>
 
-        <Link href="/specification" className="text-sm font-[600] hover:text-primary">
+        <Link href="/specification" className="bg-card rounded-lg shadow p-4 text-sm font-[600] hover:bg-accent transition border">
           Specification
         </Link>
 
-        <Link href="/motorcycle" className="text-sm font-[600] hover:text-primary">
+        <Link href="/motorcycle" className="bg-card rounded-lg shadow p-4 text-sm font-[600] hover:bg-accent transition border">
           Motorcycle
         </Link>
 
         <Collapsible open={openSections.includes('more')} onOpenChange={() => toggleSection('more')}>
-          <CollapsibleTrigger className="flex w-full items-center justify-between text-sm font-[600] hover:text-primary">
+          <CollapsibleTrigger className="bg-card rounded-lg shadow p-4 flex w-full items-center justify-between text-sm font-[600] hover:bg-accent transition border">
             More
             <ChevronDown className={cn(
               "h-4 w-4 transition-transform duration-200",
