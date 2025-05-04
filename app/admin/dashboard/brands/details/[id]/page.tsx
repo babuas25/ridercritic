@@ -34,7 +34,7 @@ export default function BrandDetailsPage() {
 
   useEffect(() => {
     if (!brandId) return;
-    fetch(`https://babuas25-ridercritic-api.onrender.com/api/brands/${brandId}`)
+    fetch(`https://api.ridercritic.com/api/brands/${brandId}`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch brand");
         return res.json();
@@ -53,7 +53,7 @@ export default function BrandDetailsPage() {
     setDeleting(true);
     setDeleteError(null);
     try {
-      const res = await fetch(`https://babuas25-ridercritic-api.onrender.com/api/brands/${brandId}`, {
+      const res = await fetch(`https://api.ridercritic.com/api/brands/${brandId}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete brand");

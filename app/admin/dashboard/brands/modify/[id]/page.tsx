@@ -27,7 +27,7 @@ export default function EditBrandPage() {
 
   useEffect(() => {
     if (!brandId) return;
-    fetch(`https://babuas25-ridercritic-api.onrender.com/api/brands/${brandId}`)
+    fetch(`https://api.ridercritic.com/api/brands/${brandId}`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch brand");
         return res.json();
@@ -53,7 +53,7 @@ export default function EditBrandPage() {
     setError(null);
     try {
       const fullData = { ...brand, ...form };
-      const res = await fetch(`https://babuas25-ridercritic-api.onrender.com/api/brands/${brandId}`, {
+      const res = await fetch(`https://api.ridercritic.com/api/brands/${brandId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(fullData),

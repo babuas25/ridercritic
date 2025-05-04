@@ -50,7 +50,7 @@ export default function MainNav() {
   useEffect(() => {
     setIsMounted(true)
     // Fetch brands from API
-    fetch("https://babuas25-ridercritic-api.onrender.com/api/brands/")
+    fetch("https://api.ridercritic.com/api/brands/")
       .then(res => {
         if (!res.ok) throw new Error("Failed to fetch brands");
         return res.json();
@@ -65,7 +65,7 @@ export default function MainNav() {
       });
 
     // Fetch types from API
-    fetch("https://babuas25-ridercritic-api.onrender.com/api/types/")
+    fetch("https://api.ridercritic.com/api/types/")
       .then(res => {
         if (!res.ok) throw new Error("Failed to fetch types");
         return res.json();

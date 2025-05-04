@@ -17,7 +17,7 @@ export default async function BrandDetailsPage({ params }: { params: { brand_id:
   let brand: Brand | null = null;
   let error = null;
   try {
-    const res = await fetch(`https://babuas25-ridercritic-api.onrender.com/api/brands/${params.brand_id}`);
+    const res = await fetch(`https://api.ridercritic.com/api/brands/${params.brand_id}`);
     if (!res.ok) throw new Error('Brand not found');
     brand = await res.json();
   } catch (e: any) {

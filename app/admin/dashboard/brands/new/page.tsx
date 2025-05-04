@@ -26,7 +26,7 @@ export default function AddBrandPage() {
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch("https://babuas25-ridercritic-api.onrender.com/api/brands/", {
+      const res = await fetch("https://api.ridercritic.com/api/brands/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

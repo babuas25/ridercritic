@@ -39,7 +39,7 @@ export default function AdminAllBrandsPage() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    let url = `https://babuas25-ridercritic-api.onrender.com/api/brands/?skip=${(page - 1) * limit}&limit=${limit}`;
+    let url = `https://api.ridercritic.com/api/brands/?skip=${(page - 1) * limit}&limit=${limit}`;
     fetch(url)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch brands");
@@ -97,7 +97,7 @@ export default function AdminAllBrandsPage() {
     try {
       await Promise.all(
         selected.map(async (id) => {
-          const res = await fetch(`https://babuas25-ridercritic-api.onrender.com/api/brands/${id}`, {
+          const res = await fetch(`https://api.ridercritic.com/api/brands/${id}`, {
             method: "DELETE",
           });
           if (!res.ok) throw new Error();

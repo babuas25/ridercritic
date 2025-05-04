@@ -10,7 +10,7 @@ export default async function TypeDetailsPage({ params }: { params: { type_id: s
   let type: Type | null = null;
   let error = null;
   try {
-    const res = await fetch(`https://babuas25-ridercritic-api.onrender.com/api/types/${params.type_id}`);
+    const res = await fetch(`https://api.ridercritic.com/api/types/${params.type_id}`);
     if (!res.ok) throw new Error('Type not found');
     type = await res.json();
   } catch (e: any) {

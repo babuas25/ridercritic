@@ -33,7 +33,7 @@ export default function AdminDashboardPage() {
       }
 
       try {
-        const response = await fetch("https://babuas25-ridercritic-api.onrender.com/api/auth/me", {
+        const response = await fetch("https://api.ridercritic.com/api/auth/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
 

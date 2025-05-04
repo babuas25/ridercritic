@@ -15,7 +15,7 @@ export default function AdminLoginPage() {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch("https://babuas25-ridercritic-api.onrender.com/api/auth/token", {
+      const res = await fetch("https://api.ridercritic.com/api/auth/token", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({
@@ -31,7 +31,7 @@ export default function AdminLoginPage() {
       }
       const data = await res.json();
       // Fetch user info to check is_superuser
-      const meRes = await fetch("https://babuas25-ridercritic-api.onrender.com/api/auth/me", {
+      const meRes = await fetch("https://api.ridercritic.com/api/auth/me", {
         headers: { Authorization: `Bearer ${data.access_token}` },
       });
       const me = await meRes.json();
