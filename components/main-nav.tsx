@@ -146,10 +146,6 @@ export default function MainNav() {
           Safety
         </Link>
 
-        <Link href="/specification" className="bg-card rounded-lg shadow p-4 text-sm font-[600] hover:bg-accent transition border">
-          Specification
-        </Link>
-
         <Link href="/motorcycle" className="bg-card rounded-lg shadow p-4 text-sm font-[600] hover:bg-accent transition border">
           Motorcycle
         </Link>
@@ -232,14 +228,6 @@ export default function MainNav() {
               <Link href="/safety" legacyBehavior passHref>
                 <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "font-normal")}>
                   Safety
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-
-            <NavigationMenuItem>
-              <Link href="/specification" legacyBehavior passHref>
-                <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "font-normal")}>
-                  Specification
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
