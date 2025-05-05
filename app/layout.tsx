@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { fonts } from './fonts';
 import { ThemeProvider } from '@/components/theme-provider';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { AdminAuthProvider } from '@/contexts/AdminAuthContext';
 import Header from '@/components/header';
 import MainNav from '@/components/main-nav';
 import Sidebar from '@/components/sidebar';
@@ -31,19 +32,21 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider>
-            <div className="min-h-screen flex flex-col">
-              <Header />
-              <MainNav />
-              <div className="flex flex-1">
-                <div className="md:block hidden">
-                  <Sidebar />
+          <AdminAuthProvider>
+            <AuthProvider>
+              <div className="min-h-screen flex flex-col">
+                <Header />
+                <MainNav />
+                <div className="flex flex-1">
+                  <div className="md:block hidden">
+                    <Sidebar />
+                  </div>
+                  <main className="flex-1 p-4 md:p-6">{children}</main>
                 </div>
-                <main className="flex-1 p-4 md:p-6">{children}</main>
+                <Footer />
               </div>
-              <Footer />
-            </div>
-          </AuthProvider>
+            </AuthProvider>
+          </AdminAuthProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
 
 export default function AdminLoginPage() {
   const [username, setUsername] = useState("");
@@ -9,6 +10,7 @@ export default function AdminLoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { login } = (useAdminAuth() || { login: (_token?: string) => {} }) as { login: (token: string) => void };
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -40,8 +42,8 @@ export default function AdminLoginPage() {
         setLoading(false);
         return;
       }
-      // Store token
-      localStorage.setItem("admin_token", data.access_token);
+      // Use context login for reactivity
+      login && login(data.access_token);
       // Redirect to dashboard
       router.push("/admin/dashboard");
     } catch (err) {

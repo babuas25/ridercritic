@@ -24,39 +24,28 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { Logo } from '@/components/ui/logo'
-
-function useSuperadmin() {
-  const [superadmin, setSuperadmin] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
-    if (token) {
-      fetch("https://api.ridercritic.com/api/auth/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then(res => res.ok ? res.json() : null)
-        .then(data => {
-          if (data && data.is_superuser) setSuperadmin(data);
-          setLoading(false);
-        });
-    } else {
-      setLoading(false);
-    }
-  }, []);
-  return { superadmin, loading };
-}
+import { useAdminAuth } from '@/contexts/AdminAuthContext'
 
 export default function Header() {
   const { theme, setTheme } = useTheme()
   const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const { user, logout } = useAuth()
-  const { superadmin, loading } = useSuperadmin()
+  const { user, logout: userLogout } = useAuth()
+  const adminAuth = useAdminAuth()
+  const admin = adminAuth?.admin
+  const isAdmin = adminAuth?.isAdmin
+  const loading = adminAuth?.loading
+  const adminLogout = adminAuth?.logout
 
   const handleLogout = async () => {
-    try {
-      await logout()
-    } catch (error) {
-      console.error('Failed to logout:', error)
+    if (isAdmin) {
+      if (adminLogout) adminLogout();
+      window.location.href = "/admin";
+    } else {
+      try {
+        await userLogout();
+      } catch (error) {
+        console.error('Failed to logout:', error)
+      }
     }
   }
 
@@ -141,14 +130,14 @@ export default function Header() {
               <span className="sr-only">Toggle theme</span>
             </Button>
             
-            {superadmin ? (
+            {isAdmin ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={undefined} alt={superadmin.username || superadmin.email || 'Superadmin'} />
+                      <AvatarImage src={undefined} alt={admin?.username || admin?.email || 'Superadmin'} />
                       <AvatarFallback>
-                        {superadmin.username?.charAt(0) || superadmin.email?.charAt(0) || 'S'}
+                        {admin?.username?.charAt(0) || admin?.email?.charAt(0) || 'A'}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
@@ -156,10 +145,7 @@ export default function Header() {
                 <DropdownMenuContent align="end" className="w-56">
                   <div className="px-4 py-2 font-bold text-primary">Superadmin</div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => {
-                    localStorage.removeItem("admin_token");
-                    window.location.href = "/admin";
-                  }} className="flex items-center font-[600]">
+                  <DropdownMenuItem onClick={handleLogout} className="flex items-center font-[600]">
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Logout</span>
                   </DropdownMenuItem>

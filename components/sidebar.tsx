@@ -18,7 +18,9 @@ import {
   Bike,
   Star,
   ShoppingBag,
-  Package
+  Package,
+  BadgeCent,
+  Shapes,
 } from "lucide-react"
 import { useState } from "react"
 import {
@@ -85,40 +87,13 @@ const adminSidebarItems: SidebarItem[] = [
   },
   {
     title: "Brands",
-    icon: FileText,
+    icon: BadgeCent,
     href: "/admin/dashboard/brands",
   },
   {
     title: "Types",
-    icon: FileText,
-    href: "/admin/types",
-    submenu: [
-      {
-        title: "All Types",
-        icon: FileText,
-        href: "/admin/types",
-      },
-      {
-        title: "Add Type",
-        icon: FileText,
-        href: "/admin/types/new",
-      },
-      {
-        title: "Type details",
-        icon: FileText,
-        href: "/admin/types/details",
-      },
-      {
-        title: "Modify",
-        icon: FileText,
-        href: "/admin/types/modify",
-      },
-      {
-        title: "Delete",
-        icon: FileText,
-        href: "/admin/types/delete",
-      },
-    ],
+    icon: Shapes,
+    href: "/admin/dashboard/types",
   },
   {
     title: "Motorcycles",
@@ -148,9 +123,10 @@ export default function Sidebar() {
   const pathname = usePathname()
   const { user } = useAuth()
   const [superadmin, setSuperadmin] = useState<any>(null)
+  const [adminLoading, setAdminLoading] = useState(true);
 
-  // Check if user is superadmin
   React.useEffect(() => {
+    setAdminLoading(true);
     const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
     if (token) {
       fetch("https://api.ridercritic.com/api/auth/me", {
@@ -159,9 +135,16 @@ export default function Sidebar() {
         .then(res => res.ok ? res.json() : null)
         .then(data => {
           if (data && data.is_superuser) setSuperadmin(data);
+          else setSuperadmin(null);
+          setAdminLoading(false);
         });
+    } else {
+      setSuperadmin(null);
+      setAdminLoading(false);
     }
-  }, []);
+  }, [user, typeof window !== "undefined" ? localStorage.getItem("admin_token") : null]);
+
+  if (adminLoading) return null;
 
   const toggleSubmenu = (title: string) => {
     setOpenSubmenus(prev => 
