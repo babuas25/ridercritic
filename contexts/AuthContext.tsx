@@ -9,7 +9,9 @@ import {
   onAuthStateChanged,
   signInWithPopup,
   sendPasswordResetEmail,
-  AuthError
+  AuthError,
+  GoogleAuthProvider,
+  signInWithCredential
 } from 'firebase/auth';
 import { auth, googleProvider, facebookProvider } from '@/lib/firebase';
 import { toast } from 'sonner';
@@ -107,13 +109,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithGoogle = async () => {
     try {
-      console.log('Attempting Google sign-in...');
-      const result = await signInWithPopup(auth, googleProvider);
-      console.log('Google sign-in successful:', result.user.email);
+      // Load Google Identity Services script if not already loaded
+      if (!window.google || !window.google.accounts) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://accounts.google.com/gsi/client';
+          script.async = true;
+          script.onload = resolve;
+          script.onerror = reject;
+          document.body.appendChild(script);
+        });
+      }
+      // Use Google Identity Services to get the ID token
+      const token = await new Promise<string>((resolve, reject) => {
+        window.google.accounts.id.initialize({
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+          callback: (response: any) => {
+            if (response.credential) {
+              resolve(response.credential);
+            } else {
+              reject(new Error('No credential returned from Google.'));
+            }
+          },
+        });
+        window.google.accounts.id.prompt();
+      });
+      // Sign in to Firebase with the Google ID token
+      const credential = GoogleAuthProvider.credential(token);
+      await signInWithCredential(auth, credential);
     } catch (error) {
-      console.error('Google sign-in error:', error);
-      const authError = error as AuthError;
-      throw new Error(getErrorMessage(authError));
+      console.error('Custom Google sign-in error:', error);
+      throw new Error('Failed to sign in with Google.');
     }
   };
 
