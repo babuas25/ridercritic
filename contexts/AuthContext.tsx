@@ -122,6 +122,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       // Use Google Identity Services to get the ID token
       const token = await new Promise<string>((resolve, reject) => {
+        if (!window.google || !window.google.accounts) {
+          return reject(new Error('Google Identity Services not loaded.'));
+        }
         window.google.accounts.id.initialize({
           client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
           callback: (response: any) => {
