@@ -98,7 +98,7 @@ const adminSidebarItems: SidebarItem[] = [
   {
     title: "Motorcycles",
     icon: Bike,
-    href: "/admin/motorcycles",
+    href: "/admin/dashboard/motorcycles",
   },
   {
     title: "Reviews",
