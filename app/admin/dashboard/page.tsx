@@ -1,16 +1,24 @@
-"use client";
+'use client';
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { 
+  LayoutDashboard, 
+  Bike, 
+  Package, 
+  Users, 
+  ShoppingBag,
+  Star 
+} from "lucide-react";
 
 interface AdminStats {
   totalUsers: number;
-  totalBrands: number;
-  totalTypes: number;
   totalMotorcycles: number;
+  totalProducts: number;
   totalReviews: number;
+  totalOrders: number;
 }
 
 export default function AdminDashboardPage() {
@@ -18,54 +26,23 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<AdminStats>({
     totalUsers: 0,
-    totalBrands: 0,
-    totalTypes: 0,
     totalMotorcycles: 0,
+    totalProducts: 0,
     totalReviews: 0,
+    totalOrders: 0,
   });
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem("admin_token");
-      if (!token) {
-        router.replace("/admin");
-        return;
-      }
-
-      try {
-        const response = await fetch("https://api.ridercritic.com/api/auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to verify admin status');
-        }
-
-        const data = await response.json();
-        if (!data.is_superuser) {
-          router.replace("/admin");
-          return;
-        }
-
-        // Fetch admin stats here
-        // This is a placeholder - replace with actual API calls
-        setStats({
-          totalUsers: 150,
-          totalBrands: 25,
-          totalTypes: 10,
-          totalMotorcycles: 100,
-          totalReviews: 500,
-        });
-
-        setLoading(false);
-      } catch (error) {
-        console.error("Error verifying admin status:", error);
-        router.replace("/admin");
-      }
-    };
-
-    checkAuth();
-  }, [router]);
+    // Fetch stats from your API
+    setStats({
+      totalUsers: 150,
+      totalMotorcycles: 75,
+      totalProducts: 200,
+      totalReviews: 450,
+      totalOrders: 320,
+    });
+    setLoading(false);
+  }, []);
 
   if (loading) {
     return (
@@ -75,60 +52,37 @@ export default function AdminDashboardPage() {
     );
   }
 
+  const cards = [
+    { title: 'Total Users', value: stats.totalUsers, icon: Users },
+    { title: 'Motorcycles', value: stats.totalMotorcycles, icon: Bike },
+    { title: 'Products', value: stats.totalProducts, icon: Package },
+    { title: 'Reviews', value: stats.totalReviews, icon: Star },
+    { title: 'Orders', value: stats.totalOrders, icon: ShoppingBag },
+  ];
+
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <Button onClick={() => router.push('/admin/brands/new')}>
-          Add New Brand
+        <Button onClick={() => router.push('/admin/dashboard/motorcycles/new')}>
+          Add New Motorcycle
         </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Total Users</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{stats.totalUsers}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Total Brands</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{stats.totalBrands}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Total Types</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{stats.totalTypes}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Total Motorcycles</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{stats.totalMotorcycles}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Total Reviews</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{stats.totalReviews}</p>
-          </CardContent>
-        </Card>
+        {cards.map((card, index) => (
+          <Card key={index}>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">
+                {card.title}
+              </CardTitle>
+              <card.icon className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{card.value}</div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   );

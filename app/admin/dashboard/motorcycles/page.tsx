@@ -192,4 +192,4 @@ export default function AdminAllMotorcyclesPage() {
       )}
     </div>
   );
-} 
+}

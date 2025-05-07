@@ -1,7 +1,10 @@
-"use client";
+'use client';
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 
 export default function AdminLoginPage() {
@@ -10,7 +13,7 @@ export default function AdminLoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { login } = (useAdminAuth() || { login: (_token?: string) => {} }) as { login: (token: string) => void };
+  const { login } = useAdminAuth();
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -32,19 +35,7 @@ export default function AdminLoginPage() {
         return;
       }
       const data = await res.json();
-      // Fetch user info to check is_superuser
-      const meRes = await fetch("https://api.ridercritic.com/api/auth/me", {
-        headers: { Authorization: `Bearer ${data.access_token}` },
-      });
-      const me = await meRes.json();
-      if (!me.is_superuser) {
-        setError("You are not a superadmin.");
-        setLoading(false);
-        return;
-      }
-      // Use context login for reactivity
-      login && login(data.access_token);
-      // Redirect to dashboard
+      login(data.access_token);
       router.push("/admin/dashboard");
     } catch (err) {
       setError("Login failed");
@@ -54,34 +45,44 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <form onSubmit={handleLogin} className="bg-white p-8 rounded shadow-md w-full max-w-sm">
-        <h2 className="text-2xl font-bold mb-4 text-center">Superadmin Login</h2>
-        <input
-          type="text"
-          placeholder="Username"
-          className="w-full mb-3 p-2 border rounded"
-          value={username}
-          onChange={e => setUsername(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full mb-3 p-2 border rounded"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          required
-        />
-        {error && <div className="text-red-500 mb-3">{error}</div>}
-        <button
-          type="submit"
-          className="w-full bg-black text-white py-2 rounded"
-          disabled={loading}
-        >
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <Card className="w-full max-w-md mx-4">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">Admin Login</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <Input
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full"
+                required
+              />
+            </div>
+            {error && <div className="text-sm text-destructive">{error}</div>}
+            <Button 
+              type="submit" 
+              className="w-full"
+              disabled={loading}
+            >
+              {loading ? "Logging in..." : "Login"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
-} 
+}
