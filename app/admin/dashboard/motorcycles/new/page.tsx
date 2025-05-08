@@ -96,12 +96,17 @@ export default function AddMotorcyclePage() {
     fetch("https://api.ridercritic.com/api/brands?skip=0&limit=100", {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
-      .then((res) => res.json())
+      .then((res) => {
+        console.log("Brands fetch status:", res.status);
+        return res.json();
+      })
       .then((data) => {
+        console.log("Brands data:", data);
         setBrands(data);
         setBrandsLoading(false);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("Brands fetch error:", err);
         setBrandsError("Failed to load brands");
         setBrandsLoading(false);
       });

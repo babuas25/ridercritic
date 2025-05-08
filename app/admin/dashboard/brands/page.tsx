@@ -39,8 +39,11 @@ export default function AdminAllBrandsPage() {
   useEffect(() => {
     setLoading(true);
     setError(null);
+    const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
     let url = `https://api.ridercritic.com/api/brands/?skip=${(page - 1) * limit}&limit=${limit}`;
-    fetch(url)
+    fetch(url, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch brands");
         return res.json();

@@ -33,6 +33,13 @@ export default function AdminDashboardPage() {
   });
 
   useEffect(() => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
+    if (!token) {
+      router.push("/admin");
+    }
+  }, [router]);
+
+  useEffect(() => {
     // Fetch stats from your API
     setStats({
       totalUsers: 150,

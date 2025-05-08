@@ -26,8 +26,11 @@ export default function AdminAllTypesPage() {
   useEffect(() => {
     setLoading(true);
     setError(null);
+    const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
     let url = `https://api.ridercritic.com/api/types/?skip=${(page - 1) * limit}&limit=${limit}`;
-    fetch(url)
+    fetch(url, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch types");
         return res.json();
