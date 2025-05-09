@@ -20,7 +20,7 @@ export default function AdminLoginPage() {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch("https://api.ridercritic.com/api/auth/token", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/auth/token`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({

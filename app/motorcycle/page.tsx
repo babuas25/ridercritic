@@ -1,241 +1,130 @@
 "use client"
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { useEffect, useState } from "react"
+import Link from "next/link"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Slider } from "@/components/ui/slider"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Separator } from "@/components/ui/separator"
-import { Check, ChevronDown, Filter } from "lucide-react"
-import Image from "next/image"
-import { useState } from "react"
 
-const types = [
-  "All Types",
-  "Sport Bike",
-  "Cruiser",
-  "Adventure",
-  "Naked",
-  "Touring",
-  "Scooter"
-]
+interface Motorcycle {
+  id: number
+  name: string
+  brand_id?: number
+  type_id?: number
+  model_year?: number
+  image_urls?: string[]
+  brand?: { name: string }
+  type?: { name: string }
+}
 
-const sortOptions = [
-  { label: "Newest", value: "newest" },
-  { label: "Price: Low to High", value: "price_asc" },
-  { label: "Price: High to Low", value: "price_desc" },
-  { label: "Name: A to Z", value: "name_asc" },
-  { label: "Name: Z to A", value: "name_desc" },
-]
+interface Brand { id: number; name: string; }
+interface Type { id: number; name: string; }
 
-// Sample data - In a real app, this would come from an API or database
-const motorcycles = [
-  {
-    id: 1,
-    name: "Honda CBR1000RR-R",
-    type: "Sport Bike",
-    price: 28500,
-    image: "/motorcycles/honda-cbr.jpg",
-    description: "The ultimate racing machine with cutting-edge technology",
-    specs: {
-      engine: "999cc",
-      power: "214 HP",
-      weight: "201 kg"
-    }
-  },
-  {
-    id: 2,
-    name: "Harley-Davidson Iron 883",
-    type: "Cruiser",
-    price: 11499,
-    image: "/motorcycles/harley-iron.jpg",
-    description: "A classic cruiser with authentic H-D style",
-    specs: {
-      engine: "883cc",
-      power: "50 HP",
-      weight: "247 kg"
-    }
-  },
-  // Add more motorcycles here
-]
+export default function PublicMotorcyclesPage() {
+  const [motorcycles, setMotorcycles] = useState<Motorcycle[]>([])
+  const [brands, setBrands] = useState<Brand[]>([])
+  const [types, setTypes] = useState<Type[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [search, setSearch] = useState("")
+  const [brandFilter, setBrandFilter] = useState("")
+  const [typeFilter, setTypeFilter] = useState("")
+  // const [ccMin, setCcMin] = useState("")
+  // const [ccMax, setCcMax] = useState("")
+  const [sortBy, setSortBy] = useState("")
 
-export default function MotorcyclePage() {
-  const [selectedType, setSelectedType] = useState("All Types")
-  const [priceRange, setPriceRange] = useState([0, 50000])
-  const [sortBy, setSortBy] = useState("newest")
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+  useEffect(() => {
+    setLoading(true)
+    setError(null)
+    Promise.all([
+      fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/motorcycles/?skip=0&limit=100`).then(res => res.json()),
+      fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/brands/`).then(res => res.json()),
+      fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/types/`).then(res => res.json()),
+    ])
+      .then(([motos, brands, types]) => {
+        setMotorcycles(motos)
+        setBrands(brands)
+        setTypes(types)
+        setLoading(false)
+      })
+      .catch(() => {
+        setError("Could not load motorcycles")
+        setLoading(false)
+      })
+  }, [])
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(price)
-  }
-
-  const filteredMotorcycles = motorcycles
-    .filter(moto => 
-      (selectedType === "All Types" || moto.type === selectedType) &&
-      moto.price >= priceRange[0] &&
-      moto.price <= priceRange[1]
-    )
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "price_asc":
-          return a.price - b.price
-        case "price_desc":
-          return b.price - a.price
-        case "name_asc":
-          return a.name.localeCompare(b.name)
-        case "name_desc":
-          return b.name.localeCompare(a.name)
-        default:
-          return 0
-      }
-    })
-
-  const FilterSection = () => (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold mb-4">Type</h3>
-        <div className="space-y-3">
-          {types.map((type) => (
-            <Button
-              key={type}
-              variant={selectedType === type ? "default" : "ghost"}
-              className="w-full justify-start"
-              onClick={() => setSelectedType(type)}
-            >
-              {selectedType === type && (
-                <Check className="mr-2 h-4 w-4" />
-              )}
-              {type}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      <Separator />
-
-      <div>
-        <h3 className="text-lg font-semibold mb-4">Price Range</h3>
-        <div className="space-y-4">
-          <Slider
-            defaultValue={[0, 50000]}
-            max={50000}
-            step={1000}
-            value={priceRange}
-            onValueChange={setPriceRange}
-            className="w-full"
-          />
-          <div className="flex justify-between text-sm">
-            <span>{formatPrice(priceRange[0])}</span>
-            <span>{formatPrice(priceRange[1])}</span>
-          </div>
-        </div>
-      </div>
-    </div>
+  let filtered = motorcycles.filter(moto =>
+    (!search || moto.name.toLowerCase().includes(search.toLowerCase())) &&
+    (!brandFilter || String(moto.brand_id) === brandFilter) &&
+    (!typeFilter || String(moto.type_id) === typeFilter)
+    // && (!ccMin || (moto.engine_cc && moto.engine_cc >= Number(ccMin)))
+    // && (!ccMax || (moto.engine_cc && moto.engine_cc <= Number(ccMax)))
   )
 
+  if (sortBy === "brand") filtered = filtered.sort((a, b) => (a.brand_id || 0) - (b.brand_id || 0))
+  if (sortBy === "type") filtered = filtered.sort((a, b) => (a.type_id || 0) - (b.type_id || 0))
+  if (sortBy === "year") filtered = filtered.sort((a, b) => (b.model_year || 0) - (a.model_year || 0))
+  // if (sortBy === "cc") filtered = filtered.sort((a, b) => (b.engine_cc || 0) - (a.engine_cc || 0))
+
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold tracking-tight">Motorcycles</h1>
-          <p className="text-muted-foreground">
-            Explore our collection of motorcycles from various manufacturers
-          </p>
-        </div>
-
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Desktop Filters */}
-          <div className="hidden lg:block w-[240px] flex-none">
-            <FilterSection />
-          </div>
-
-          <div className="flex-1">
-            {/* Mobile Filter Button & Sort */}
-            <div className="flex items-center gap-4 mb-6">
-              <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="outline" className="lg:hidden">
-                    <Filter className="mr-2 h-4 w-4" />
-                    Filters
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-[300px]">
-                  <SheetHeader>
-                    <SheetTitle>Filters</SheetTitle>
-                    <SheetDescription>
-                      Refine your motorcycle search
-                    </SheetDescription>
-                  </SheetHeader>
-                  <div className="mt-6">
-                    <FilterSection />
-                  </div>
-                </SheetContent>
-              </Sheet>
-
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  {sortOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Motorcycle Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {filteredMotorcycles.map((motorcycle) => (
-                <Card key={motorcycle.id} className="flex flex-col">
-                  <CardHeader>
-                    <div className="aspect-video relative rounded-lg overflow-hidden mb-4">
-                      <Image
-                        src={motorcycle.image}
-                        alt={motorcycle.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <CardTitle>{motorcycle.name}</CardTitle>
-                      <Badge variant="secondary">{motorcycle.type}</Badge>
-                    </div>
-                    <CardDescription>{motorcycle.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex-grow">
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-muted-foreground">Engine</span>
-                        <span className="font-medium">{motorcycle.specs.engine}</span>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <span className="text-muted-foreground">Power</span>
-                        <span className="font-medium">{motorcycle.specs.power}</span>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <span className="text-muted-foreground">Weight</span>
-                        <span className="font-medium">{motorcycle.specs.weight}</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-between">
-                    <span className="text-lg font-bold">{formatPrice(motorcycle.price)}</span>
-                    <Button>View Details</Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </div>
+    <div className="container py-8">
+      <h1 className="text-3xl font-bold mb-6 text-center">All Motorcycles</h1>
+      <div className="flex flex-wrap gap-4 mb-6 items-end justify-center">
+        <input
+          type="text"
+          placeholder="Search by name..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="border rounded px-3 py-2 min-w-[200px]"
+        />
+        <select value={brandFilter} onChange={e => setBrandFilter(e.target.value)} className="border rounded px-3 py-2">
+          <option value="">All Brands</option>
+          {brands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+        </select>
+        <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className="border rounded px-3 py-2">
+          <option value="">All Types</option>
+          {types.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+        </select>
+        {/* <input type="number" placeholder="Min CC" value={ccMin} onChange={e => setCcMin(e.target.value)} className="border rounded px-3 py-2 w-20" />
+        <input type="number" placeholder="Max CC" value={ccMax} onChange={e => setCcMax(e.target.value)} className="border rounded px-3 py-2 w-20" /> */}
+        <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="border rounded px-3 py-2">
+          <option value="">Sort By</option>
+          <option value="brand">Brand</option>
+          <option value="type">Type</option>
+          <option value="year">Year</option>
+          {/* <option value="cc">Engine CC</option> */}
+        </select>
       </div>
+      {loading && <div className="text-center">Loading...</div>}
+      {error && <div className="text-center text-red-500">{error}</div>}
+      {!loading && !error && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {filtered.map((moto) => (
+            <Link key={moto.id} href={`/motorcycle/${moto.id}`} className="group">
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
+                {moto.image_urls && moto.image_urls.length > 0 ? (
+                  <img
+                    src={moto.image_urls[0]}
+                    alt={moto.name}
+                    className="w-full h-48 object-cover rounded-t-lg"
+                  />
+                ) : (
+                  <div className="w-full h-48 bg-muted flex items-center justify-center text-muted-foreground rounded-t-lg">
+                    No Image
+                  </div>
+                )}
+                <CardContent className="flex-1 flex flex-col gap-2 p-4">
+                  <div className="font-semibold text-lg group-hover:text-primary transition-colors">{moto.name}</div>
+                  <div className="flex gap-2 flex-wrap text-sm">
+                    {moto.model_year && <Badge variant="secondary">{moto.model_year}</Badge>}
+                    {moto.brand_id && <Badge variant="outline">Brand ID: {moto.brand_id}</Badge>}
+                    {moto.type_id && <Badge variant="outline">Type ID: {moto.type_id}</Badge>}
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   )
 } 

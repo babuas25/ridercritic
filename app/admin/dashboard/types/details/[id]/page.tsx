@@ -21,7 +21,7 @@ export default function TypeDetailsPage() {
 
   useEffect(() => {
     if (!typeId) return;
-    fetch(`https://api.ridercritic.com/api/types/${typeId}`)
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/types/${typeId}`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch type");
         return res.json();
@@ -41,7 +41,7 @@ export default function TypeDetailsPage() {
     setDeleteError(null);
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
-      const res = await fetch(`https://api.ridercritic.com/api/types/${typeId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/types/${typeId}`, {
         method: "DELETE",
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {})

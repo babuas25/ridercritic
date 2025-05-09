@@ -93,7 +93,7 @@ export default function AddMotorcyclePage() {
   useEffect(() => {
     setBrandsLoading(true);
     const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
-    fetch("https://api.ridercritic.com/api/brands?skip=0&limit=100", {
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/brands?skip=0&limit=100`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
       .then((res) => {
@@ -115,7 +115,7 @@ export default function AddMotorcyclePage() {
   useEffect(() => {
     setTypesLoading(true);
     const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
-    fetch("https://api.ridercritic.com/api/types?skip=0&limit=100", {
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/types?skip=0&limit=100`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
       .then((res) => res.json())
@@ -163,9 +163,13 @@ export default function AddMotorcyclePage() {
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch("https://api.ridercritic.com/api/motorcycles/", {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/motorcycles/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
         body: JSON.stringify({
           ...form,
           model_year: form.model_year ? Number(form.model_year) : undefined,

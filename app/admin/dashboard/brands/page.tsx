@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface Brand {
   id: number;
@@ -40,7 +41,7 @@ export default function AdminAllBrandsPage() {
     setLoading(true);
     setError(null);
     const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
-    let url = `https://api.ridercritic.com/api/brands/?skip=${(page - 1) * limit}&limit=${limit}`;
+    let url = `${process.env.NEXT_PUBLIC_BASE_URL}api/brands/?skip=${(page - 1) * limit}&limit=${limit}`;
     fetch(url, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
@@ -100,7 +101,7 @@ export default function AdminAllBrandsPage() {
     try {
       await Promise.all(
         selected.map(async (id) => {
-          const res = await fetch(`https://api.ridercritic.com/api/brands/${id}`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/brands/${id}`, {
             method: "DELETE",
           });
           if (!res.ok) throw new Error();
@@ -124,19 +125,20 @@ export default function AdminAllBrandsPage() {
         <h1 className="text-2xl font-bold">All Brands</h1>
         <div className="flex gap-2">
           {selected.length > 0 && (
-            <button
+            <Button
               onClick={handleBulkDelete}
-              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+              variant="destructive"
+              className="flex items-center gap-2"
               disabled={deleting}
             >
               <Trash2 className="h-4 w-4" />
               {deleting ? "Deleting..." : `Delete Selected (${selected.length})`}
-            </button>
+            </Button>
           )}
           <Link href="/admin/dashboard/brands/new">
-            <button className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition">
+            <Button variant="default" className="flex items-center gap-2">
               <Plus className="h-4 w-4" /> Add New Brand
-            </button>
+            </Button>
           </Link>
         </div>
       </div>
@@ -198,9 +200,9 @@ export default function AdminAllBrandsPage() {
                   <td className="border px-4 py-2">{brand.description || '-'}</td>
                   <td className="border px-4 py-2">
                     <Link href={`/admin/dashboard/brands/modify/${brand.id}`}>
-                      <button className="flex items-center gap-1 px-2 py-1 bg-primary text-white rounded hover:bg-primary/90 transition text-xs">
+                      <Button variant="secondary" size="sm" className="flex items-center gap-1">
                         <Pencil className="h-3 w-3" /> Edit
-                      </button>
+                      </Button>
                     </Link>
                   </td>
                 </tr>
@@ -226,9 +228,9 @@ export default function AdminAllBrandsPage() {
                 <div className="text-xs text-muted-foreground">Description: <span className="text-black">{brand.description || '-'}</span></div>
                 <div>
                   <Link href={`/admin/dashboard/brands/modify/${brand.id}`}>
-                    <button className="flex items-center gap-1 px-2 py-1 bg-primary text-white rounded hover:bg-primary/90 transition text-xs">
+                    <Button variant="secondary" size="sm" className="flex items-center gap-1">
                       <Pencil className="h-3 w-3" /> Edit
-                    </button>
+                    </Button>
                   </Link>
                 </div>
               </div>

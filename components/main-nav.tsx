@@ -50,7 +50,7 @@ export default function MainNav() {
   useEffect(() => {
     setIsMounted(true)
     // Fetch brands from API
-    fetch("https://api.ridercritic.com/api/brands/")
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/brands/`)
       .then(res => {
         if (!res.ok) throw new Error("Failed to fetch brands");
         return res.json();
@@ -65,7 +65,7 @@ export default function MainNav() {
       });
 
     // Fetch types from API
-    fetch("https://api.ridercritic.com/api/types/")
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/types/`)
       .then(res => {
         if (!res.ok) throw new Error("Failed to fetch types");
         return res.json();
@@ -234,9 +234,7 @@ export default function MainNav() {
 
             <NavigationMenuItem>
               <Link href="/motorcycle" legacyBehavior passHref>
-                <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "font-normal")}>
-                  Motorcycle
-                </NavigationMenuLink>
+                <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), "font-normal")}>Motorcycle</NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
 

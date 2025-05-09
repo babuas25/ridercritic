@@ -28,7 +28,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const token = localStorage.getItem("admin_token");
     if (token) {
-      fetch("https://api.ridercritic.com/api/auth/me", {
+      fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/auth/me`, {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then(res => res.ok ? res.json() : null)
@@ -47,7 +47,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const login = (token: string) => {
     localStorage.setItem("admin_token", token);
     // Fetch admin info and update state
-    fetch("https://api.ridercritic.com/api/auth/me", {
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/auth/me`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(res => res.ok ? res.json() : null)

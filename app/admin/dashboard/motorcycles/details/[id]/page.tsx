@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Edit, Trash2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from '@/hooks/use-toast';
 
 function renderObject(obj: any, title?: string) {
   if (!obj || typeof obj !== "object") return null;
@@ -51,6 +52,11 @@ export default function MotorcycleDetailsPage() {
   const [type, setType] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [undoTimeout, setUndoTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [lastDeleted, setLastDeleted] = useState<any>(null);
+  const [mainImageIdx, setMainImageIdx] = useState(0);
 
   useEffect(() => {
     if (!authLoading && !isAdmin) {
@@ -68,7 +74,7 @@ export default function MotorcycleDetailsPage() {
       return;
     }
 
-    fetch(`https://api.ridercritic.com/api/motorcycles/${id}`, {
+    fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/motorcycles/${id}`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then((res) => {
@@ -78,14 +84,14 @@ export default function MotorcycleDetailsPage() {
       .then((data) => {
         setMotorcycle(data);
         if (data.brand_id) {
-          fetch(`https://api.ridercritic.com/api/brands/${data.brand_id}`, {
+          fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/brands/${data.brand_id}`, {
             headers: { Authorization: `Bearer ${token}` }
           })
             .then(res => res.ok ? res.json() : null)
             .then(setBrand);
         }
         if (data.type_id) {
-          fetch(`https://api.ridercritic.com/api/types/${data.type_id}`, {
+          fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/types/${data.type_id}`, {
             headers: { Authorization: `Bearer ${token}` }
           })
             .then(res => res.ok ? res.json() : null)
@@ -98,6 +104,57 @@ export default function MotorcycleDetailsPage() {
         setLoading(false);
       });
   }, [id, isAdmin, authLoading]);
+
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this motorcycle? This action cannot be undone.")) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      const token = localStorage.getItem("admin_token");
+      // Fetch the motorcycle data before deleting for undo
+      const resData = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/motorcycles/${id}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      const deletedData = await resData.json();
+      setLastDeleted(deletedData);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/motorcycles/${id}`, {
+        method: "DELETE",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) throw new Error("Failed to delete motorcycle");
+      // Show undo toast
+      const undo = async () => {
+        if (!lastDeleted) return;
+        await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/motorcycles/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify(lastDeleted),
+        });
+        toast({ title: "Motorcycle restored", description: "The motorcycle has been restored.", variant: "default" });
+        router.push(`/admin/dashboard/motorcycles/details/${lastDeleted.id}`);
+      };
+      toast({
+        title: "Motorcycle deleted successfully",
+        description: "The motorcycle has been deleted.",
+        variant: "default",
+        action: (
+          <button onClick={undo} className="ml-2 underline text-primary">Undo</button>
+        ),
+      });
+      // Remove undo after 8 seconds
+      if (undoTimeout) clearTimeout(undoTimeout);
+      setUndoTimeout(setTimeout(() => setLastDeleted(null), 8000));
+      router.push("/admin/dashboard/motorcycles");
+    } catch (err) {
+      setDeleteError("Could not delete motorcycle");
+      toast({ title: "Could not delete motorcycle", description: "An error occurred while deleting the motorcycle.", variant: "destructive" });
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   if (authLoading || !isAdmin) return <div className="p-4">Loading...</div>;
   if (loading) return (
@@ -132,13 +189,18 @@ export default function MotorcycleDetailsPage() {
             Back
           </Button>
           <div className="flex gap-2">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={() => router.push(`/admin/dashboard/motorcycles/modify/${id}`)}>
               <Edit className="h-4 w-4" />
               Edit
             </Button>
-            <Button variant="destructive" className="gap-2">
+            <Button variant="destructive" className="gap-2" onClick={handleDelete} disabled={deleting}>
               <Trash2 className="h-4 w-4" />
-              Delete
+              {deleting ? (
+                <>
+                  <span className="inline-block w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin align-middle mr-1"></span>
+                  Deleting...
+                </>
+              ) : "Delete"}
             </Button>
           </div>
         </div>
@@ -154,16 +216,48 @@ export default function MotorcycleDetailsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-4">
                 {motorcycle.image_urls && motorcycle.image_urls.length > 0 && (
-                  <div className="grid grid-cols-2 gap-4">
-                    {motorcycle.image_urls.map((url: string, idx: number) => (
-                      <img 
-                        key={idx} 
-                        src={url} 
-                        alt="Motorcycle" 
-                        className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer" 
-                        onClick={() => window.open(url, '_blank')}
+                  <div className="flex flex-col items-center mb-6">
+                    <div className="relative">
+                      <img
+                        src={motorcycle.image_urls[mainImageIdx]}
+                        alt="Motorcycle"
+                        className="w-80 h-80 object-cover rounded-2xl shadow-xl border bg-card border-border transition-transform duration-300 hover:scale-105 cursor-pointer"
+                        onClick={() => window.open(motorcycle.image_urls[mainImageIdx], '_blank')}
                       />
-                    ))}
+                      {motorcycle.image_urls.length > 1 && (
+                        <>
+                          <button
+                            className="absolute left-0 top-1/2 -translate-y-1/2 bg-card/80 border border-border rounded-full p-1 shadow hover:ring-2 hover:ring-primary focus:ring-2 focus:ring-primary transition"
+                            onClick={() => setMainImageIdx((mainImageIdx - 1 + motorcycle.image_urls.length) % motorcycle.image_urls.length)}
+                            style={{ zIndex: 2 }}
+                            aria-label="Previous image"
+                          >
+                            <span className="text-primary text-lg">&#8592;</span>
+                          </button>
+                          <button
+                            className="absolute right-0 top-1/2 -translate-y-1/2 bg-card/80 border border-border rounded-full p-1 shadow hover:ring-2 hover:ring-primary focus:ring-2 focus:ring-primary transition"
+                            onClick={() => setMainImageIdx((mainImageIdx + 1) % motorcycle.image_urls.length)}
+                            style={{ zIndex: 2 }}
+                            aria-label="Next image"
+                          >
+                            <span className="text-primary text-lg">&#8594;</span>
+                          </button>
+                        </>
+                      )}
+                    </div>
+                    {motorcycle.image_urls.length > 1 && (
+                      <div className="flex gap-2 mt-3">
+                        {motorcycle.image_urls.map((url: string, idx: number) => (
+                          <img
+                            key={idx}
+                            src={url}
+                            alt="Thumbnail"
+                            className={`w-16 h-16 object-cover rounded-lg border-2 cursor-pointer transition-all bg-card border-border ${mainImageIdx === idx ? 'ring-2 ring-primary scale-105' : ''}`}
+                            onClick={() => setMainImageIdx(idx)}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
                 <Card>
@@ -219,6 +313,7 @@ export default function MotorcycleDetailsPage() {
             </div>
           </CardContent>
         </Card>
+        {deleteError && <Alert variant="destructive" className="m-4"><AlertCircle className="h-4 w-4" /><AlertDescription>{deleteError}</AlertDescription></Alert>}
       </div>
     </ScrollArea>
   );

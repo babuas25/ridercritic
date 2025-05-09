@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { toast } from '@/hooks/use-toast';
+import { Button } from "@/components/ui/button";
 
 interface Motorcycle {
   id: number;
@@ -33,11 +35,13 @@ export default function AdminAllMotorcyclesPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [sortBy, setSortBy] = useState<keyof Motorcycle | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [undoTimeout, setUndoTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [lastBulkDeleted, setLastBulkDeleted] = useState<Motorcycle[] | null>(null);
 
   useEffect(() => {
     setLoading(true);
     setError(null);
-    let url = `https://api.ridercritic.com/api/motorcycles/?skip=${(page - 1) * limit}&limit=${limit}`;
+    let url = `${process.env.NEXT_PUBLIC_BASE_URL}api/motorcycles/?skip=${(page - 1) * limit}&limit=${limit}`;
     fetch(url)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch motorcycles");
@@ -87,21 +91,57 @@ export default function AdminAllMotorcyclesPage() {
   };
 
   const handleBulkDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete the selected motorcycles? This action cannot be undone.")) return;
     setDeleting(true);
     setDeleteError(null);
     try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('admin_token') : null;
+      // Store deleted motorcycles for undo
+      const deletedMotorcycles = motorcycles.filter((m) => selected.includes(m.id));
+      setLastBulkDeleted(deletedMotorcycles);
       await Promise.all(
         selected.map(async (id) => {
-          const res = await fetch(`https://api.ridercritic.com/api/motorcycles/${id}`, {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/motorcycles/${id}`, {
             method: "DELETE",
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
           });
           if (!res.ok) throw new Error();
         })
       );
       setMotorcycles((prev) => prev.filter((m) => !selected.includes(m.id)));
       setSelected([]);
+      // Show undo toast
+      const undo = async () => {
+        if (!lastBulkDeleted) return;
+        await Promise.all(
+          lastBulkDeleted.map(async (m) => {
+            await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}api/motorcycles/`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+              },
+              body: JSON.stringify(m),
+            });
+          })
+        );
+        toast({ title: "Motorcycles restored", description: "The deleted motorcycles have been restored.", variant: "default" });
+        setMotorcycles((prev) => [...prev, ...(lastBulkDeleted || [])]);
+      };
+      toast({
+        title: "Selected motorcycles deleted successfully",
+        description: "The selected motorcycles have been deleted.",
+        variant: "default",
+        action: (
+          <button onClick={undo} className="ml-2 underline text-primary">Undo</button>
+        ),
+      });
+      // Remove undo after 8 seconds
+      if (undoTimeout) clearTimeout(undoTimeout);
+      setUndoTimeout(setTimeout(() => setLastBulkDeleted(null), 8000));
     } catch {
       setDeleteError("Could not delete selected motorcycles");
+      toast({ title: "Could not delete selected motorcycles", description: "An error occurred while deleting the selected motorcycles.", variant: "destructive" });
     } finally {
       setDeleting(false);
     }
@@ -115,19 +155,25 @@ export default function AdminAllMotorcyclesPage() {
         <h1 className="text-2xl font-bold">All Motorcycles</h1>
         <div className="flex gap-2">
           {selected.length > 0 && (
-            <button
+            <Button
               onClick={handleBulkDelete}
-              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+              variant="destructive"
+              className="flex items-center gap-2"
               disabled={deleting}
             >
               <Trash2 className="h-4 w-4" />
-              {deleting ? "Deleting..." : `Delete Selected (${selected.length})`}
-            </button>
+              {deleting ? (
+                <>
+                  <span className="inline-block w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin align-middle mr-1"></span>
+                  Deleting...
+                </>
+              ) : `Delete Selected (${selected.length})`}
+            </Button>
           )}
           <Link href="/admin/dashboard/motorcycles/new">
-            <button className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition">
+            <Button variant="default" className="flex items-center gap-2">
               <Plus className="h-4 w-4" /> Add New Motorcycle
-            </button>
+            </Button>
           </Link>
         </div>
       </div>
@@ -179,9 +225,9 @@ export default function AdminAllMotorcyclesPage() {
                   <td className="border px-4 py-2">{motorcycle.price || '-'}</td>
                   <td className="border px-4 py-2">
                     <Link href={`/admin/dashboard/motorcycles/modify/${motorcycle.id}`}>
-                      <button className="flex items-center gap-1 px-2 py-1 bg-primary text-white rounded hover:bg-primary/90 transition text-xs">
+                      <Button variant="secondary" size="sm" className="flex items-center gap-1">
                         <Pencil className="h-3 w-3" /> Edit
-                      </button>
+                      </Button>
                     </Link>
                   </td>
                 </tr>
