@@ -1,95 +1,139 @@
-# ridercritic
+# RiderCritic - Static Template
 
-A modern web application for motorcycle enthusiasts to share and review their riding experiences.
+A modern, responsive motorcycle review website template built with Next.js 14 and Tailwind CSS.
 
 ## Features
 
-- User Authentication (Email/Password, Google, Facebook)
-- Protected Dashboard
-- Modern UI with Tailwind CSS
-- Real-time Updates
-- Responsive Design
-- Secure Environment Configuration
+- **Modern Design**: Clean, professional layout with dark/light theme support
+- **Responsive**: Fully responsive design that works on all devices
+- **Static Content**: Fast-loading static pages with no backend dependencies
+- **Component Library**: Built with shadcn/ui components for consistent design
+- **TypeScript**: Full TypeScript support for better development experience
+- **SEO Ready**: Optimized for search engines with proper meta tags
+
+## Design Pages
+
+- **Home**: Landing page with featured content and call-to-actions
+- **Motorcycles**: Showcase of motorcycle models with filtering
+- **Reviews**: Community reviews and ratings display
+- **Products**: Motorcycle gear and accessories catalog
+- **Accessories**: Additional motorcycle accessories and parts
+- **About**: Company information and mission
+- **Contact**: Contact form and company details
 
 ## Tech Stack
 
-- Next.js 14
-- Firebase Authentication
-- Tailwind CSS
-- Shadcn/ui Components
-- Vercel Deployment
-- GitHub Actions CI/CD
+- **Framework**: Next.js 14 (App Router)
+- **Styling**: Tailwind CSS
+- **Components**: shadcn/ui (Radix UI)
+- **Icons**: Lucide React
+- **Theme**: next-themes (dark/light mode)
+- **TypeScript**: Full TypeScript support
+- **Linting**: ESLint
 
-## Development
+## Installation
 
-To run the development server:
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd ridercritic
+   ```
 
-```bash
-npm install
-npm run dev
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Run development server**
+   ```bash
+   npm run dev
+   ```
+
+4. **Build for production**
+   ```bash
+   npm run build
+   npm start
+   ```
+
+## Usage
+
+This template is designed as a starting point for motorcycle-related websites. It includes:
+
+- **Responsive Navigation**: Mobile-friendly navigation with sidebar
+- **Static Content**: Pre-built pages with sample data
+- **Component System**: Reusable UI components
+- **Theme Support**: Dark and light mode toggle
+- **Modern Layout**: Professional design with proper spacing
+
+## Project Structure
+
+```
+ridercritic/
+├── app/                    # Next.js App Router pages
+│   ├── about/             # About page
+│   ├── accessories/       # Accessories catalog
+│   ├── contact/           # Contact page
+│   ├── motorcycle/        # Motorcycle showcase
+│   ├── products/          # Products catalog
+│   ├── reviews/           # Reviews page
+│   ├── layout.tsx         # Root layout
+│   └── page.tsx           # Home page
+├── components/            # React components
+│   ├── ui/               # shadcn/ui components
+│   ├── header.tsx        # Site header
+│   ├── main-nav.tsx      # Main navigation
+│   ├── sidebar.tsx       # Sidebar navigation
+│   └── footer.tsx        # Site footer
+├── public/               # Static assets
+└── lib/                  # Utility functions
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Customization
+
+### Adding New Pages
+
+1. Create a new directory in `app/`
+2. Add a `page.tsx` file
+3. Use existing components for consistent styling
+
+### Modifying Content
+
+- Edit static data in page components
+- Update navigation in `components/main-nav.tsx`
+- Customize colors in `app/globals.css`
+
+### Adding Components
+
+- Use shadcn/ui components for consistency
+- Follow the existing component patterns
+- Add new components to `components/ui/` for shared use
 
 ## Deployment
 
-The application is automatically deployed to Vercel through GitHub Actions CI/CD pipeline.
+This static template can be deployed to any static hosting service:
 
-## Environment Variables
+- **Vercel** (recommended for Next.js)
+- **Netlify**
+- **GitHub Pages**
+- **AWS S3 + CloudFront**
 
-Required environment variables are securely managed through GitHub Secrets and automatically deployed to Vercel.
+## Notes
 
-### Firebase Auth Domain Setup
+- All functionality has been removed, keeping only the design
+- No backend integration required
+- Optimized for performance and SEO
+- Mobile-first responsive design
+- Accessible components with proper ARIA labels
 
-- For **local development**, set in your `.env.local`:
-  ```env
-  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=localhost
-  ```
-- For **production** (GitHub/Vercel secrets):
-  ```env
-  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=ridercritic.com
-  ```
+## Development
 
-### Google Sign-In Troubleshooting
-- If Google sign-in redirects to your home page or a 404, ensure the correct `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` is set for your environment.
-- The `/__/auth/handler` route is handled by Firebase Hosting or the Firebase Emulator Suite. It will not work on localhost unless you use the emulator.
-- For local testing of Google sign-in, use the Firebase Emulator Suite, or test on your deployed production site.
+The template uses modern development practices:
 
-# RiderCritic Admin Dashboard
-
-## Local Development Notes
-
-- When running the frontend on `localhost:3000` and the API on a different domain (e.g., `api.ridercritic.com`), you may encounter CORS errors. This is a browser security feature.
-- To resolve CORS issues in local development, ensure your backend API sends the correct CORS headers:
-  - `Access-Control-Allow-Origin: http://localhost:3000`
-  - `Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS`
-  - `Access-Control-Allow-Headers: Content-Type, Authorization`
-- Alternatively, use a proxy in your frontend dev server to forward API requests to your backend.
-
-## Deployment Notes
-
-- When deployed, ensure your frontend and backend use the correct production domains (e.g., `https://ridercritic.com` and `https://api.ridercritic.com`).
-- The backend API must allow CORS from your production frontend domain (e.g., `Access-Control-Allow-Origin: https://ridercritic.com`).
-- All API URLs in the frontend should use the correct protocol (`https://`) and domain.
-
-## Authentication
-
-- The admin dashboard and all protected admin pages require a valid `admin_token` in localStorage. If not present, users will be redirected to `/admin`.
-- All API calls that require authentication send the `Authorization: Bearer <admin_token>` header.
-
-## Features
-
-- Admin dashboard with stats
-- Brands and Types management (with Authorization header)
-- Add Motorcycle page with dropdowns for Brands and Types (requires valid token)
-
-## Troubleshooting
-
-- If you see "Failed to load brands/types" or dropdowns are empty, check:
-  - The API is reachable and returns data
-  - The correct token is present in localStorage
-  - No CORS errors in the browser console
+- **TypeScript** for type safety
+- **ESLint** for code quality
+- **Tailwind CSS** for styling
+- **Component composition** for maintainability
 
 ---
 
-For any issues, check the browser console and network tab for errors, and ensure your backend CORS settings are correct for your environment. 
+**Built with ❤️ for motorcycle enthusiasts**

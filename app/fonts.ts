@@ -1,5 +1,4 @@
 import localFont from 'next/font/local'
-import { GeistSans } from 'geist/font'
 
 export const nordique = localFont({
   src: [
@@ -24,5 +23,8 @@ export const nordique = localFont({
 
 export const fonts = {
   nordique,
-  geist: GeistSans
+  geist: {
+    className: 'font-sans',
+    variable: '--font-geist'
+  }
 }

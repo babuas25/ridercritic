@@ -1,236 +1,66 @@
 "use client"
 
-import React from "react"
+import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import Link from "next/link"
-import { 
-  Home, 
-  Settings, 
-  Users, 
-  BarChart2, 
-  FileText,
-  ChevronDown,
-  ChevronRight,
-  Menu,
-  LayoutDashboard,
+import {
+  Home,
+  Settings,
   Bike,
   Star,
   ShoppingBag,
   Package,
-  BadgeCent,
-  Shapes,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
-import { useState } from "react"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
-import { useAuth } from '@/contexts/AuthContext'
-import { usePathname } from 'next/navigation'
 import { Logo } from "@/components/ui/logo"
 
-interface SidebarItem {
-  title: string
-  icon: any
-  href: string
-  submenu?: SidebarItem[]
-}
-
-const generalSidebarItems: SidebarItem[] = [
+const sidebarItems = [
   {
     title: "Home",
     icon: Home,
     href: "/",
   },
   {
-    title: "Dashboard",
-    icon: LayoutDashboard,
-    href: "/dashboard",
-  },
-  {
-    title: "Analytics",
-    icon: BarChart2,
-    href: "/analytics",
-    submenu: [
-      {
-        title: "Dashboard",
-        icon: BarChart2,
-        href: "/analytics/dashboard",
-      },
-      {
-        title: "Reports",
-        icon: FileText,
-        href: "/analytics/reports",
-      },
-    ],
-  },
-  {
-    title: "Documents",
-    icon: FileText,
-    href: "/documents",
-  },
-  {
-    title: "Settings",
-    icon: Settings,
-    href: "/settings",
-  },
-]
-
-const adminSidebarItems: SidebarItem[] = [
-  {
-    title: "Dashboard",
-    icon: LayoutDashboard,
-    href: "/admin/dashboard",
-  },
-  {
-    title: "Brands",
-    icon: BadgeCent,
-    href: "/admin/dashboard/brands",
-  },
-  {
-    title: "Types",
-    icon: Shapes,
-    href: "/admin/dashboard/types",
+    title: "Reviews",
+    icon: Star,
+    href: "/reviews",
   },
   {
     title: "Motorcycles",
     icon: Bike,
-    href: "/admin/dashboard/motorcycles",
-  },
-  {
-    title: "Reviews",
-    icon: Star,
-    href: "/admin/reviews",
+    href: "/motorcycle",
   },
   {
     title: "Products",
     icon: ShoppingBag,
-    href: "/admin/products",
+    href: "/products",
   },
   {
     title: "Accessories",
     icon: Package,
-    href: "/admin/accessories",
+    href: "/accessories",
+  },
+  {
+    title: "About",
+    icon: Settings,
+    href: "/about",
   },
 ]
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(true)
-  const [openSubmenus, setOpenSubmenus] = useState<string[]>([])
-  const pathname = usePathname()
-  const { user } = useAuth()
-  const [superadmin, setSuperadmin] = useState<any>(null)
-  const [adminLoading, setAdminLoading] = useState(true);
 
-  React.useEffect(() => {
-    setAdminLoading(true);
-    const token = typeof window !== "undefined" ? localStorage.getItem("admin_token") : null;
-    if (token) {
-      fetch("https://api.ridercritic.com/api/auth/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then(res => res.ok ? res.json() : null)
-        .then(data => {
-          if (data && data.is_superuser) setSuperadmin(data);
-          else setSuperadmin(null);
-          setAdminLoading(false);
-        });
-    } else {
-      setSuperadmin(null);
-      setAdminLoading(false);
-    }
-  }, [user, typeof window !== "undefined" ? localStorage.getItem("admin_token") : null]);
-
-  if (adminLoading) return null;
-
-  const toggleSubmenu = (title: string) => {
-    setOpenSubmenus(prev => 
-      prev.includes(title) 
-        ? prev.filter(item => item !== title)
-        : [...prev, title]
-    )
+  const toggleSidebar = () => {
+    setIsCollapsed(!isCollapsed)
   }
-
-  const renderNavItem = (item: SidebarItem) => {
-    const hasSubmenu = item.submenu && item.submenu.length > 0
-    const isSubmenuOpen = openSubmenus.includes(item.title)
-    const isActive = pathname === item.href
-
-    if (hasSubmenu) {
-      return (
-        <Collapsible
-          key={item.title}
-          open={isSubmenuOpen}
-          onOpenChange={() => toggleSubmenu(item.title)}
-        >
-          <CollapsibleTrigger asChild>
-            <Link
-              href={item.href}
-              className={cn(
-                "flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm font-[600] hover:bg-accent hover:text-accent-foreground",
-                isActive && "bg-accent text-accent-foreground"
-              )}
-            >
-              <span className="flex items-center gap-3">
-                <item.icon className="h-4 w-4" />
-                {!isCollapsed && <span>{item.title}</span>}
-              </span>
-              {!isCollapsed && (
-                isSubmenuOpen ? (
-                  <ChevronDown className="h-4 w-4 ml-auto" />
-                ) : (
-                  <ChevronRight className="h-4 w-4 ml-auto" />
-                )
-              )}
-            </Link>
-          </CollapsibleTrigger>
-          {!isCollapsed && item.submenu && (
-            <CollapsibleContent className="space-y-1">
-              {item.submenu.map((subitem) => (
-                <Link
-                  key={subitem.title}
-                  href={subitem.href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-[600] hover:bg-accent hover:text-accent-foreground",
-                    pathname === subitem.href && "bg-accent text-accent-foreground"
-                  )}
-                >
-                  <subitem.icon className="h-4 w-4" />
-                  {subitem.title}
-                </Link>
-              ))}
-            </CollapsibleContent>
-          )}
-        </Collapsible>
-      )
-    }
-
-    return (
-      <Link
-        key={item.title}
-        href={item.href}
-        className={cn(
-          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-[600] hover:bg-accent hover:text-accent-foreground",
-          isActive && "bg-accent text-accent-foreground"
-        )}
-      >
-        <item.icon className="h-4 w-4" />
-        {!isCollapsed && item.title}
-      </Link>
-    )
-  }
-
-  // Determine which sidebar items to show
-  const sidebarItems = superadmin ? adminSidebarItems : generalSidebarItems
 
   return (
     <div className={cn(
-      "hidden border-r bg-background md:block",
-      isCollapsed ? "w-[60px]" : "w-[240px]",
-      "transition-all duration-300"
+      "hidden border-r bg-background md:block transition-all duration-300 ease-in-out",
+      isCollapsed ? "w-[60px]" : "w-[240px]"
     )}>
       <div className="flex h-16 items-center justify-between px-3 border-b">
         {!isCollapsed && (
@@ -239,16 +69,35 @@ export default function Sidebar() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setIsCollapsed(!isCollapsed)}
+          onClick={toggleSidebar}
+          className="h-8 w-8 shrink-0 ml-auto hover:bg-accent hover:text-accent-foreground transition-colors"
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          <Menu className="h-4 w-4" />
+          {isCollapsed ? (
+            <ChevronRight className="h-4 w-4" />
+          ) : (
+            <ChevronLeft className="h-4 w-4" />
+          )}
         </Button>
       </div>
       <ScrollArea className="h-[calc(100vh-4rem)]">
         <div className="space-y-4 py-4">
           <div className="px-3 py-2">
             <div className="space-y-1">
-              {sidebarItems.map((item) => renderNavItem(item))}
+              {sidebarItems.map((item) => (
+                <Link
+                  key={item.title}
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-[600] hover:bg-accent hover:text-accent-foreground transition-colors",
+                    isCollapsed && "justify-center px-2"
+                  )}
+                  title={isCollapsed ? item.title : undefined}
+                >
+                  <item.icon className="h-4 w-4 shrink-0" />
+                  {!isCollapsed && <span>{item.title}</span>}
+                </Link>
+              ))}
             </div>
           </div>
         </div>

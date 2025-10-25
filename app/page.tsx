@@ -1,25 +1,7 @@
-"use client"
-
-// import MainNav from "@/components/main-nav"
-import { useMediaQuery } from "@/hooks/use-media-query"
-import { useState, useEffect } from "react"
-
 export default function Home() {
-  const [isMounted, setIsMounted] = useState(false)
-
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
   return (
-    <>
-      {/* MainNav removed to avoid duplication */}
-      <div className="container mx-auto mt-6">
-        <h1 className="text-4xl font-bold mb-6">Welcome to ridercritic</h1>
-        <p className="text-lg text-muted-foreground mb-8">
-          Your ultimate guide to motorcycles and riding culture.
-        </p>
-      </div>
-    </>
+    <div className="container mx-auto mt-6">
+      {/* Home page content removed */}
+    </div>
   )
 }

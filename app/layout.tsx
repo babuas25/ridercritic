@@ -2,8 +2,6 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { fonts } from './fonts';
 import { ThemeProvider } from '@/components/theme-provider';
-import { AuthProvider } from '@/contexts/AuthContext';
-import { AdminAuthProvider } from '@/contexts/AdminAuthContext';
 import Header from '@/components/header';
 import MainNav from '@/components/main-nav';
 import Sidebar from '@/components/sidebar';
@@ -32,21 +30,16 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AdminAuthProvider>
-            <AuthProvider>
-              <div className="min-h-screen flex flex-col">
-                <Header />
-                <MainNav />
-                <div className="flex flex-1">
-                  <div className="md:block hidden">
-                    <Sidebar />
-                  </div>
-                  <main className="flex-1 p-4 md:p-6">{children}</main>
-                </div>
-                <Footer />
-              </div>
-            </AuthProvider>
-          </AdminAuthProvider>
+          <div className="min-h-screen flex flex-col">
+            <Header />
+            {/* MainNav on both mobile and desktop */}
+            <MainNav />
+            <div className="flex flex-1 min-h-0">
+              <Sidebar />
+              <main className="flex-1 p-4 md:p-6 overflow-auto">{children}</main>
+            </div>
+            <Footer />
+          </div>
         </ThemeProvider>
       </body>
     </html>
