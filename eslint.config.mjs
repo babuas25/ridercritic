@@ -20,6 +20,18 @@ export default [
     },
   },
   {
+    files: ["**/auth/**", "**/nextauth**"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
+  {
+    files: ["next-env.d.ts"],
+    rules: {
+      "@typescript-eslint/triple-slash-reference": "off",
+    },
+  },
+  {
     ignores: ["node_modules", ".next", "out"],
   },
 ];

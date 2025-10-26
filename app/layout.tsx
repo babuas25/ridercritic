@@ -1,7 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { fonts } from './fonts';
-import { ThemeProvider } from '@/components/theme-provider';
+import { Providers } from '@/components/providers';
 import Header from '@/components/header';
 import MainNav from '@/components/main-nav';
 import Sidebar from '@/components/sidebar';
@@ -24,12 +24,7 @@ export default function RootLayout({
         "min-h-screen bg-background antialiased",
         fonts.nordique.variable
       )}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <Providers>
           <div className="min-h-screen flex flex-col">
             <Header />
             {/* MainNav on both mobile and desktop */}
@@ -40,7 +35,7 @@ export default function RootLayout({
             </div>
             <Footer />
           </div>
-        </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );
