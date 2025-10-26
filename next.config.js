@@ -1,14 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   images: {
     unoptimized: true,
   },
-  experimental: {
-    esmExternals: 'loose',
-  },
+  turbopack: {},
   webpack: (config, { isServer }) => {
     config.cache = false;
     

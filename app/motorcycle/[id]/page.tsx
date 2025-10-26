@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Star, Gauge, Settings, Weight, Zap } from "lucide-react"
@@ -23,9 +23,8 @@ const sampleMotorcycle = {
   }
 }
 
-export default function MotorcycleDetailPage({ params }: { params: { id: string } }) {
-  const id = params.id
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export default async function MotorcycleDetailPage({ params: _params }: { params: Promise<{ id: string }> }) {
   // Since this is static, we'll show sample data for any ID
   const motorcycle = sampleMotorcycle
 

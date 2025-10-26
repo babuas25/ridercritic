@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   DropdownMenu,
@@ -13,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Moon, Sun, Search, Menu, User, LogIn, UserPlus, Home, Star, Bike, ShoppingBag, Package, Settings, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Moon, Sun, Search, Menu, Home, Star, Bike, ShoppingBag, Package, Settings, ChevronLeft, ChevronRight } from 'lucide-react'
 import {
   Sheet,
   SheetContent,
@@ -162,7 +161,6 @@ export default function Header() {
 
                   <div className={`flex items-center gap-3 px-3 py-2 text-sm font-[600] text-muted-foreground ${isMobileCollapsed ? 'justify-center px-2' : ''}`}
                        title={isMobileCollapsed ? "Sign in" : undefined}>
-                    <User className="h-4 w-4" />
                     {!isMobileCollapsed && <span>Sign in</span>}
                   </div>
                 </div>
@@ -211,7 +209,6 @@ export default function Header() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <User className="h-4 w-4" />
                   <span className="sr-only">User menu</span>
                 </Button>
               </DropdownMenuTrigger>
@@ -222,14 +219,12 @@ export default function Header() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href="/auth/login" className="flex items-center gap-2">
-                    <LogIn className="h-4 w-4" />
                     Sign in
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/auth/register" className="flex items-center gap-2">
-                    <UserPlus className="h-4 w-4" />
-                    Sign up
+                    Registration
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>

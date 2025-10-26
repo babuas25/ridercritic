@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 
 export default function MainNav() {
   return (
-    <nav className="border-b bg-background hidden md:block">
+    <nav className="sticky top-[4rem] z-40 border-b bg-background hidden md:block">
       <div className="container flex h-14 items-center">
         <div className="flex gap-6">
           <Link

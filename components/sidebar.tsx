@@ -59,7 +59,7 @@ export default function Sidebar() {
 
   return (
     <div className={cn(
-      "hidden border-r bg-background md:block transition-all duration-300 ease-in-out",
+      "hidden border-r bg-background md:block md:sticky md:top-[7.5rem] md:h-[calc(100vh-7.5rem)] transition-all duration-300 ease-in-out",
       isCollapsed ? "w-[60px]" : "w-[240px]"
     )}>
       <div className="flex h-16 items-center justify-between px-3 border-b">
@@ -80,7 +80,7 @@ export default function Sidebar() {
           )}
         </Button>
       </div>
-      <ScrollArea className="h-[calc(100vh-4rem)]">
+      <ScrollArea className="flex-1">
         <div className="space-y-4 py-4">
           <div className="px-3 py-2">
             <div className="space-y-1">
