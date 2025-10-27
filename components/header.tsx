@@ -5,6 +5,7 @@ import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +13,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Moon, Sun, Search, Menu, Home, Star, Bike, ShoppingBag, Package, Settings, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Moon, Sun, Search, Menu, Home, Star, Bike, ShoppingBag, Package, Settings, ChevronLeft, ChevronRight, LogOut, User } from 'lucide-react'
+import { useSession, signOut } from 'next-auth/react'
 import {
   Sheet,
   SheetContent,
@@ -27,12 +29,17 @@ import { Logo } from '@/components/ui/logo'
 
 export default function Header() {
   const { theme, setTheme } = useTheme()
+  const { data: session } = useSession()
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isMobileCollapsed, setIsMobileCollapsed] = useState(false)
   const [mounted, setMounted] = useState(false)
 
   const toggleMobileSidebar = () => {
     setIsMobileCollapsed(!isMobileCollapsed)
+  }
+
+  const handleSignOut = () => {
+    signOut({ callbackUrl: '/' })
   }
 
   // Get current theme with fallback
@@ -206,29 +213,59 @@ export default function Header() {
               <span className="sr-only">Toggle theme</span>
             </Button>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <span className="sr-only">User menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                  Sign in
-                </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/auth/login" className="flex items-center gap-2">
-                    Sign in
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/auth/register" className="flex items-center gap-2">
-                    Registration
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {session ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={session.user.image || ''} alt={session.user.name || ''} />
+                      <AvatarFallback>
+                        {session.user.name?.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="px-2 py-1.5">
+                    <p className="text-sm font-medium">{session.user.name}</p>
+                    <p className="text-xs text-muted-foreground">{session.user.email}</p>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/user" className="flex items-center gap-2 cursor-pointer">
+                      <User className="h-4 w-4" />
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <User className="h-5 w-5" />
+                    <span className="sr-only">User menu</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link href="/auth?tab=login" className="flex items-center gap-2 cursor-pointer">
+                      Sign in
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/auth?tab=register" className="flex items-center gap-2 cursor-pointer">
+                      Register
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </nav>
         </div>
       </div>

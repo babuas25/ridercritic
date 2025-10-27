@@ -2,8 +2,25 @@ import NextAuth from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { DEFAULT_ROLE, DEFAULT_SUB_ROLE } from '@/lib/auth'
+import { signInWithEmailAndPassword } from 'firebase/auth'
+import { auth } from '@/lib/firebase'
+import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { db } from '@/lib/firebase'
 
 const handler = NextAuth({
+  secret: process.env.NEXTAUTH_SECRET,
+  cookies: {
+    state: {
+      name: `next-auth.state-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 900, // 15 minutes
+      },
+    },
+  },
   providers: [
     GoogleProvider({
       clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
@@ -15,10 +32,68 @@ const handler = NextAuth({
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' }
       },
-      async authorize() {
-        // This would typically connect to your Firebase Auth
-        // For now, we'll handle this in the login page
-        return null
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Invalid credentials')
+        }
+
+        try {
+          // Sign in with Firebase Auth
+          const userCredential = await signInWithEmailAndPassword(
+            auth,
+            credentials.email,
+            credentials.password
+          )
+          
+          const firebaseUser = userCredential.user
+
+          // Check if user document exists in Firestore
+          const userRef = doc(db, 'users', firebaseUser.uid)
+          const userSnap = await getDoc(userRef)
+
+          let userData: any = {}
+
+          if (userSnap.exists()) {
+            // Get user data from Firestore
+            const data = userSnap.data()
+            userData = {
+              id: firebaseUser.uid,
+              email: firebaseUser.email,
+              name: data.displayName || firebaseUser.displayName || 'User',
+              role: data.role || DEFAULT_ROLE,
+              subRole: data.subRole || DEFAULT_SUB_ROLE,
+              image: firebaseUser.photoURL,
+            }
+          } else {
+            // Create new user document
+            const userDataToSave = {
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              displayName: firebaseUser.displayName || 'User',
+              gender: '',
+              dob: '',
+              role: DEFAULT_ROLE,
+              subRole: DEFAULT_SUB_ROLE,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            }
+
+            await setDoc(userRef, userDataToSave)
+
+            userData = {
+              id: firebaseUser.uid,
+              email: firebaseUser.email,
+              name: firebaseUser.displayName || 'User',
+              role: DEFAULT_ROLE,
+              subRole: DEFAULT_SUB_ROLE,
+              image: firebaseUser.photoURL,
+            }
+          }
+
+          return userData
+        } catch (error: any) {
+          throw new Error(error.message || 'Authentication failed')
+        }
       }
     })
   ],
@@ -31,7 +106,11 @@ const handler = NextAuth({
       user: any
     }) {
       if (user) {
-        token.role = user.role || DEFAULT_ROLE
+        // Check if this user is the Super Admin
+        const superAdminEmail = process.env.SUPER_ADMIN_EMAIL
+        const isSuperAdmin = user.email === superAdminEmail
+        
+        token.role = isSuperAdmin ? 'Super Admin' : (user.role || DEFAULT_ROLE)
         token.subRole = user.subRole || DEFAULT_SUB_ROLE
       }
       return token
@@ -52,36 +131,84 @@ const handler = NextAuth({
       account: any
     }) {
       if (account?.provider === 'google') {
-        // Temporarily disable Firestore creation for testing
-        // TODO: Re-enable once Firestore API is enabled
-        console.log('Google sign-in successful for user:', user.email)
-        return true
-
-        // Original Firestore code (commented out for testing):
-        /*
         try {
-          await createUserDocument(user.id, {
-            uid: user.id,
-            email: user.email,
-            displayName: user.name,
-            gender: '',
-            dob: '',
-            role: DEFAULT_ROLE,
-            subRole: DEFAULT_SUB_ROLE,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          })
+          // Check if user document exists
+          const userRef = doc(db, 'users', user.id)
+          
+          try {
+            const userSnap = await getDoc(userRef)
+            
+            if (!userSnap.exists()) {
+              // Create user document in Firestore
+              const superAdminEmail = process.env.SUPER_ADMIN_EMAIL
+              const isSuperAdmin = user.email === superAdminEmail
+
+              await setDoc(userRef, {
+                uid: user.id,
+                email: user.email,
+                displayName: user.name,
+                gender: '',
+                dob: '',
+                role: isSuperAdmin ? 'Super Admin' : DEFAULT_ROLE,
+                subRole: DEFAULT_SUB_ROLE,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              })
+
+              // Update user object with role
+              user.role = isSuperAdmin ? 'Super Admin' : DEFAULT_ROLE
+              user.subRole = DEFAULT_SUB_ROLE
+            } else {
+              // Get existing role from Firestore
+              const data = userSnap.data()
+              user.role = data.role || DEFAULT_ROLE
+              user.subRole = data.subRole || DEFAULT_SUB_ROLE
+            }
+          } catch (error: any) {
+            // If read fails, try to create the document anyway
+            console.log('Could not read user document, creating new one:', error.message)
+            const superAdminEmail = process.env.SUPER_ADMIN_EMAIL
+            const isSuperAdmin = user.email === superAdminEmail
+
+            try {
+              await setDoc(userRef, {
+                uid: user.id,
+                email: user.email,
+                displayName: user.name,
+                gender: '',
+                dob: '',
+                role: isSuperAdmin ? 'Super Admin' : DEFAULT_ROLE,
+                subRole: DEFAULT_SUB_ROLE,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              })
+              
+              user.role = isSuperAdmin ? 'Super Admin' : DEFAULT_ROLE
+              user.subRole = DEFAULT_SUB_ROLE
+            } catch (createError) {
+              console.error('Could not create user document:', createError)
+              // Still allow sign-in but with default role
+              user.role = DEFAULT_ROLE
+              user.subRole = DEFAULT_SUB_ROLE
+            }
+          }
+
+          console.log('Google sign-in successful for user:', user.email)
+          return true
         } catch (error) {
-          console.error('Error creating user document:', error)
-          return false
+          console.error('Error handling Google sign-in:', error)
+          // Still allow sign-in
+          user.role = DEFAULT_ROLE
+          user.subRole = DEFAULT_SUB_ROLE
+          return true
         }
-        */
       }
       return true
     }
   },
   pages: {
-    signIn: '/login',
+    signIn: '/auth',
+    error: '/auth',
   },
 })
 

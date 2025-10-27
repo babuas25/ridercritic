@@ -5,7 +5,6 @@ import { Providers } from '@/components/providers';
 import Header from '@/components/header';
 import MainNav from '@/components/main-nav';
 import Sidebar from '@/components/sidebar';
-import Footer from '@/components/footer';
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
@@ -33,7 +32,6 @@ export default function RootLayout({
               <Sidebar />
               <main className="flex-1 p-4 md:p-6 overflow-y-auto">{children}</main>
             </div>
-            <Footer />
           </div>
         </Providers>
       </body>

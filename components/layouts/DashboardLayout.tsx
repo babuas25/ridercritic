@@ -3,7 +3,6 @@
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -14,69 +13,17 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
-  LayoutDashboard,
   Settings,
   LogOut,
   User,
-  Shield,
-  Crown,
-  Building2,
-  ShoppingBag,
-  Handshake,
-  Briefcase
 } from 'lucide-react'
-import Link from 'next/link'
 import { signOut } from 'next-auth/react'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
 }
-
-const navigationItems = [
-  {
-    title: 'Dashboard',
-    href: '/dashboard/user',
-    icon: LayoutDashboard,
-    roles: ['User Admin'],
-  },
-  {
-    title: 'Super Admin',
-    href: '/dashboard/super-admin',
-    icon: Crown,
-    roles: ['Super Admin'],
-  },
-  {
-    title: 'Admin Panel',
-    href: '/dashboard/admin',
-    icon: Shield,
-    roles: ['Admin', 'Super Admin'],
-  },
-  {
-    title: 'Sponsor Management',
-    href: '/dashboard/sponsor',
-    icon: Building2,
-    roles: ['Sponsor Admin', 'Admin', 'Super Admin'],
-  },
-  {
-    title: 'Supplier Management',
-    href: '/dashboard/supplier',
-    icon: ShoppingBag,
-    roles: ['Supplier Admin', 'Admin', 'Super Admin'],
-  },
-  {
-    title: 'Partner Management',
-    href: '/dashboard/partner',
-    icon: Handshake,
-    roles: ['Partner Admin', 'Admin', 'Super Admin'],
-  },
-  {
-    title: 'Freelancer Management',
-    href: '/dashboard/freelancer',
-    icon: Briefcase,
-    roles: ['Freelancer Admin', 'Admin', 'Super Admin'],
-  },
-]
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { data: session, status } = useSession()
@@ -196,39 +143,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
       </header>
 
-      <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-64 bg-white shadow-sm border-r min-h-[calc(100vh-73px)]">
-          <nav className="p-6">
-            <ul className="space-y-2">
-              {navigationItems.map((item) => {
-                if (!item.roles.includes(userRole)) return null
-
-                const isActive = false // You can implement active state logic here
-
-                return (
-                  <li key={item.href}>
-                    <Link href={item.href}>
-                      <Button
-                        variant={isActive ? "default" : "ghost"}
-                        className="w-full justify-start"
-                      >
-                        <item.icon className="mr-2 h-4 w-4" />
-                        {item.title}
-                      </Button>
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
-          </nav>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 p-6">
-          {children}
-        </main>
-      </div>
+      {/* Main Content */}
+      <main className="p-6">
+        {children}
+      </main>
     </div>
   )
 }
