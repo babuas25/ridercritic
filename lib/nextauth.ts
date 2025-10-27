@@ -1,7 +1,7 @@
 import NextAuth from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { createUserDocument } from '@/lib/firebase'
+import { createUserDocument, updateLastLogin } from '@/lib/firebase'
 import { DEFAULT_ROLE, DEFAULT_SUB_ROLE } from '@/lib/auth'
 
 export default NextAuth({
@@ -66,6 +66,9 @@ export default NextAuth({
             createdAt: new Date(),
             updatedAt: new Date(),
           })
+          
+          // Update last login timestamp
+          await updateLastLogin(user.id)
         } catch (error) {
           console.error('Error creating user document:', error)
           return false

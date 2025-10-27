@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { signIn, getSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -14,7 +14,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
-import { createUserDocument } from '@/lib/firebase'
+import { createUserDocument, updateLastLogin } from '@/lib/firebase'
 import { DEFAULT_ROLE, DEFAULT_SUB_ROLE } from '@/lib/auth'
 
 const loginSchema = z.object({
@@ -27,7 +27,7 @@ const registerSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string().min(6, 'Password must be at least 6 characters'),
-  gender: z.enum(['Male', 'Female'], { required_error: 'Please select your gender' }),
+  gender: z.enum(['Male', 'Female'], { message: 'Please select your gender' }),
   dob: z.string().min(1, 'Date of birth is required'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
@@ -37,7 +37,7 @@ const registerSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>
 type RegisterFormData = z.infer<typeof registerSchema>
 
-export default function AuthPage() {
+function AuthForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -85,7 +85,10 @@ export default function AuthPage() {
 
     try {
       // Sign in with Firebase
-      await signInWithEmailAndPassword(auth, data.email, data.password)
+      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password)
+      
+      // Update last login timestamp
+      await updateLastLogin(userCredential.user.uid)
       
       // Sign in with NextAuth
       const result = await signIn('credentials', {
@@ -341,6 +344,18 @@ export default function AuthPage() {
         </Card>
       </div>
     </div>
+  )
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">Loading...</div>
+      </div>
+    }>
+      <AuthForm />
+    </Suspense>
   )
 }
 

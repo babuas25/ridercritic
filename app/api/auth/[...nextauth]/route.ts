@@ -4,8 +4,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { DEFAULT_ROLE, DEFAULT_SUB_ROLE } from '@/lib/auth'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
-import { db } from '@/lib/firebase'
+import { adminDb } from '@/lib/firebase-admin'
 
 const handler = NextAuth({
   secret: process.env.NEXTAUTH_SECRET,
@@ -47,21 +46,27 @@ const handler = NextAuth({
           
           const firebaseUser = userCredential.user
 
+          // Check if Admin SDK is configured
+          if (!adminDb) {
+            console.error('Firebase Admin SDK is not initialized. Please configure FIREBASE_PRIVATE_KEY and FIREBASE_CLIENT_EMAIL in .env.local')
+            throw new Error('Server configuration error. Please contact support.')
+          }
+
           // Check if user document exists in Firestore
-          const userRef = doc(db, 'users', firebaseUser.uid)
-          const userSnap = await getDoc(userRef)
+          const userRef = adminDb.collection('users').doc(firebaseUser.uid)
+          const userSnap = await userRef.get()
 
           let userData: any = {}
 
-          if (userSnap.exists()) {
+          if (userSnap.exists) {
             // Get user data from Firestore
             const data = userSnap.data()
             userData = {
               id: firebaseUser.uid,
               email: firebaseUser.email,
-              name: data.displayName || firebaseUser.displayName || 'User',
-              role: data.role || DEFAULT_ROLE,
-              subRole: data.subRole || DEFAULT_SUB_ROLE,
+              name: data?.displayName || firebaseUser.displayName || 'User',
+              role: data?.role || DEFAULT_ROLE,
+              subRole: data?.subRole || DEFAULT_SUB_ROLE,
               image: firebaseUser.photoURL,
             }
           } else {
@@ -78,7 +83,7 @@ const handler = NextAuth({
               updatedAt: new Date(),
             }
 
-            await setDoc(userRef, userDataToSave)
+            await userRef.set(userDataToSave)
 
             userData = {
               id: firebaseUser.uid,
@@ -105,6 +110,7 @@ const handler = NextAuth({
       token: any,
       user: any
     }) {
+      // Only update if we have a new user login
       if (user) {
         // Check if this user is the Super Admin
         const superAdminEmail = process.env.SUPER_ADMIN_EMAIL
@@ -113,6 +119,8 @@ const handler = NextAuth({
         token.role = isSuperAdmin ? 'Super Admin' : (user.role || DEFAULT_ROLE)
         token.subRole = user.subRole || DEFAULT_SUB_ROLE
       }
+      
+      // Always return token with role (either new or existing)
       return token
     },
     async session({ session, token }: {
@@ -132,18 +140,27 @@ const handler = NextAuth({
     }) {
       if (account?.provider === 'google') {
         try {
-          // Check if user document exists
-          const userRef = doc(db, 'users', user.id)
+          // Check if Admin SDK is configured
+          if (!adminDb) {
+            console.error('Firebase Admin SDK is not initialized. Please configure FIREBASE_PRIVATE_KEY and FIREBASE_CLIENT_EMAIL in .env.local')
+            // Still allow sign-in but with default role
+            user.role = DEFAULT_ROLE
+            user.subRole = DEFAULT_SUB_ROLE
+            return true
+          }
+
+          // Check if user document exists using Admin SDK
+          const userRef = adminDb.collection('users').doc(user.id)
           
           try {
-            const userSnap = await getDoc(userRef)
+            const userSnap = await userRef.get()
             
-            if (!userSnap.exists()) {
+            if (!userSnap.exists) {
               // Create user document in Firestore
               const superAdminEmail = process.env.SUPER_ADMIN_EMAIL
               const isSuperAdmin = user.email === superAdminEmail
 
-              await setDoc(userRef, {
+              await userRef.set({
                 uid: user.id,
                 email: user.email,
                 displayName: user.name,
@@ -161,8 +178,8 @@ const handler = NextAuth({
             } else {
               // Get existing role from Firestore
               const data = userSnap.data()
-              user.role = data.role || DEFAULT_ROLE
-              user.subRole = data.subRole || DEFAULT_SUB_ROLE
+              user.role = data?.role || DEFAULT_ROLE
+              user.subRole = data?.subRole || DEFAULT_SUB_ROLE
             }
           } catch (error: any) {
             // If read fails, try to create the document anyway
@@ -171,7 +188,7 @@ const handler = NextAuth({
             const isSuperAdmin = user.email === superAdminEmail
 
             try {
-              await setDoc(userRef, {
+              await userRef.set({
                 uid: user.id,
                 email: user.email,
                 displayName: user.name,

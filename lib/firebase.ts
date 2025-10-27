@@ -31,4 +31,12 @@ export const createUserDocument = async (userId: string, userData: Record<string
   }
 }
 
+// Update user's last login timestamp
+export const updateLastLogin = async (userId: string) => {
+  const userRef = doc(db, 'users', userId)
+  await setDoc(userRef, {
+    lastLogin: new Date(),
+  }, { merge: true })
+}
+
 export default app

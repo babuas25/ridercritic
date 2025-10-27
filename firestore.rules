@@ -1,0 +1,36 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users collection
+    match /users/{userId} {
+      // Allow authenticated users to read their own data
+      allow read: if request.auth != null && request.auth.uid == userId;
+      
+      // Allow authenticated users to write their own data
+      allow write: if request.auth != null && request.auth.uid == userId;
+      
+      // Note: Admin SDK operations (server-side) bypass these rules
+      // All server-side Firestore operations use Admin SDK
+    }
+    
+    // Reviews collection (example - adjust as needed)
+    match /reviews/{reviewId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+    
+    // Products collection (example - adjust as needed)
+    match /products/{productId} {
+      allow read: if true; // Public read
+      allow write: if request.auth != null; // Only authenticated users can write
+    }
+    
+    // Default: deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+

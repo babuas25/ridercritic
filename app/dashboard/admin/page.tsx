@@ -61,40 +61,32 @@ export default function AdminDashboard() {
   const [selectedRole, setSelectedRole] = useState<string>('all')
   const [isAddUserOpen, setIsAddUserOpen] = useState(false)
   const [isEditUserOpen, setIsEditUserOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [editingUser, setEditingUser] = useState<User | null>(null)
 
-  // Mock data - in a real app, this would come from Firestore
+  // Fetch real users from API
   useEffect(() => {
-    const mockUsers: User[] = [
-      {
-        uid: '1',
-        email: 'john.doe@example.com',
-        displayName: 'John Doe',
-        role: 'User Admin',
-        subRole: 'NewStar',
-        createdAt: new Date('2024-01-15'),
-        lastLogin: new Date('2024-01-20'),
-      },
-      {
-        uid: '2',
-        email: 'jane.smith@example.com',
-        displayName: 'Jane Smith',
-        role: 'Admin',
-        subRole: 'CriticMaster',
-        createdAt: new Date('2024-01-10'),
-        lastLogin: new Date('2024-01-19'),
-      },
-      {
-        uid: '3',
-        email: 'bob.wilson@example.com',
-        displayName: 'Bob Wilson',
-        role: 'Sponsor Admin',
-        subRole: 'CriticStar',
-        createdAt: new Date('2024-01-12'),
-        lastLogin: new Date('2024-01-18'),
-      },
-    ]
-    setUsers(mockUsers)
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch('/api/users')
+        if (!response.ok) {
+          throw new Error('Failed to fetch users')
+        }
+        const data = await response.json()
+        // Convert date strings back to Date objects
+        const usersWithDates = data.users.map((user: User & { createdAt: string | Date; lastLogin?: string | Date }) => ({
+          ...user,
+          createdAt: user.createdAt ? new Date(user.createdAt) : new Date(),
+          lastLogin: user.lastLogin ? new Date(user.lastLogin) : undefined,
+        }))
+        setUsers(usersWithDates)
+      } catch (error) {
+        console.error('Error fetching users:', error)
+        // Fallback to empty array on error
+        setUsers([])
+      }
+    }
+
+    fetchUsers()
   }, [])
 
   if (!session) {
@@ -129,18 +121,62 @@ export default function AdminDashboard() {
     }
   }
 
-  const handleRoleChange = (userId: string, newRole: UserRole) => {
-    // In a real app, this would update the user in Firestore
-    setUsers(users.map(user =>
-      user.uid === userId ? { ...user, role: newRole } : user
-    ))
+  const handleEditUser = (user: User) => {
+    setEditingUser({ ...user })
+    setIsEditUserOpen(true)
   }
 
-  const handleSubRoleChange = (userId: string, newSubRole: UserSubRole) => {
-    // In a real app, this would update the user in Firestore
-    setUsers(users.map(user =>
-      user.uid === userId ? { ...user, subRole: newSubRole } : user
-    ))
+  const handleUpdateUser = async () => {
+    if (editingUser) {
+      try {
+        // Update via API
+        const response = await fetch('/api/users', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            uid: editingUser.uid,
+            displayName: editingUser.displayName,
+            role: editingUser.role,
+            subRole: editingUser.subRole,
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to update user')
+        }
+
+        // Update local state
+        setUsers(users.map(user =>
+          user.uid === editingUser.uid ? editingUser : user
+        ))
+        
+        setIsEditUserOpen(false)
+        setEditingUser(null)
+      } catch (error) {
+        console.error('Error updating user:', error)
+        alert('Failed to update user. Please try again.')
+      }
+    }
+  }
+
+  const handleEditingNameChange = (name: string) => {
+    if (editingUser) {
+      setEditingUser({ ...editingUser, displayName: name })
+    }
+  }
+
+  const handleEditingRoleChange = (role: UserRole) => {
+    if (editingUser) {
+      setEditingUser({ ...editingUser, role })
+    }
+  }
+
+  const handleEditingSubRoleChange = (subRole: UserSubRole) => {
+    if (editingUser) {
+      setEditingUser({ ...editingUser, subRole })
+    }
   }
 
   return (
@@ -299,10 +335,7 @@ export default function AdminDashboard() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => {
-                            setSelectedUser(user)
-                            setIsEditUserOpen(true)
-                          }}
+                          onClick={() => handleEditUser(user)}
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
@@ -379,27 +412,32 @@ export default function AdminDashboard() {
                 Update user information and permissions.
               </DialogDescription>
             </DialogHeader>
-            {selectedUser && (
+            {editingUser && (
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="edit-email" className="text-right">
                     Email
                   </Label>
-                  <Input id="edit-email" value={selectedUser.email} className="col-span-3" disabled />
+                  <Input id="edit-email" value={editingUser.email} className="col-span-3" disabled />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="edit-name" className="text-right">
                     Name
                   </Label>
-                  <Input id="edit-name" value={selectedUser.displayName} className="col-span-3" />
+                  <Input 
+                    id="edit-name" 
+                    value={editingUser.displayName} 
+                    onChange={(e) => handleEditingNameChange(e.target.value)}
+                    className="col-span-3" 
+                  />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="edit-role" className="text-right">
                     Role
                   </Label>
                   <Select
-                    value={selectedUser.role}
-                    onValueChange={(value) => handleRoleChange(selectedUser.uid, value as UserRole)}
+                    value={editingUser.role}
+                    onValueChange={(value) => handleEditingRoleChange(value as UserRole)}
                   >
                     <SelectTrigger className="col-span-3">
                       <SelectValue />
@@ -422,8 +460,8 @@ export default function AdminDashboard() {
                     Sub Role
                   </Label>
                   <Select
-                    value={selectedUser.subRole}
-                    onValueChange={(value) => handleSubRoleChange(selectedUser.uid, value as UserSubRole)}
+                    value={editingUser.subRole}
+                    onValueChange={(value) => handleEditingSubRoleChange(value as UserSubRole)}
                   >
                     <SelectTrigger className="col-span-3">
                       <SelectValue />
@@ -438,7 +476,7 @@ export default function AdminDashboard() {
               </div>
             )}
             <DialogFooter>
-              <Button type="submit" onClick={() => setIsEditUserOpen(false)}>
+              <Button type="submit" onClick={handleUpdateUser}>
                 Save Changes
               </Button>
             </DialogFooter>
