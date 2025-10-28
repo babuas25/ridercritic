@@ -23,6 +23,8 @@ import {
   MessageSquare,
   CheckCircle,
   AlertTriangle,
+  Tags,
+  Grid,
 } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 
@@ -71,7 +73,9 @@ export default function Sidebar() {
       // Items for Super Admin
       if (userRole === 'Super Admin') {
         items.push(
-          { title: "User Management", icon: Users, href: "/dashboard/admin" }
+          { title: "User Management", icon: Users, href: "/dashboard/admin" },
+          { title: "Brands", icon: Tags, href: "/dashboard/brands" },
+          { title: "Types", icon: Grid, href: "/dashboard/types" }
         )
       }
       // Items for Admin
