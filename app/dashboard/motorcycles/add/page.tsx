@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import DashboardLayout from '@/components/layouts/DashboardLayout'
@@ -12,9 +12,6 @@ import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, ArrowRight, Save, Eye, Loader2 } from 'lucide-react'
 import { MotorcycleFormData } from '@/types/motorcycle'
 import { createMotorcycle, saveDraft } from '@/lib/motorcycles'
-
-// Prevent static generation
-export const dynamic = 'force-dynamic'
 
 // Import all 13 modular step components
 import BasicInformationStep from '@/components/motorcycle-form/BasicInformationStep'
@@ -34,9 +31,18 @@ import ReviewValidationStep from '@/components/motorcycle-form/ReviewValidationS
 export default function AddMotorcyclePage() {
   const { data: session } = useSession()
   const router = useRouter()
+  const [isMounted, setIsMounted] = useState(false)
   const [currentStep, setCurrentStep] = useState(1)
   const [saving, setSaving] = useState(false)
   const [publishing, setPublishing] = useState(false)
+  
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+  
+  if (!isMounted) {
+    return null
+  }
   
   // Initialize form data with all fields
   const [formData, setFormData] = useState<MotorcycleFormData>({
