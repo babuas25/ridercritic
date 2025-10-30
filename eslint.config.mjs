@@ -2,12 +2,16 @@ import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import tsParser from "@typescript-eslint/parser";
 import globals from "globals";
+import nextPlugin from "@next/eslint-plugin-next";
 
 export default [
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
     files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
+    plugins: {
+      "@next/next": nextPlugin,
+    },
     languageOptions: {
       parser: tsParser,
       globals: {
@@ -16,6 +20,8 @@ export default [
       },
     },
     rules: {
+      ...nextPlugin.configs.recommended.rules,
+      ...nextPlugin.configs["core-web-vitals"].rules,
       "react/prop-types": "off",
     },
   },

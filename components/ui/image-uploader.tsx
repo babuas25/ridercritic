@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import Image from 'next/image'
 import { Button } from './button'
 import { Upload, X, Loader2 } from 'lucide-react'
 import { uploadImage, uploadMultipleImages, validateImageFile } from '@/lib/storage'
@@ -146,11 +147,13 @@ export function ImageUploader({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {currentImages.map((url, index) => (
             <div key={index} className="relative border rounded-lg overflow-hidden group">
-              <div className="aspect-video bg-gray-100">
-                <img 
+              <div className="aspect-video bg-gray-100 relative">
+                <Image 
                   src={url} 
                   alt={`Upload ${index + 1}`}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 25vw"
                 />
               </div>
               {onRemove && (

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from "next/link"
+import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -67,10 +68,13 @@ export default function MotorcycleDetailPage() {
         <div className="space-y-4">
           {motorcycle.coverImage ? (
             <div className="w-full h-96 relative overflow-hidden rounded-lg">
-              <img 
+              <Image 
                 src={motorcycle.coverImage} 
                 alt={motorcycle.modelName}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
+                priority
+                sizes="(max-width: 768px) 100vw, 50vw"
               />
             </div>
           ) : (
@@ -87,7 +91,13 @@ export default function MotorcycleDetailPage() {
             {motorcycle.galleryImages && motorcycle.galleryImages.length > 0 ? (
               motorcycle.galleryImages.slice(0, 4).map((img, i) => (
                 <div key={i} className="h-20 relative overflow-hidden rounded-lg">
-                  <img src={img} alt={`View ${i + 1}`} className="w-full h-full object-cover" />
+                  <Image 
+                    src={img} 
+                    alt={`View ${i + 1}`} 
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 25vw, 10vw"
+                  />
                 </div>
               ))
             ) : (

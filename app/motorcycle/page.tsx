@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from "next/link"
+import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -67,10 +68,12 @@ export default function MotorcyclesPage() {
               <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col">
                 {bike.coverImage ? (
                   <div className="w-full h-48 relative overflow-hidden rounded-t-lg">
-                    <img 
+                    <Image 
                       src={bike.coverImage} 
                       alt={bike.modelName}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                   </div>
                 ) : (
