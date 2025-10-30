@@ -2,29 +2,159 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // Helper functions for role-based access control
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    function getUserSubRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.subRole;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && (getUserRole() == 'Super Admin' || getUserRole() == 'Admin');
+    }
+    
+    function isSuperAdmin() {
+      return isAuthenticated() && getUserRole() == 'Super Admin';
+    }
+    
+    function canWriteReviews() {
+      return isAuthenticated() && (getUserSubRole() == 'CriticStar' || getUserSubRole() == 'CriticMaster');
+    }
+    
+    function canModerate() {
+      return isAuthenticated() && getUserSubRole() == 'CriticMaster';
+    }
+    
     // Users collection
     match /users/{userId} {
-      // Allow authenticated users to read their own data
-      allow read: if request.auth != null && request.auth.uid == userId;
+      // Users can read their own data
+      allow read: if isAuthenticated() && request.auth.uid == userId;
       
-      // Allow authenticated users to write their own data
-      allow write: if request.auth != null && request.auth.uid == userId;
+      // Users can update their own profile (except role/subRole)
+      allow update: if isAuthenticated() && request.auth.uid == userId 
+                    && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'subRole']);
       
-      // Note: Admin SDK operations (server-side) bypass these rules
-      // All server-side Firestore operations use Admin SDK
+      // Only Super Admin can create users or modify roles
+      allow create: if isSuperAdmin();
+      allow update: if isSuperAdmin();
+      allow delete: if isSuperAdmin();
+      
+      // Admins can read all users
+      allow read: if isAdmin();
     }
     
-    // Reviews collection (example - adjust as needed)
+    // Motorcycles collection
+    match /motorcycles/{motorcycleId} {
+      // Public read access for published motorcycles
+      allow read: if true;
+      
+      // TEMPORARY: Allow all writes for development (app-level checks enforce admin-only)
+      // TODO: Integrate Firebase Auth with NextAuth for proper authentication
+      allow create, update, delete: if true;
+    }
+    
+    // Motorcycle drafts collection
+    match /motorcycle_drafts/{draftId} {
+      // TEMPORARY: Allow all reads and writes for development
+      // TODO: Integrate Firebase Auth with NextAuth for proper authentication
+      allow read, write: if true;
+    }
+    
+    // Reviews collection
     match /reviews/{reviewId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+      // Anyone can read published reviews
+      allow read: if true;
+      
+      // CriticStar and above can create reviews
+      allow create: if canWriteReviews();
+      
+      // Users can update their own reviews
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      
+      // CriticMaster can moderate any review
+      allow update: if canModerate();
+      
+      // Users can delete their own reviews, or CriticMaster can delete any
+      allow delete: if (isAuthenticated() && resource.data.userId == request.auth.uid) || canModerate();
     }
     
-    // Products collection (example - adjust as needed)
-    match /products/{productId} {
-      allow read: if true; // Public read
-      allow write: if request.auth != null; // Only authenticated users can write
+    // Comments collection (nested under reviews)
+    match /reviews/{reviewId}/comments/{commentId} {
+      // Anyone can read comments
+      allow read: if true;
+      
+      // Authenticated users can create comments
+      allow create: if isAuthenticated();
+      
+      // Users can update/delete their own comments
+      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      
+      // CriticMaster can moderate any comment
+      allow update, delete: if canModerate();
+    }
+    
+    // Brands collection
+    match /brands/{brandId} {
+      // Public read
+      allow read: if true;
+      
+      // Only Admins can manage brands
+      allow write: if isAdmin();
+    }
+    
+    // Categories collection
+    match /categories/{categoryId} {
+      // Public read
+      allow read: if true;
+      
+      // Only Admins can manage categories
+      allow write: if isAdmin();
+    }
+    
+    // Types collection (motorcycle types/categories)
+    match /types/{typeId} {
+      // Public read
+      allow read: if true;
+      
+      // Only Admins can manage types
+      allow write: if isAdmin();
+    }
+    
+    // User activity logs
+    match /activity_logs/{logId} {
+      // Only admins can read activity logs
+      allow read: if isAdmin();
+      
+      // System can create logs (via Admin SDK)
+      allow create: if isAuthenticated();
+    }
+    
+    // Notifications collection
+    match /notifications/{notificationId} {
+      // Users can read their own notifications
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      
+      // Users can update their own notifications (mark as read)
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      
+      // System creates notifications (via Admin SDK)
+      allow create: if isAuthenticated();
+    }
+    
+    // Settings collection (global app settings)
+    match /settings/{settingId} {
+      // Public read for certain settings
+      allow read: if true;
+      
+      // Only Super Admin can modify settings
+      allow write: if isSuperAdmin();
     }
     
     // Default: deny all other access

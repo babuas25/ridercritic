@@ -3,8 +3,13 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  turbopack: {},
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+  },
   webpack: (config, { isServer }) => {
+    // Disable caching to prevent module resolution issues
     config.cache = false;
     
     // Handle undici package

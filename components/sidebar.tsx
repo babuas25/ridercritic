@@ -74,6 +74,7 @@ export default function Sidebar() {
       if (userRole === 'Super Admin') {
         items.push(
           { title: "User Management", icon: Users, href: "/dashboard/admin" },
+          { title: "Motorcycles", icon: Bike, href: "/dashboard/motorcycles" },
           { title: "Brands", icon: Tags, href: "/dashboard/brands" },
           { title: "Types", icon: Grid, href: "/dashboard/types" }
         )
@@ -82,6 +83,7 @@ export default function Sidebar() {
       else if (userRole === 'Admin') {
         items.push(
           { title: "User Management", icon: Users, href: "/dashboard/admin" },
+          { title: "Motorcycles", icon: Bike, href: "/dashboard/motorcycles" },
           { title: "Analytics", icon: Activity, href: "#" },
           { title: "Settings", icon: Settings, href: "#" }
         )

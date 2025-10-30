@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "ridercritic"
-  }
+    "default": "ridercritics-386df"
+  },
+  "targets": {},
+  "etags": {}
 }

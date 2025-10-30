@@ -1,0 +1,13 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // TEMPORARY: Allow all reads and writes for development
+    // TODO: Integrate Firebase Auth with NextAuth for proper authentication
+    match /{allPaths=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}
