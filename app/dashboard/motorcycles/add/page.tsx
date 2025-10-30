@@ -13,6 +13,9 @@ import { ArrowLeft, ArrowRight, Save, Eye, Loader2 } from 'lucide-react'
 import { MotorcycleFormData } from '@/types/motorcycle'
 import { createMotorcycle, saveDraft } from '@/lib/motorcycles'
 
+// Prevent static generation
+export const dynamic = 'force-dynamic'
+
 // Import all 13 modular step components
 import BasicInformationStep from '@/components/motorcycle-form/BasicInformationStep'
 import EngineSpecificationsStep from '@/components/motorcycle-form/EngineSpecificationsStep'
