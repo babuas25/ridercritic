@@ -258,7 +258,7 @@ export default function MotorcyclesManagementPage() {
                   <TableRow key={motorcycle.id}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{motorcycle.brand} {motorcycle.modelName}</div>
+                        <div className="font-medium">{motorcycle.brand.charAt(0).toUpperCase() + motorcycle.brand.slice(1)} {motorcycle.modelName}</div>
                         <div className="text-sm text-muted-foreground">{motorcycle.modelYear}</div>
                       </div>
                     </TableCell>

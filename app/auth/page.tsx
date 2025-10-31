@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
-import { signIn, getSession } from 'next-auth/react'
+import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -95,15 +95,15 @@ function AuthForm() {
         email: data.email,
         password: data.password,
         redirect: false,
+        callbackUrl: '/dashboard/user',
       })
 
       if (result?.error) {
         setError('Invalid email or password')
       } else {
-        const session = await getSession()
-        if (session) {
-          router.push('/dashboard/user')
-        }
+        // Redirect to the callback URL
+        const callbackUrl = result?.url || '/dashboard/user'
+        router.push(callbackUrl)
       }
     } catch (error: any) {
       setError(error.message || 'Invalid email or password')
@@ -358,4 +358,3 @@ export default function AuthPage() {
     </Suspense>
   )
 }
-

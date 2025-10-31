@@ -1,8 +1,6 @@
 'use client'
 
-'use client'
-
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import DashboardLayout from '@/components/layouts/DashboardLayout'
@@ -31,20 +29,11 @@ import ReviewValidationStep from '@/components/motorcycle-form/ReviewValidationS
 export default function AddMotorcyclePage() {
   const { data: session } = useSession()
   const router = useRouter()
-  const [isMounted, setIsMounted] = useState(false)
+  
+  // All hooks at top level
   const [currentStep, setCurrentStep] = useState(1)
   const [saving, setSaving] = useState(false)
   const [publishing, setPublishing] = useState(false)
-  
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
-  
-  if (!isMounted) {
-    return null
-  }
-  
-  // Initialize form data with all fields
   const [formData, setFormData] = useState<MotorcycleFormData>({
     // 1️⃣ BASIC INFORMATION
     brand: '',
@@ -226,7 +215,7 @@ export default function AddMotorcyclePage() {
     lastUpdatedDate: ''
   })
 
-  // Initialize step images state for all 12 steps (step1-step12)
+  // Initialize step images state
   const [stepImages, setStepImages] = useState<{
     step1: string[]
     step2: string[]
