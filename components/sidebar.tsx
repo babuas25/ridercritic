@@ -90,33 +90,11 @@ export default function Sidebar() {
       }
       // Items for User Admin based on subRole
       else if (userRole === 'User Admin') {
-        // NewStar - Basic user
-        if (userSubRole === 'NewStar') {
-          items.push(
-            { title: "Browse Reviews", icon: FileText, href: "/reviews" },
-            { title: "Motorcycles", icon: Bike, href: "/motorcycle" },
-            { title: "Community", icon: MessageSquare, href: "#" },
-            { title: "Learn", icon: Star, href: "#" }
-          )
-        }
-        // CriticStar - Can write reviews
-        else if (userSubRole === 'CriticStar') {
-          items.push(
-            { title: "Write Review", icon: PenTool, href: "#" },
-            { title: "My Reviews", icon: FileText, href: "#" },
-            { title: "Browse", icon: Bike, href: "/motorcycle" },
-            { title: "Community", icon: MessageSquare, href: "#" }
-          )
-        }
-        // CriticMaster - Moderation powers
-        else if (userSubRole === 'CriticMaster') {
-          items.push(
-            { title: "Moderation Queue", icon: CheckCircle, href: "#" },
-            { title: "Reports", icon: AlertTriangle, href: "#" },
-            { title: "Reviews", icon: FileText, href: "/reviews" },
-            { title: "Community", icon: MessageSquare, href: "#" }
-          )
-        }
+        items.push({
+          title: "Reviews",
+          icon: Star,
+          href: "/dashboard/reviews/write",
+        })
       }
       // Items for other admin roles
       else {
@@ -132,7 +110,7 @@ export default function Sidebar() {
     // Default items for non-dashboard pages
     return [
       { title: "Home", icon: Home, href: "/" },
-      { title: "Reviews", icon: Star, href: "/reviews" },
+      { title: "Reviews", icon: Star, href: "/dashboard/reviews/write" },
       { title: "Motorcycles", icon: Bike, href: "/motorcycle" },
       { title: "Products", icon: ShoppingBag, href: "/products" },
       { title: "Accessories", icon: Package, href: "/accessories" },

@@ -1,61 +1,76 @@
+'use client'
+
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-
-const sampleReviews = [
-  {
-    id: 1,
-    title: "2024 Honda CBR1000RR - A Rider's Dream",
-    motorcycle: "Honda CBR1000RR",
-    rating: 5,
-    author: "Mike Chen",
-    date: "2024-10-15",
-    excerpt: "The perfect blend of power, handling, and technology. This bike exceeded all my expectations on both track and street.",
-    category: "Sport Bike"
-  },
-  {
-    id: 2,
-    title: "BMW R1250GS Adventure - Ultimate Touring Companion",
-    motorcycle: "BMW R1250GS",
-    rating: 5,
-    author: "Sarah Johnson",
-    date: "2024-10-12",
-    excerpt: "Crossed three states in comfort. The adaptive suspension and electronic aids make long rides effortless.",
-    category: "Adventure"
-  },
-  {
-    id: 3,
-    title: "Harley-Davidson Fat Boy - American Icon",
-    motorcycle: "Harley-Davidson Fat Boy",
-    rating: 4,
-    author: "David Wilson",
-    date: "2024-10-10",
-    excerpt: "The rumble, the style, the heritage - everything you expect from a Harley. Comfortable for long cruises.",
-    category: "Cruiser"
-  },
-  {
-    id: 4,
-    title: "Kawasaki Ninja 400 - Perfect Starter Bike",
-    motorcycle: "Kawasaki Ninja 400",
-    rating: 4,
-    author: "Alex Rodriguez",
-    date: "2024-10-08",
-    excerpt: "Great power delivery for beginners. Forgiving handling and enough power to grow into. Highly recommended.",
-    category: "Sport Bike"
-  },
-  {
-    id: 5,
-    title: "Ducati Multistrada V4 - Italian Excellence",
-    motorcycle: "Ducati Multistrada V4",
-    rating: 5,
-    author: "Maria Santos",
-    date: "2024-10-05",
-    excerpt: "The electronics package is incredible. Multiple riding modes make it versatile for any condition or mood.",
-    category: "Adventure"
-  }
-]
+import { getAllReviews, ReviewData } from '@/lib/reviews'
+import Link from 'next/link'
 
 export default function ReviewsPage() {
+  const [reviews, setReviews] = useState<ReviewData[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const reviewsData = await getAllReviews(20)
+        setReviews(reviewsData)
+      } catch (err) {
+        console.error('Error fetching reviews:', err)
+        setError("Failed to load reviews")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchReviews()
+  }, [])
+
+  // Format date for display
+  const formatDate = (date: Date | string | null) => {
+    if (!date) return 'Unknown date'
+    
+    try {
+      const d = date instanceof Date ? date : new Date(date)
+      return d.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+    } catch {
+      return 'Unknown date'
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="container py-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading reviews...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="container py-8">
+        <div className="text-center">
+          <p className="text-destructive">{error}</p>
+          <Button 
+            onClick={() => window.location.reload()} 
+            className="mt-4"
+          >
+            Retry
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="container py-8">
       <div className="text-center mb-8">
@@ -66,39 +81,53 @@ export default function ReviewsPage() {
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {sampleReviews.map((review) => (
-          <Card key={review.id} className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-lg mb-1">{review.title}</CardTitle>
-                  <CardDescription className="text-sm">
-                    Review of {review.motorcycle}
-                  </CardDescription>
+      {reviews.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">No reviews yet. Be the first to write one!</p>
+          <Button className="mt-4" asChild>
+            <Link href="/dashboard/reviews/write">Write a Review</Link>
+          </Button>
+        </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {reviews.map((review) => (
+            <Card key={review.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle className="text-lg mb-1">
+                      <Link 
+                        href={`/reviews/${review.id}`} 
+                        className="hover:text-primary transition-colors"
+                      >
+                        {review.title}
+                      </Link>
+                    </CardTitle>
+                    <CardDescription className="text-sm">
+                      Review of {review.topic}
+                    </CardDescription>
+                  </div>
+                  <Badge variant="secondary">
+                    {Array(review.rating).fill('★').join('')}
+                  </Badge>
                 </div>
-                <Badge variant="secondary">
-                  {Array(review.rating).fill('★').join('')}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                &quot;{review.excerpt}&quot;
-              </p>
-              <div className="flex justify-between items-center text-xs text-muted-foreground">
-                <span>By {review.author}</span>
-                <span>{review.date}</span>
-              </div>
-              <div className="mt-3">
-                <Badge variant="outline" className="text-xs">
-                  {review.category}
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardHeader>
+              <CardContent>
+                <div 
+                  className="text-sm text-muted-foreground mb-4 line-clamp-3"
+                  dangerouslySetInnerHTML={{ 
+                    __html: review.content.replace(/<[^>]*>/g, '').substring(0, 100) + '...' 
+                  }}
+                />
+                <div className="flex justify-between items-center text-xs text-muted-foreground">
+                  <span>By {review.authorName}</span>
+                  <span>{formatDate(review.createdAt)}</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <div className="text-center mt-12">
         <h2 className="text-2xl font-semibold mb-4">Review Categories</h2>
