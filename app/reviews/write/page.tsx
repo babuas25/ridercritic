@@ -1,17 +1,58 @@
 "use client"
 
-import { useState } from "react"
-import dynamic from 'next/dynamic'
-const Editor = dynamic(
-  () => import('react-draft-wysiwyg').then(mod => mod.Editor),
-  { ssr: false }
-)
-import { EditorState } from 'draft-js'
-import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'
+import { useState, useEffect } from "react"
+import { useEditor, EditorContent } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import { Placeholder } from '@tiptap/extension-placeholder'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 export default function WriteReviewPage() {
-  const [editorState, setEditorState] = useState(EditorState.createEmpty())
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [title, setTitle] = useState("")
   const [youtubeUrl, setYoutubeUrl] = useState("")
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Placeholder.configure({
+        placeholder: 'Write your review content here...'
+      })
+    ],
+    content: '',
+  })
+
+  // Check if user is authorized to write reviews
+  useEffect(() => {
+    if (status === 'loading') return
+
+    if (!session) {
+      router.push('/login')
+      return
+    }
+
+    // Allow User Admin with any subrole to write reviews
+    // According to requirements, NewStar should be able to write reviews
+    const role = session.user.role
+    // subRole is not used in this component
+    
+    if (role !== 'User Admin') {
+      router.push('/dashboard')
+      return
+    }
+    
+    // All User Admin subroles can write reviews
+    // NewStar, CriticStar, CriticMaster
+  }, [session, status, router])
+
+  if (status === 'loading') {
+    return <div className="p-6">Loading...</div>
+  }
+
+  if (!session) {
+    return null
+  }
 
   return (
     <div className="p-6">
@@ -22,28 +63,17 @@ export default function WriteReviewPage() {
           <input
             type="text"
             id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             className="w-full p-2 border rounded"
             placeholder="Enter review title"
           />
         </div>
         <div>
           <label htmlFor="content" className="block text-sm font-medium mb-1">Content</label>
-          <Editor
-            editorState={editorState}
-            onEditorStateChange={setEditorState}
-            wrapperClassName="wrapper-class"
-            editorClassName="editor-class"
-            toolbarClassName="toolbar-class"
-            toolbar={{
-              options: ['inline', 'blockType', 'fontSize', 'list', 'textAlign', 'link', 'image', 'remove', 'history'],
-              inline: { inDropdown: true },
-              list: { inDropdown: true },
-              textAlign: { inDropdown: true },
-              link: { inDropdown: true },
-              image: { inDropdown: true },
-              history: { inDropdown: true },
-            }}
-          />
+          <div className="border rounded-md">
+            <EditorContent editor={editor} className="min-h-48 p-2" />
+          </div>
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Upload Images</label>

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { getReview, ReviewData } from '@/lib/reviews'
 import { notFound, useParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function ReviewDetailPage() {
   const [review, setReview] = useState<ReviewData | null>(null)
@@ -28,7 +29,22 @@ export default function ReviewDetailPage() {
           notFound()
           return
         }
-        setReview(reviewData)
+        
+        // Process the review to handle Firestore timestamps properly
+        const processedReview = {
+          ...reviewData,
+          createdAt: reviewData.createdAt instanceof Date ? reviewData.createdAt : 
+                    reviewData.createdAt && typeof reviewData.createdAt === 'object' && 'toDate' in reviewData.createdAt ? 
+                    (reviewData.createdAt as unknown as { toDate: () => Date }).toDate() : 
+                    reviewData.createdAt ? new Date(reviewData.createdAt as string) : null,
+          updatedAt: reviewData.updatedAt instanceof Date ? reviewData.updatedAt : 
+                    reviewData.updatedAt && typeof reviewData.updatedAt === 'object' && 'toDate' in reviewData.updatedAt ? 
+                    (reviewData.updatedAt as unknown as { toDate: () => Date }).toDate() : 
+                    reviewData.updatedAt ? new Date(reviewData.updatedAt as string) : null,
+          rating: typeof reviewData.rating === 'number' ? reviewData.rating : 0
+        }
+        
+        setReview(processedReview)
       } catch (err) {
         console.error('Error fetching review:', err)
         setError("Failed to load review")
@@ -45,7 +61,22 @@ export default function ReviewDetailPage() {
     if (!date) return 'Unknown date'
     
     try {
-      const d = date instanceof Date ? date : new Date(date)
+      // Handle different date formats
+      let d: Date
+      if (date instanceof Date) {
+        d = date
+      } else if (typeof date === 'object' && date !== null && 'toDate' in date) {
+        // Firestore Timestamp
+        d = (date as unknown as { toDate: () => Date }).toDate()
+      } else {
+        d = new Date(date)
+      }
+      
+      // Check if date is valid
+      if (isNaN(d.getTime())) {
+        return 'Unknown date'
+      }
+      
       return d.toLocaleDateString('en-US', {
         weekday: 'long',
         year: 'numeric',
@@ -119,7 +150,7 @@ export default function ReviewDetailPage() {
             </div>
             <div className="flex items-center gap-4">
               <Badge variant="secondary" className="text-lg py-2 px-3">
-                {Array(review.rating).fill('★').join('')}
+                {Array(Math.min(5, Math.max(0, Math.round(review.rating || 0)))).fill('★').join('')}
                 <span className="ml-2">{review.rating}/5</span>
               </Badge>
             </div>
@@ -145,10 +176,12 @@ export default function ReviewDetailPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {review.images.map((image, index) => (
                   <div key={index} className="aspect-square overflow-hidden rounded-lg border">
-                    <img 
+                    <Image 
                       src={image} 
                       alt={`Review image ${index + 1}`}
-                      className="w-full h-full object-cover"
+                      className="object-cover"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                   </div>
                 ))}

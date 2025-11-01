@@ -15,7 +15,7 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith('/accessories') ||
       pathname.startsWith('/motorcycle') ||
       pathname.startsWith('/products') ||
-      pathname.startsWith('/reviews') ||
+      pathname.startsWith('/reviews') && !pathname.startsWith('/dashboard/reviews/write') ||
       pathname.startsWith('/login') ||
       pathname.startsWith('/register')) {
     return NextResponse.next()
@@ -31,8 +31,14 @@ export async function middleware(request: NextRequest) {
     }
 
     const role = token.role as string
+    // subRole is not used in this middleware
 
-    // Check role-based access
+    // Allow User Admin with any subrole to access review writing page
+    if (pathname.startsWith('/dashboard/reviews/write') && role === 'User Admin') {
+      return NextResponse.next()
+    }
+
+    // Check role-based access for specific admin paths
     if (pathname.startsWith('/dashboard/super-admin') && role !== 'Super Admin') {
       const url = new URL('/dashboard/user', request.url)
       return NextResponse.redirect(url)
@@ -61,6 +67,22 @@ export async function middleware(request: NextRequest) {
     if (pathname.startsWith('/dashboard/freelancer') && !['Freelancer Admin', 'Admin', 'Super Admin'].includes(role)) {
       const url = new URL('/dashboard/user', request.url)
       return NextResponse.redirect(url)
+    }
+    
+    // Allow general dashboard access for all authenticated users
+    if (pathname === '/dashboard' || pathname === '/dashboard/') {
+      // Redirect to appropriate dashboard based on role
+      if (role === 'Super Admin') {
+        const url = new URL('/dashboard/super-admin', request.url)
+        return NextResponse.redirect(url)
+      } else if (role === 'Admin') {
+        const url = new URL('/dashboard/admin', request.url)
+        return NextResponse.redirect(url)
+      } else {
+        // For User Admin and other roles, go to user dashboard
+        const url = new URL('/dashboard/user', request.url)
+        return NextResponse.redirect(url)
+      }
     }
   }
 

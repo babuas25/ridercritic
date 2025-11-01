@@ -11,14 +11,16 @@ import { useRouter } from 'next/navigation'
 import { createReview, uploadReviewImages } from '@/lib/reviews'
 import { auth } from '@/lib/firebase'
 import { onAuthStateChanged } from 'firebase/auth'
+import Image from 'next/image'
 
 // Tiptap Editor Components
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
+import TextAlign from '@tiptap/extension-text-align'
 
 // Define the MenuBar component for formatting options
-const MenuBar = ({ editor }: { editor: any }) => {
+const MenuBar = ({ editor }: { editor: ReturnType<typeof useEditor> | null }) => {
   if (!editor) {
     return null
   }
@@ -212,10 +214,12 @@ const MotorcycleCard = ({
     >
       <div className="flex-shrink-0 w-16 h-16 rounded-md overflow-hidden bg-muted">
         {motorcycle.coverImage ? (
-          <img 
+          <Image 
             src={motorcycle.coverImage} 
             alt={motorcycle.name} 
-            className="w-full h-full object-cover"
+            width={64}
+            height={64}
+            className="object-cover"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.style.display = 'none';
@@ -319,6 +323,9 @@ export default function WriteReviewPage() {
       Placeholder.configure({
         placeholder: 'Write your review here...',
       }),
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
     ],
     content: '',
     onUpdate: ({ editor }) => {
@@ -399,13 +406,14 @@ export default function WriteReviewPage() {
     
     // Check if user has permission to write reviews
     const userSubRole = session.user.subRole
-    const canWrite = userSubRole === 'CriticStar' || userSubRole === 'CriticMaster'
+    // Allow all User Admin subroles to write reviews (NewStar, CriticStar, CriticMaster)
+    const canWrite = userSubRole === 'NewStar' || userSubRole === 'CriticStar' || userSubRole === 'CriticMaster'
     
     console.log('User subRole:', userSubRole)
     console.log('Can write reviews:', canWrite)
     
     if (!canWrite) {
-      setError("You don't have permission to write reviews. You need to be a CriticStar or higher.")
+      setError("You don't have permission to write reviews. All User Admin subroles can write reviews.")
       return
     }
     
@@ -766,10 +774,12 @@ export default function WriteReviewPage() {
                       <div className="mt-4 grid grid-cols-3 gap-2">
                         {images.map((image, index) => (
                           <div key={index} className="relative">
-                            <img 
+                            <Image 
                               src={URL.createObjectURL(image)} 
                               alt={`Preview ${index}`}
-                              className="w-full h-24 object-cover rounded-md"
+                              width={96}
+                              height={96}
+                              className="object-cover rounded-md"
                             />
                             <button
                               type="button"

@@ -7,24 +7,19 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSession } from "next-auth/react"
-import {
-  Home,
-  Settings,
-  Bike,
-  Star,
-  ShoppingBag,
-  Package,
-  ChevronLeft,
-  ChevronRight,
-  Users,
-  Activity,
-  PenTool,
-  FileText,
-  MessageSquare,
-  CheckCircle,
-  AlertTriangle,
-  Tags,
-  Grid,
+import { 
+  Home, 
+  Settings, 
+  Bike, 
+  ShoppingBag, 
+  Package, 
+  ChevronLeft, 
+  ChevronRight, 
+  Users, 
+  Activity, 
+  Star, 
+  Tags, 
+  Grid, 
 } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 
@@ -90,11 +85,14 @@ export default function Sidebar() {
       }
       // Items for User Admin based on subRole
       else if (userRole === 'User Admin') {
-        items.push({
-          title: "Reviews",
-          icon: Star,
-          href: "/dashboard/reviews/write",
-        })
+        // Add reviews link for NewStar, CriticStar, and CriticMaster subroles
+        if (userSubRole === 'NewStar' || userSubRole === 'CriticStar' || userSubRole === 'CriticMaster') {
+          items.push({
+            title: "Reviews",
+            icon: Star,
+            href: "/dashboard/reviews/write",
+          })
+        }
       }
       // Items for other admin roles
       else {

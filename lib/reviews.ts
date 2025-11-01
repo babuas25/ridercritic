@@ -10,11 +10,9 @@ import {
   orderBy,
   limit,
   serverTimestamp,
-  where,
-  Query,
-  DocumentData
+  where
 } from 'firebase/firestore'
-import { db, auth } from './firebase'
+import { db } from './firebase'
 import { uploadImage } from './storage'
 
 const REVIEWS_COLLECTION = 'reviews'

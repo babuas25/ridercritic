@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { getAllReviews, ReviewData } from '@/lib/reviews'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function ReviewsPage() {
   const [reviews, setReviews] = useState<ReviewData[]>([])
@@ -16,7 +17,16 @@ export default function ReviewsPage() {
     const fetchReviews = async () => {
       try {
         const reviewsData = await getAllReviews(20)
-        setReviews(reviewsData)
+        // Process the reviews to handle Firestore timestamps properly
+        const processedReviews = reviewsData.map(review => ({
+          ...review,
+          createdAt: review.createdAt instanceof Date ? review.createdAt : 
+                    review.createdAt && typeof review.createdAt === 'object' && 'toDate' in review.createdAt ? 
+                    (review.createdAt as unknown as { toDate: () => Date }).toDate() : 
+                    review.createdAt ? new Date(review.createdAt as string) : null,
+          rating: typeof review.rating === 'number' ? review.rating : 0
+        }))
+        setReviews(processedReviews)
       } catch (err) {
         console.error('Error fetching reviews:', err)
         setError("Failed to load reviews")
@@ -33,7 +43,22 @@ export default function ReviewsPage() {
     if (!date) return 'Unknown date'
     
     try {
-      const d = date instanceof Date ? date : new Date(date)
+      // Handle different date formats
+      let d: Date
+      if (date instanceof Date) {
+        d = date
+      } else if (typeof date === 'object' && date !== null && 'toDate' in date) {
+        // Firestore Timestamp
+        d = (date as unknown as { toDate: () => Date }).toDate()
+      } else {
+        d = new Date(date)
+      }
+      
+      // Check if date is valid
+      if (isNaN(d.getTime())) {
+        return 'Unknown date'
+      }
+      
       return d.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
@@ -92,6 +117,19 @@ export default function ReviewsPage() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {reviews.map((review) => (
             <Card key={review.id} className="hover:shadow-lg transition-shadow">
+              {/* Display review image if available */}
+              {review.images && review.images.length > 0 && (
+                <div className="relative h-48 overflow-hidden rounded-t-lg">
+                  <Image 
+                    src={review.images[0]} 
+                    alt={review.title}
+                    className="object-cover"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                </div>
+              )}
+              
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
@@ -108,7 +146,8 @@ export default function ReviewsPage() {
                     </CardDescription>
                   </div>
                   <Badge variant="secondary">
-                    {Array(review.rating).fill('★').join('')}
+                    {Array(Math.min(5, Math.max(0, Math.round(review.rating || 0)))).fill('★').join('')}
+                    <span className="ml-1">{review.rating}/5</span>
                   </Badge>
                 </div>
               </CardHeader>
