@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { getAllReviews, ReviewData } from '@/lib/reviews'
 import Link from 'next/link'
 import Image from 'next/image'
+import { Star } from 'lucide-react'
 
 export default function ReviewsPage() {
   const [reviews, setReviews] = useState<ReviewData[]>([])
@@ -71,10 +71,29 @@ export default function ReviewsPage() {
 
   if (loading) {
     return (
-      <div className="container py-8">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading reviews...</p>
+      <div className="min-h-screen bg-background">
+        <div className="container py-16 md:py-24">
+          <div className="text-center mb-16">
+            <div className="h-10 w-64 bg-muted rounded animate-pulse mx-auto mb-4"></div>
+            <div className="h-6 w-96 bg-muted rounded animate-pulse mx-auto"></div>
+          </div>
+          
+          <div className="grid gap-8 md:gap-10 md:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card key={i} className="overflow-hidden border-border/50">
+                <div className="h-48 bg-muted animate-pulse"></div>
+                <div className="p-6">
+                  <div className="h-6 bg-muted rounded animate-pulse mb-3"></div>
+                  <div className="h-4 bg-muted rounded animate-pulse mb-2 w-3/4"></div>
+                  <div className="h-4 bg-muted rounded animate-pulse mb-4 w-1/2"></div>
+                  <div className="flex justify-between items-center">
+                    <div className="h-4 bg-muted rounded animate-pulse w-1/3"></div>
+                    <div className="h-4 bg-muted rounded animate-pulse w-1/4"></div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
     )
@@ -82,12 +101,12 @@ export default function ReviewsPage() {
 
   if (error) {
     return (
-      <div className="container py-8">
-        <div className="text-center">
-          <p className="text-destructive">{error}</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center p-8">
+          <p className="text-destructive mb-4">{error}</p>
           <Button 
             onClick={() => window.location.reload()} 
-            className="mt-4"
+            variant="outline"
           >
             Retry
           </Button>
@@ -97,85 +116,114 @@ export default function ReviewsPage() {
   }
 
   return (
-    <div className="container py-8">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-4">Motorcycle Reviews</h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          Real reviews from real riders. Get honest insights about motorcycles
-          before you make your next purchase decision.
-        </p>
-      </div>
-
-      {reviews.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">No reviews yet. Be the first to write one!</p>
-          <Button className="mt-4" asChild>
-            <Link href="/dashboard/reviews/write">Write a Review</Link>
-          </Button>
+    <div className="min-h-screen bg-background">
+      <div className="container py-16 md:py-24">
+        <div className="text-center mb-16 max-w-2xl mx-auto">
+          <h1 className="text-3xl md:text-4xl font-medium tracking-tight mb-4">
+            Motorcycle Reviews
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Real reviews from real riders. Get honest insights about motorcycles before you make your next purchase decision.
+          </p>
         </div>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {reviews.map((review) => (
-            <Card key={review.id} className="hover:shadow-lg transition-shadow">
-              {/* Display review image if available */}
-              {review.images && review.images.length > 0 && (
-                <div className="relative h-48 overflow-hidden rounded-t-lg">
-                  <Image 
-                    src={review.images[0]} 
-                    alt={review.title}
-                    className="object-cover"
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
-                </div>
-              )}
-              
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-lg mb-1">
-                      <Link 
-                        href={`/reviews/${review.id}`} 
-                        className="hover:text-primary transition-colors"
-                      >
-                        {review.title}
-                      </Link>
-                    </CardTitle>
-                    <CardDescription className="text-sm">
-                      Review of {review.topic}
-                    </CardDescription>
-                  </div>
-                  <Badge variant="secondary">
-                    {Array(Math.min(5, Math.max(0, Math.round(review.rating || 0)))).fill('★').join('')}
-                    <span className="ml-1">{review.rating}/5</span>
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div 
-                  className="text-sm text-muted-foreground mb-4 line-clamp-3"
-                  dangerouslySetInnerHTML={{ 
-                    __html: review.content.replace(/<[^>]*>/g, '').substring(0, 100) + '...' 
-                  }}
-                />
-                <div className="flex justify-between items-center text-xs text-muted-foreground">
-                  <span>By {review.authorName}</span>
-                  <span>{formatDate(review.createdAt)}</span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
 
-      <div className="text-center mt-12">
-        <h2 className="text-2xl font-semibold mb-4">Review Categories</h2>
-        <div className="flex flex-wrap gap-2 justify-center">
-          {['All Reviews', 'Sport Bikes', 'Adventure', 'Cruisers', 'Touring', 'Classics'].map((category) => (
-            <Button key={category} variant="outline" className="mb-2">
-              {category}
+        {reviews.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-muted-foreground mb-6">No reviews yet. Be the first to write one!</p>
+            <Button asChild>
+              <Link href="/dashboard/reviews/write">Write a Review</Link>
             </Button>
-          ))}
+          </div>
+        ) : (
+          <div className="grid gap-8 md:gap-10 md:grid-cols-2 lg:grid-cols-3">
+            {reviews.map((review, index) => (
+              <Card key={review.id} className="overflow-hidden border-border/50 hover:shadow-sm transition-shadow duration-300">
+                {/* Display review image if available */}
+                {review.images && review.images.length > 0 ? (
+                  <div className="relative h-48">
+                    <Image 
+                      src={review.images[0]} 
+                      alt={review.title}
+                      className="object-cover"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      priority={index === 0} // Add priority to first image
+                    />
+                  </div>
+                ) : (
+                  <div className="h-48 bg-muted flex items-center justify-center">
+                    <div className="text-muted-foreground/20">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <path d="M21 15l-5-5L5 21"></path>
+                      </svg>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="p-6">
+                  <h3 className="font-medium text-lg mb-2 line-clamp-1">
+                    <Link 
+                      href={`/reviews/${review.id}`} 
+                      className="hover:text-foreground transition-colors"
+                    >
+                      {review.title}
+                    </Link>
+                  </h3>
+                  
+                  <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+                    {review.content.replace(/<[^>]*>/g, '').substring(0, 100) + '...'}
+                  </p>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star 
+                          key={i} 
+                          className={`w-4 h-4 ${i < Math.round(review.rating || 0) ? 'fill-foreground' : 'fill-muted stroke-muted-foreground'}`}
+                        />
+                      ))}
+                      <span className="text-xs text-muted-foreground ml-1">
+                        {review.rating}/5
+                      </span>
+                    </div>
+                    
+                    <div className="text-xs text-muted-foreground">
+                      {formatDate(review.createdAt)}
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 pt-4 border-t border-border/50 flex items-center justify-between">
+                    <span className="text-sm font-medium">
+                      {review.authorName}
+                    </span>
+                    <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                      {review.topic}
+                    </span>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* Categories Section */}
+        <div className="mt-24 pt-12 border-t border-border/50">
+          <h2 className="text-2xl font-medium tracking-tight text-center mb-8">
+            Review Categories
+          </h2>
+          <div className="flex flex-wrap justify-center gap-3">
+            {['All Reviews', 'Sport Bikes', 'Adventure', 'Cruisers', 'Touring', 'Classics'].map((category) => (
+              <Button 
+                key={category} 
+                variant="outline" 
+                className="rounded-full px-5 py-2 h-auto text-sm border-border/50 hover:bg-muted/50"
+              >
+                {category}
+              </Button>
+            ))}
+          </div>
         </div>
       </div>
     </div>

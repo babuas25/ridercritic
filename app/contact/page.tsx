@@ -1,62 +1,68 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+'use client'
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Mail, MessageSquare, Phone, MapPin } from 'lucide-react'
+import { Mail, Phone, MapPin, MessageSquare } from 'lucide-react'
 
 export default function ContactPage() {
   return (
-    <div className="container py-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-background">
+      <div className="container py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
+          <h1 className="text-3xl font-bold tracking-tight mb-4">Contact Us</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Have questions about motorcycles, reviews, or our platform?
-            We&apos;d love to hear from you!
+            Have questions or feedback? We&apos;d love to hear from you.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
+        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-16">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Mail className="h-5 w-5" />
-                Email Us
+                Send us a Message
               </CardTitle>
-              <CardDescription>
-                Send us a detailed message and we&apos;ll get back to you within 24 hours.
-              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Name</label>
+                  <label htmlFor="contact-name" className="block text-sm font-medium mb-1">Name</label>
                   <input
                     type="text"
+                    id="contact-name"
+                    name="contactName"
                     placeholder="Your full name"
                     className="w-full border rounded-md px-3 py-2 text-sm"
                     disabled
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Email</label>
+                  <label htmlFor="contact-email" className="block text-sm font-medium mb-1">Email</label>
                   <input
                     type="email"
+                    id="contact-email"
+                    name="contactEmail"
                     placeholder="your.email@example.com"
                     className="w-full border rounded-md px-3 py-2 text-sm"
                     disabled
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Subject</label>
+                  <label htmlFor="contact-subject" className="block text-sm font-medium mb-1">Subject</label>
                   <input
                     type="text"
+                    id="contact-subject"
+                    name="contactSubject"
                     placeholder="What's this about?"
                     className="w-full border rounded-md px-3 py-2 text-sm"
                     disabled
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Message</label>
+                  <label htmlFor="contact-message" className="block text-sm font-medium mb-1">Message</label>
                   <textarea
+                    id="contact-message"
+                    name="contactMessage"
                     placeholder="Tell us more..."
                     rows={4}
                     className="w-full border rounded-md px-3 py-2 text-sm"

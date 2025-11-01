@@ -74,7 +74,16 @@ service cloud.firestore {
       allow create, update, delete: if true;
     }
     
-    // Comments collection (nested under reviews)
+    // Comments collection
+    match /comments/{commentId} {
+      // Anyone can read comments
+      allow read: if true;
+      
+      // Allow all writes for development
+      allow create, update, delete: if true;
+    }
+    
+    // Comments collection (nested under reviews) - for backward compatibility
     match /reviews/{reviewId}/comments/{commentId} {
       // Anyone can read comments
       allow read: if true;
