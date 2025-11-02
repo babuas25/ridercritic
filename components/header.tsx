@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -19,7 +19,9 @@ import {
   SheetContent,
   SheetTrigger,
   SheetHeader,
+  SheetTitle,
   SheetClose,
+  SheetDescription
 } from "@/components/ui/sheet"
 import Link from 'next/link'
 import { Logo } from '@/components/ui/logo'
@@ -29,11 +31,6 @@ export default function Header() {
   const { data: session } = useSession()
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isMobileCollapsed] = useState(false)
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -52,6 +49,8 @@ export default function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-64 p-0">
+              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+              <SheetDescription className="sr-only">Main navigation menu with links to different sections of the website</SheetDescription>
               <SheetHeader className="p-4 border-b">
                 <SheetClose asChild>
                   <Button variant="ghost" size="icon" className="h-8 w-8 ml-auto">
@@ -77,23 +76,57 @@ export default function Header() {
                 </nav>
               </div>
               <div className="absolute bottom-0 left-0 right-0 p-4 border-t">
-                <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
                   <Button 
                     variant="ghost" 
                     size="icon" 
                     className="h-8 w-8"
                     onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                    title={isMobileCollapsed ? "Toggle theme" : undefined}
+                    title="Toggle theme"
                   >
                     <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                     <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                    {!isMobileCollapsed && mounted && (theme === 'dark' ? 'Lite' : 'Dark')}
+                    <span className="sr-only">Toggle theme</span>
                   </Button>
 
-                  <div className={`flex items-center gap-3 px-3 py-2 text-sm font-[600] text-muted-foreground ${isMobileCollapsed ? 'justify-center px-2' : ''}`}
-                       title={isMobileCollapsed ? "Sign in" : undefined}>
-                    {!isMobileCollapsed && <span>Sign in</span>}
-                  </div>
+                  {session ? (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={session.user.image || undefined} alt={session.user.name || 'User'} />
+                            <AvatarFallback>
+                              <User className="h-4 w-4" />
+                            </AvatarFallback>
+                          </Avatar>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-56" align="end" forceMount>
+                        <div className="flex items-center justify-start gap-2 p-2">
+                          <div className="flex flex-col space-y-1 leading-none">
+                            {session.user.name && <p className="font-medium text-sm">{session.user.name}</p>}
+                            {session.user.email && <p className="text-xs text-muted-foreground truncate">{session.user.email}</p>}
+                          </div>
+                        </div>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link href="/dashboard" className="cursor-pointer">
+                            <Settings className="mr-2 h-4 w-4" />
+                            <span>Dashboard</span>
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
+                          <LogOut className="mr-2 h-4 w-4" />
+                          <span>Sign out</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  ) : (
+                    <Button variant="ghost" size="sm" asChild className="h-8">
+                      <Link href="/auth">Sign in</Link>
+                    </Button>
+                  )}
                 </div>
               </div>
             </SheetContent>
@@ -103,8 +136,8 @@ export default function Header() {
           </Link>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-4 ml-auto md:ml-0">
-          <div className="relative">
+        <div className="flex flex-1 items-center justify-end gap-2 md:gap-4">
+          <div className="relative flex items-center">
             <Button
               variant="ghost"
               size="icon"
@@ -127,6 +160,61 @@ export default function Header() {
               />
               <Search className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
             </div>
+          </div>
+
+          {/* Mobile theme toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 md:hidden"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            title="Toggle theme"
+          >
+            <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Toggle theme</span>
+          </Button>
+
+          {/* Mobile user icon */}
+          <div className="md:hidden">
+            {session ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={session.user.image || undefined} alt={session.user.name || 'User'} />
+                      <AvatarFallback>
+                        <User className="h-4 w-4" />
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <div className="flex items-center justify-start gap-2 p-2">
+                    <div className="flex flex-col space-y-1 leading-none">
+                      {session.user.name && <p className="font-medium text-sm">{session.user.name}</p>}
+                      {session.user.email && <p className="text-xs text-muted-foreground truncate">{session.user.email}</p>}
+                    </div>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard" className="cursor-pointer">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Dashboard</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Sign out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button variant="ghost" size="sm" asChild className="h-8">
+                <Link href="/auth">Sign in</Link>
+              </Button>
+            )}
           </div>
 
           <nav className="hidden md:flex items-center gap-1">
