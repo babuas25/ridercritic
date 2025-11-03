@@ -7,11 +7,13 @@ import { getAllCritics, CriticData } from '@/lib/critics'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Star } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 export default function CriticsPage() {
   const [critics, setCritics] = useState<CriticData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const router = useRouter()
 
   useEffect(() => {
     const fetchCritics = async () => {
@@ -105,7 +107,7 @@ export default function CriticsPage() {
         <div className="text-center p-8">
           <p className="text-destructive mb-4">{error}</p>
           <Button 
-            onClick={() => window.location.reload()} 
+            onClick={() => router.refresh()} 
             variant="outline"
           >
             Retry

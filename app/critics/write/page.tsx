@@ -284,6 +284,57 @@ const Rating = ({
   )
 }
 
+// Create a separate component for the edit functionality to avoid SSR issues
+const EditCriticHandler = ({ editor, setIsEditing, setCriticId, setTitle, setTopics, setRating, setYoutubeUrl, setImages, setError }: {
+  editor: ReturnType<typeof useEditor> | null,
+  setIsEditing: (value: boolean) => void,
+  setCriticId: (value: string) => void,
+  setTitle: (value: string) => void,
+  setTopics: (value: string[]) => void,
+  setRating: (value: number) => void,
+  setYoutubeUrl: (value: string) => void,
+  setImages: (value: File[]) => void,
+  setError: (value: string) => void
+}) => {
+  const searchParams = useSearchParams()
+  
+  useEffect(() => {
+    const editParam = searchParams.get('edit')
+    if (editParam) {
+      setIsEditing(true)
+      setCriticId(editParam)
+      
+      // Load the critic data
+      const loadCritic = async () => {
+        try {
+          const criticData = await getCritic(editParam)
+          if (criticData) {
+            setTitle(criticData.title)
+            setTopics([criticData.topic])
+            setRating(criticData.rating)
+            setYoutubeUrl(criticData.youtubeLink || "")
+            // For editing, we'll just use empty File objects as placeholders
+            // The actual URLs will be handled when saving
+            setImages(criticData.images.map(() => new File([], "")) || [])
+            
+            // Set editor content
+            if (editor) {
+              editor.commands.setContent(criticData.content)
+            }
+          }
+        } catch (err) {
+          console.error('Error loading critic:', err)
+          setError("Failed to load critic for editing")
+        }
+      }
+      
+      loadCritic()
+    }
+  }, [searchParams, editor, setIsEditing, setCriticId, setTitle, setTopics, setRating, setYoutubeUrl, setImages, setError])
+
+  return null
+}
+
 export default function WriteCriticPage() {
   const [title, setTitle] = useState("")
   const [topics, setTopics] = useState<string[]>([])
@@ -313,7 +364,7 @@ export default function WriteCriticPage() {
   const suggestionsRef = useRef<HTMLDivElement>(null)
   const { data: session, status } = useSession()
   const router = useRouter()
-  const searchParams = useSearchParams()
+  // Remove the direct use of useSearchParams here
 
   // Initialize Tiptap editor with SSR configuration
   const editor = useEditor({
@@ -336,39 +387,8 @@ export default function WriteCriticPage() {
     },
   })
 
-  // Load critic data for editing
-  useEffect(() => {
-    const editParam = searchParams.get('edit')
-    if (editParam) {
-      setIsEditing(true)
-      setCriticId(editParam)
-      
-      // Load the critic data
-      const loadCritic = async () => {
-        try {
-          const criticData = await getCritic(editParam)
-          if (criticData) {
-            setTitle(criticData.title)
-            setTopics([criticData.topic])
-            setRating(criticData.rating)
-            setYoutubeUrl(criticData.youtubeLink || "")
-            setImages(criticData.images.map(url => new File([], url)) || [])
-            
-            // Set editor content
-            if (editor) {
-              editor.commands.setContent(criticData.content)
-            }
-          }
-        } catch (err) {
-          console.error('Error loading critic:', err)
-          setError("Failed to load critic for editing")
-        }
-      }
-      
-      loadCritic()
-    }
-  }, [searchParams, editor])
-
+  // Handle edit functionality through the separate component
+  // This avoids SSR issues with useSearchParams
   useEffect(() => {
     setIsClient(true)
     isMounted.current = true
@@ -600,6 +620,27 @@ export default function WriteCriticPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto py-8 px-4">
+        {/* Add the EditCriticHandler component */}
+        {isClient && (
+          <EditCriticHandler 
+            editor={editor} 
+            setIsEditing={setIsEditing} 
+            setCriticId={setCriticId} 
+            setTitle={setTitle} 
+            setTopics={setTopics} 
+            setRating={setRating} 
+            setYoutubeUrl={setYoutubeUrl} 
+            setImages={(value: (File | string)[]) => {
+              // Convert string URLs back to File objects or keep as strings
+              const files = value.map(item => 
+                typeof item === 'string' ? item : item
+              );
+              setImages(files as File[]);
+            }} 
+            setError={setError} 
+          />
+        )}
+        
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">{isEditing ? "Edit Critic" : "Write Critic"}</h1>
           <p className="text-muted-foreground mt-2">

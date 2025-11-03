@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { getCritic, CriticData } from '@/lib/critics'
 import { getCommentsByCritic, createComment, CommentData } from '@/lib/comments'
-import { notFound, useParams } from 'next/navigation'
+import { notFound, useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Star } from 'lucide-react'
@@ -27,6 +27,7 @@ export default function CriticDetailPage() {
   const [commentError, setCommentError] = useState("")
   const { data: session } = useSession()
   const params = useParams()
+  const router = useRouter()
   const { id } = params
 
   useEffect(() => {
@@ -252,7 +253,7 @@ export default function CriticDetailPage() {
         <div className="text-center p-8 max-w-md">
           <p className="text-destructive mb-4">{error}</p>
           <Button 
-            onClick={() => window.location.reload()} 
+            onClick={() => router.refresh()} 
             variant="outline"
           >
             Retry
