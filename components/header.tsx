@@ -69,9 +69,9 @@ export default function Header() {
                     <Bike className="h-4 w-4" />
                     <span>Motorcycles</span>
                   </Link>
-                  <Link href="/reviews" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                  <Link href="/critics" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
                     <Star className="h-4 w-4" />
-                    <span>Reviews</span>
+                    <span>Critics</span>
                   </Link>
                 </nav>
               </div>

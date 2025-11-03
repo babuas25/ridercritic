@@ -8,7 +8,7 @@ export default function AboutPage() {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">About RiderCritic</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Your ultimate destination for motorcycle reviews, community insights,
+            Your ultimate destination for motorcycle critics, community insights,
             and everything related to the world of two wheels.
           </p>
         </div>
@@ -20,7 +20,7 @@ export default function AboutPage() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                To empower motorcycle enthusiasts with honest, detailed reviews and
+                To empower motorcycle enthusiasts with honest, detailed critics and
                 comprehensive information to help them make informed decisions about
                 their riding passion.
               </p>
@@ -45,7 +45,7 @@ export default function AboutPage() {
           <div className="grid md:grid-cols-3 gap-6">
             <Card className="text-center">
               <CardHeader>
-                <CardTitle className="text-lg">Expert Reviews</CardTitle>
+                <CardTitle className="text-lg">Expert Critics</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-3">
@@ -58,7 +58,7 @@ export default function AboutPage() {
 
             <Card className="text-center">
               <CardHeader>
-                <CardTitle className="text-lg">User Reviews</CardTitle>
+                <CardTitle className="text-lg">User Critics</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-3">

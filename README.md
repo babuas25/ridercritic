@@ -39,9 +39,9 @@ See `FIX_NEXAUTH.md` for detailed instructions.
 7. **User Admin** - Base role for all new users
 
 #### User Subroles (3 levels)
-1. **NewStar** - Basic access, can browse and read reviews
-2. **CriticStar** - Can write reviews and rate content
-3. **CriticMaster** - Can moderate and approve/reject reviews
+1. **NewStar** - Basic access, can browse and read critics
+2. **CriticStar** - Can write critics and rate content
+3. **CriticMaster** - Can moderate and approve/reject critics
 
 ### Dashboard System
 - **Role-specific dashboards** with appropriate features and permissions

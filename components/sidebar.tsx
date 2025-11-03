@@ -29,6 +29,22 @@ interface SidebarItem {
   href: string
 }
 
+// Helper function to get dashboard URL based on user role and subrole
+const getDashboardUrl = (userRole: string | undefined, userSubRole: string | undefined) => {
+  if (userRole === 'Super Admin') return '/dashboard/super-admin'
+  if (userRole === 'Admin') return '/dashboard/admin'
+  if (userRole === 'Sponsor Admin') return '/dashboard/sponsor'
+  if (userRole === 'Supplier Admin') return '/dashboard/supplier'
+  if (userRole === 'Partner Admin') return '/dashboard/partner'
+  if (userRole === 'Freelancer Admin') return '/dashboard/freelancer'
+  if (userRole === 'User Admin') {
+    if (userSubRole === 'NewStar') return '/dashboard/user/newstar'
+    if (userSubRole === 'CriticStar') return '/dashboard/user/criticstar'
+    if (userSubRole === 'CriticMaster') return '/dashboard/user/criticmaster'
+  }
+  return '/dashboard/user'
+}
+
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(true)
   const pathname = usePathname()
@@ -46,22 +62,11 @@ export default function Sidebar() {
   const getSidebarItems = (): SidebarItem[] => {
     // If on dashboard pages, show role-specific items
     if (isDashboard && session) {
-      const getDashboardUrl = () => {
-        if (userRole === 'Super Admin') return '/dashboard/super-admin'
-        if (userRole === 'Admin') return '/dashboard/admin'
-        if (userRole === 'User Admin') {
-          if (userSubRole === 'NewStar') return '/dashboard/user/newstar'
-          if (userSubRole === 'CriticStar') return '/dashboard/user/criticstar'
-          if (userSubRole === 'CriticMaster') return '/dashboard/user/criticmaster'
-        }
-        return '/dashboard/user'
-      }
-
       const items: SidebarItem[] = [
         {
           title: "Dashboard",
           icon: Home,
-          href: getDashboardUrl(),
+          href: getDashboardUrl(userRole, userSubRole),
         },
       ]
 
@@ -69,6 +74,7 @@ export default function Sidebar() {
       if (userRole === 'Super Admin') {
         items.push(
           { title: "User Management", icon: Users, href: "/dashboard/admin" },
+          { title: "Critic Management", icon: Star, href: "/dashboard/critics" },
           { title: "Motorcycles", icon: Bike, href: "/dashboard/motorcycles" },
           { title: "Brands", icon: Tags, href: "/dashboard/brands" },
           { title: "Types", icon: Grid, href: "/dashboard/types" }
@@ -78,6 +84,7 @@ export default function Sidebar() {
       else if (userRole === 'Admin') {
         items.push(
           { title: "User Management", icon: Users, href: "/dashboard/admin" },
+          { title: "Critic Management", icon: Star, href: "/dashboard/critics" },
           { title: "Motorcycles", icon: Bike, href: "/dashboard/motorcycles" },
           { title: "Analytics", icon: Activity, href: "#" },
           { title: "Settings", icon: Settings, href: "#" }
@@ -85,12 +92,12 @@ export default function Sidebar() {
       }
       // Items for User Admin based on subRole
       else if (userRole === 'User Admin') {
-        // Add reviews link for NewStar, CriticStar, and CriticMaster subroles
+        // Add critics link for NewStar, CriticStar, and CriticMaster subroles
         if (userSubRole === 'NewStar' || userSubRole === 'CriticStar' || userSubRole === 'CriticMaster') {
           items.push({
-            title: "Reviews",
+            title: "Critics",
             icon: Star,
-            href: "/dashboard/reviews/write",
+            href: "/dashboard/user/critics",
           })
         }
       }
@@ -107,8 +114,12 @@ export default function Sidebar() {
 
     // Default items for non-dashboard pages
     return [
-      { title: "Home", icon: Home, href: "/" },
-      { title: "Reviews", icon: Star, href: "/dashboard/reviews/write" },
+      { 
+        title: "Home", 
+        icon: Home, 
+        href: session ? getDashboardUrl(userRole, userSubRole) : "/" 
+      },
+      { title: "Critics", icon: Star, href: "/critics/write" },
       { title: "Motorcycles", icon: Bike, href: "/motorcycle" },
       { title: "Products", icon: ShoppingBag, href: "/products" },
       { title: "Accessories", icon: Package, href: "/accessories" },

@@ -126,7 +126,7 @@ export default function MotorcycleDetailPage() {
               <div className="flex items-center gap-1 mb-4">
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                 <span className="text-sm font-medium text-gray-900 dark:text-white">4.8</span>
-                <span className="text-sm text-gray-500 dark:text-gray-400">(127 reviews)</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">(127 critics)</span>
               </div>
               
               {/* Pricing */}
@@ -152,7 +152,7 @@ export default function MotorcycleDetailPage() {
               {/* Action Buttons */}
               <div className="flex gap-3">
                 <Button className="flex-1 bg-black text-white hover:bg-gray-800 dark:bg-white dark:text-black dark:hover:bg-gray-200">
-                  View Reviews
+                  View Critics
                 </Button>
                 <Button variant="outline" className="flex-1 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
                   Compare Models

@@ -128,24 +128,24 @@ export default function ContactPage() {
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">How do I submit a review?</CardTitle>
+                <CardTitle className="text-lg">How do I submit a critic?</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
                   Contact us through the form above and we&apos;ll guide you through
-                  the review submission process.
+                  the critic submission process.
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Can I suggest a motorcycle for review?</CardTitle>
+                <CardTitle className="text-lg">Can I suggest a motorcycle for critic?</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
                   Absolutely! We&apos;d love to hear your suggestions for motorcycles
-                  you&apos;d like to see reviewed.
+                  you&apos;d like to see critiqued.
                 </p>
               </CardContent>
             </Card>

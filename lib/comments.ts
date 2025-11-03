@@ -16,7 +16,7 @@ const COMMENTS_COLLECTION = 'comments'
 
 export interface CommentData {
   id?: string
-  reviewId: string
+  criticId: string
   content: string
   authorName: string
   userId?: string // Optional for logged-in users
@@ -64,11 +64,11 @@ export async function createComment(
 }
 
 /**
- * Get comments for a specific review
- * @param reviewId - Review document ID
+ * Get comments for a specific critic
+ * @param criticId - Critic document ID
  * @returns Array of comments
  */
-export async function getCommentsByReview(reviewId: string): Promise<CommentData[]> {
+export async function getCommentsByCritic(criticId: string): Promise<CommentData[]> {
   try {
     const commentsRef = collection(db, COMMENTS_COLLECTION)
     
@@ -76,7 +76,7 @@ export async function getCommentsByReview(reviewId: string): Promise<CommentData
     try {
       const q = query(
         commentsRef, 
-        where('reviewId', '==', reviewId), 
+        where('criticId', '==', criticId), 
         orderBy('createdAt', 'asc')
       )
       
@@ -106,9 +106,9 @@ export async function getCommentsByReview(reviewId: string): Promise<CommentData
         } as CommentData)
       })
       
-      // Filter by reviewId and sort by createdAt
+      // Filter by criticId and sort by createdAt
       const filteredComments = allComments
-        .filter(comment => comment.reviewId === reviewId)
+        .filter(comment => comment.criticId === criticId)
         .sort((a, b) => {
           const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt as string)
           const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt as string)

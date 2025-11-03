@@ -24,7 +24,7 @@ import FeaturesEquipmentStep from '@/components/motorcycle-form/FeaturesEquipmen
 import PricingMarketDataStep from '@/components/motorcycle-form/PricingMarketDataStep'
 import ColorOptionsStep from '@/components/motorcycle-form/ColorOptionsStep'
 import AdditionalInformationStep from '@/components/motorcycle-form/AdditionalInformationStep'
-import ReviewValidationStep from '@/components/motorcycle-form/ReviewValidationStep'
+import CriticValidationStep from '@/components/motorcycle-form/CriticValidationStep'
 
 export default function AddMotorcyclePage() {
   const { data: session } = useSession()
@@ -208,9 +208,9 @@ export default function AddMotorcyclePage() {
     relatedModels: [],
     adminNotes: '',
     
-    // 1️⃣3️⃣ REVIEW & VALIDATION
+    // 1️⃣3️⃣ CRITIC & VALIDATION
     dataCompletionPercentage: 0,
-    reviewStatus: 'Pending Review',
+    reviewStatus: 'Pending Critic',
     lastUpdatedBy: '',
     lastUpdatedDate: ''
   })
@@ -475,7 +475,7 @@ export default function AddMotorcyclePage() {
             )}
 
             {currentStep === 13 && (
-              <ReviewValidationStep
+              <CriticValidationStep
                 formData={formData}
                 setFormData={setFormData}
               />

@@ -64,16 +64,16 @@ export const getAccessibleRoutes = (role: UserRole, subRole: UserSubRole): strin
   // Subrole-specific routes
   if (subRole === 'NewStar') {
     routes.push('/dashboard/user/newstar')
-    // NewStar users can write reviews
-    routes.push('/dashboard/reviews/write')
+    // NewStar users can write critics
+    routes.push('/critics/write')
   } else if (subRole === 'CriticStar') {
     routes.push('/dashboard/user/criticstar')
-    // CriticStar users can write reviews
-    routes.push('/dashboard/reviews/write')
+    // CriticStar users can write critics
+    routes.push('/critics/write')
   } else if (subRole === 'CriticMaster') {
     routes.push('/dashboard/user/criticmaster')
-    // CriticMaster users can write reviews
-    routes.push('/dashboard/reviews/write')
+    // CriticMaster users can write critics
+    routes.push('/critics/write')
   }
 
   // Role-specific routes

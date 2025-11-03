@@ -3,39 +3,39 @@
 import { useState, useEffect } from "react"
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { getAllReviews, ReviewData } from '@/lib/reviews'
+import { getAllCritics, CriticData } from '@/lib/critics'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Star } from 'lucide-react'
 
-export default function ReviewsPage() {
-  const [reviews, setReviews] = useState<ReviewData[]>([])
+export default function CriticsPage() {
+  const [critics, setCritics] = useState<CriticData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
   useEffect(() => {
-    const fetchReviews = async () => {
+    const fetchCritics = async () => {
       try {
-        const reviewsData = await getAllReviews(20)
-        // Process the reviews to handle Firestore timestamps properly
-        const processedReviews = reviewsData.map(review => ({
-          ...review,
-          createdAt: review.createdAt instanceof Date ? review.createdAt : 
-                    review.createdAt && typeof review.createdAt === 'object' && 'toDate' in review.createdAt ? 
-                    (review.createdAt as unknown as { toDate: () => Date }).toDate() : 
-                    review.createdAt ? new Date(review.createdAt as string) : null,
-          rating: typeof review.rating === 'number' ? review.rating : 0
+        const criticsData = await getAllCritics(20)
+        // Process the critics to handle Firestore timestamps properly
+        const processedCritics = criticsData.map(critic => ({
+          ...critic,
+          createdAt: critic.createdAt instanceof Date ? critic.createdAt : 
+                    critic.createdAt && typeof critic.createdAt === 'object' && 'toDate' in critic.createdAt ? 
+                    (critic.createdAt as unknown as { toDate: () => Date }).toDate() : 
+                    critic.createdAt ? new Date(critic.createdAt as string) : null,
+          rating: typeof critic.rating === 'number' ? critic.rating : 0
         }))
-        setReviews(processedReviews)
+        setCritics(processedCritics)
       } catch (err) {
-        console.error('Error fetching reviews:', err)
-        setError("Failed to load reviews")
+        console.error('Error fetching critics:', err)
+        setError("Failed to load critics")
       } finally {
         setLoading(false)
       }
     }
 
-    fetchReviews()
+    fetchCritics()
   }, [])
 
   // Format date for display
@@ -120,30 +120,30 @@ export default function ReviewsPage() {
       <div className="container py-16 md:py-24">
         <div className="text-center mb-16 max-w-2xl mx-auto">
           <h1 className="text-3xl md:text-4xl font-medium tracking-tight mb-4">
-            Motorcycle Reviews
+            Motorcycle Critics
           </h1>
           <p className="text-muted-foreground text-lg">
-            Real reviews from real riders. Get honest insights about motorcycles before you make your next purchase decision.
+            Real critics from real riders. Get honest insights about motorcycles before you make your next purchase decision.
           </p>
         </div>
 
-        {reviews.length === 0 ? (
+        {critics.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-muted-foreground mb-6">No reviews yet. Be the first to write one!</p>
+            <p className="text-muted-foreground mb-6">No critics yet. Be the first to write one!</p>
             <Button asChild>
-              <Link href="/dashboard/reviews/write">Write a Review</Link>
+              <Link href="/critics/write">Write a Critic</Link>
             </Button>
           </div>
         ) : (
           <div className="grid gap-8 md:gap-10 md:grid-cols-2 lg:grid-cols-3">
-            {reviews.map((review, index) => (
-              <Card key={review.id} className="overflow-hidden border-border/50 hover:shadow-sm transition-shadow duration-300">
-                {/* Display review image if available */}
-                {review.images && review.images.length > 0 ? (
+            {critics.map((critic, index) => (
+              <Card key={critic.id} className="overflow-hidden border-border/50 hover:shadow-sm transition-shadow duration-300">
+                {/* Display critic image if available */}
+                {critic.images && critic.images.length > 0 ? (
                   <div className="relative h-48">
                     <Image 
-                      src={review.images[0]} 
-                      alt={review.title}
+                      src={critic.images[0]} 
+                      alt={critic.title}
                       className="object-cover"
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -165,15 +165,15 @@ export default function ReviewsPage() {
                 <div className="p-6">
                   <h3 className="font-medium text-lg mb-2 line-clamp-1">
                     <Link 
-                      href={`/reviews/${review.id}`} 
+                      href={`/critics/${critic.id}`} 
                       className="hover:text-foreground transition-colors"
                     >
-                      {review.title}
+                      {critic.title}
                     </Link>
                   </h3>
                   
                   <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-                    {review.content.replace(/<[^>]*>/g, '').substring(0, 100) + '...'}
+                    {critic.content.replace(/<[^>]*>/g, '').substring(0, 100) + '...'}
                   </p>
                   
                   <div className="flex items-center justify-between">
@@ -181,25 +181,25 @@ export default function ReviewsPage() {
                       {[...Array(5)].map((_, i) => (
                         <Star 
                           key={i} 
-                          className={`w-4 h-4 ${i < Math.round(review.rating || 0) ? 'fill-foreground' : 'fill-muted stroke-muted-foreground'}`}
+                          className={`w-4 h-4 ${i < Math.round(critic.rating || 0) ? 'fill-foreground' : 'fill-muted stroke-muted-foreground'}`}
                         />
                       ))}
                       <span className="text-xs text-muted-foreground ml-1">
-                        {review.rating}/5
+                        {critic.rating}/5
                       </span>
                     </div>
                     
                     <div className="text-xs text-muted-foreground">
-                      {formatDate(review.createdAt)}
+                      {formatDate(critic.createdAt)}
                     </div>
                   </div>
                   
                   <div className="mt-4 pt-4 border-t border-border/50 flex items-center justify-between">
                     <span className="text-sm font-medium">
-                      {review.authorName}
+                      {critic.authorName}
                     </span>
                     <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
-                      {review.topic}
+                      {critic.topic}
                     </span>
                   </div>
                 </div>
@@ -211,10 +211,10 @@ export default function ReviewsPage() {
         {/* Categories Section */}
         <div className="mt-24 pt-12 border-t border-border/50">
           <h2 className="text-2xl font-medium tracking-tight text-center mb-8">
-            Review Categories
+            Critic Categories
           </h2>
           <div className="flex flex-wrap justify-center gap-3">
-            {['All Reviews', 'Sport Bikes', 'Adventure', 'Cruisers', 'Touring', 'Classics'].map((category) => (
+            {['All Critics', 'Sport Bikes', 'Adventure', 'Cruisers', 'Touring', 'Classics'].map((category) => (
               <Button 
                 key={category} 
                 variant="outline" 

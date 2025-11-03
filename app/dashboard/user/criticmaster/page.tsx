@@ -38,7 +38,7 @@ export default function CriticMasterDashboard() {
             </CardTitle>
             <CardDescription>
               You have earned the highest level of community trust. Help maintain quality standards
-              by moderating reviews and guiding the community.
+              by moderating critics and guiding the community.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -60,7 +60,7 @@ export default function CriticMasterDashboard() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
+              <CardTitle className="text-sm font-medium">Pending Critics</CardTitle>
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -79,7 +79,7 @@ export default function CriticMasterDashboard() {
             <CardContent>
               <div className="text-2xl font-bold text-green-600">8</div>
               <p className="text-xs text-muted-foreground">
-                Reviews approved
+                Critics approved
               </p>
             </CardContent>
           </Card>
@@ -92,7 +92,7 @@ export default function CriticMasterDashboard() {
             <CardContent>
               <div className="text-2xl font-bold text-red-600">2</div>
               <p className="text-xs text-muted-foreground">
-                Reviews rejected
+                Critics rejected
               </p>
             </CardContent>
           </Card>
@@ -116,25 +116,25 @@ export default function CriticMasterDashboard() {
           <CardHeader>
             <CardTitle>Moderation Queue</CardTitle>
             <CardDescription>
-              Reviews and content that need your attention
+              Critics and content that need your attention
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="pending" className="w-full">
               <TabsList>
-                <TabsTrigger value="pending">Pending Reviews</TabsTrigger>
+                <TabsTrigger value="pending">Pending Critics</TabsTrigger>
                 <TabsTrigger value="reports">Community Reports</TabsTrigger>
               </TabsList>
               <TabsContent value="pending" className="space-y-4">
                 <div className="space-y-4">
-                  {/* Mock pending reviews */}
+                  {/* Mock pending critics */}
                   {[
                     {
                       id: 1,
-                      title: "2024 Honda CBR1000RR Review",
+                      title: "2024 Honda CBR1000RR Critic",
                       author: "john_rider",
                       date: "2024-01-20",
-                      type: "Motorcycle Review",
+                      type: "Motorcycle Critic",
                       content: "This bike is absolutely amazing! The power delivery is smooth and the handling is precise..."
                     },
                     {
@@ -142,7 +142,7 @@ export default function CriticMasterDashboard() {
                       title: "Best Motorcycle Gear for 2024",
                       author: "safety_first",
                       date: "2024-01-19",
-                      type: "Gear Review",
+                      type: "Gear Critic",
                       content: "I've been riding for 10 years and this gear has saved me multiple times..."
                     },
                     {
@@ -150,16 +150,16 @@ export default function CriticMasterDashboard() {
                       title: "Track Day Experience at Laguna Seca",
                       author: "track_enthusiast",
                       date: "2024-01-18",
-                      type: "Experience Review",
+                      type: "Experience Critic",
                       content: "What an incredible experience! The track is challenging but rewarding..."
                     }
-                  ].map((review) => (
-                    <div key={review.id} className="p-4 border rounded-lg">
+                  ].map((critic) => (
+                    <div key={critic.id} className="p-4 border rounded-lg">
                       <div className="flex items-center justify-between mb-2">
                         <div>
-                          <h4 className="font-medium">{review.title}</h4>
+                          <h4 className="font-medium">{critic.title}</h4>
                           <p className="text-sm text-muted-foreground">
-                            by {review.author} • {review.date} • {review.type}
+                            by {critic.author} • {critic.date} • {critic.type}
                           </p>
                         </div>
                         <div className="flex gap-2">
@@ -174,7 +174,7 @@ export default function CriticMasterDashboard() {
                         </div>
                       </div>
                       <p className="text-sm text-muted-foreground line-clamp-2">
-                        {review.content}
+                        {critic.content}
                       </p>
                     </div>
                   ))}
@@ -209,7 +209,7 @@ export default function CriticMasterDashboard() {
                   <div>
                     <div className="font-medium text-sm">Approve Quality Content</div>
                     <div className="text-xs text-muted-foreground">
-                      Well-written, helpful reviews that follow guidelines
+                      Well-written, helpful critics that follow guidelines
                     </div>
                   </div>
                 </div>
@@ -219,7 +219,7 @@ export default function CriticMasterDashboard() {
                   <div>
                     <div className="font-medium text-sm">Encourage Constructive Feedback</div>
                     <div className="text-xs text-muted-foreground">
-                      Reviews that provide value to the community
+                      Critics that provide value to the community
                     </div>
                   </div>
                 </div>
@@ -283,7 +283,7 @@ export default function CriticMasterDashboard() {
               <div className="text-center p-4 border rounded-lg">
                 <Award className="h-8 w-8 text-purple-500 mx-auto mb-2" />
                 <div className="text-2xl font-bold text-purple-600">156</div>
-                <div className="text-sm text-muted-foreground">Reviews Moderated</div>
+                <div className="text-sm text-muted-foreground">Critics Moderated</div>
               </div>
 
               <div className="text-center p-4 border rounded-lg">

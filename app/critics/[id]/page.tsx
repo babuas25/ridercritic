@@ -5,16 +5,16 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { getReview, ReviewData } from '@/lib/reviews'
-import { getCommentsByReview, createComment, CommentData } from '@/lib/comments'
+import { getCritic, CriticData } from '@/lib/critics'
+import { getCommentsByCritic, createComment, CommentData } from '@/lib/comments'
 import { notFound, useParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Star } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 
-export default function ReviewDetailPage() {
-  const [review, setReview] = useState<ReviewData | null>(null)
+export default function CriticDetailPage() {
+  const [critic, setCritic] = useState<CriticData | null>(null)
   const [comments, setComments] = useState<CommentData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -30,38 +30,38 @@ export default function ReviewDetailPage() {
   const { id } = params
 
   useEffect(() => {
-    const fetchReviewAndComments = async () => {
+    const fetchCriticAndComments = async () => {
       if (!id || typeof id !== 'string') {
         notFound()
         return
       }
 
       try {
-        // Fetch review
-        const reviewData = await getReview(id)
-        if (!reviewData) {
+        // Fetch critic
+        const criticData = await getCritic(id)
+        if (!criticData) {
           notFound()
           return
         }
         
-        // Process the review to handle Firestore timestamps properly
-        const processedReview = {
-          ...reviewData,
-          createdAt: reviewData.createdAt instanceof Date ? reviewData.createdAt : 
-                    reviewData.createdAt && typeof reviewData.createdAt === 'object' && 'toDate' in reviewData.createdAt ? 
-                    (reviewData.createdAt as unknown as { toDate: () => Date }).toDate() : 
-                    reviewData.createdAt ? new Date(reviewData.createdAt as string) : null,
-          updatedAt: reviewData.updatedAt instanceof Date ? reviewData.updatedAt : 
-                    reviewData.updatedAt && typeof reviewData.updatedAt === 'object' && 'toDate' in reviewData.updatedAt ? 
-                    (reviewData.updatedAt as unknown as { toDate: () => Date }).toDate() : 
-                    reviewData.updatedAt ? new Date(reviewData.updatedAt as string) : null,
-          rating: typeof reviewData.rating === 'number' ? reviewData.rating : 0
+        // Process the critic to handle Firestore timestamps properly
+        const processedCritic = {
+          ...criticData,
+          createdAt: criticData.createdAt instanceof Date ? criticData.createdAt : 
+                    criticData.createdAt && typeof criticData.createdAt === 'object' && 'toDate' in criticData.createdAt ? 
+                    (criticData.createdAt as unknown as { toDate: () => Date }).toDate() : 
+                    criticData.createdAt ? new Date(criticData.createdAt as string) : null,
+          updatedAt: criticData.updatedAt instanceof Date ? criticData.updatedAt : 
+                    criticData.updatedAt && typeof criticData.updatedAt === 'object' && 'toDate' in criticData.updatedAt ? 
+                    (criticData.updatedAt as unknown as { toDate: () => Date }).toDate() : 
+                    criticData.updatedAt ? new Date(criticData.updatedAt as string) : null,
+          rating: typeof criticData.rating === 'number' ? criticData.rating : 0
         }
         
-        setReview(processedReview)
+        setCritic(processedCritic)
         
         // Fetch comments
-        const commentsData = await getCommentsByReview(id)
+        const commentsData = await getCommentsByCritic(id)
         // Process comments timestamps
         const processedComments = commentsData.map(comment => ({
           ...comment,
@@ -76,14 +76,14 @@ export default function ReviewDetailPage() {
         }))
         setComments(processedComments)
       } catch (err) {
-        console.error('Error fetching review or comments:', err)
-        setError("Failed to load review or comments")
+        console.error('Error fetching critic or comments:', err)
+        setError("Failed to load critic or comments")
       } finally {
         setLoading(false)
       }
     }
 
-    fetchReviewAndComments()
+    fetchCriticAndComments()
   }, [id])
 
   // Format date for display
@@ -133,8 +133,8 @@ export default function ReviewDetailPage() {
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!review?.id) {
-      setCommentError("Review not found")
+    if (!critic?.id) {
+      setCommentError("Critic not found")
       return
     }
     
@@ -173,7 +173,7 @@ export default function ReviewDetailPage() {
       // Create comment
       const newCommentId = await createComment(
         {
-          reviewId: review.id,
+          criticId: critic.id,
           content: commentForm.content,
           authorName: authorName,
           isAnonymous: !session?.user,
@@ -185,7 +185,7 @@ export default function ReviewDetailPage() {
       // Add new comment to state
       const newComment: CommentData = {
         id: newCommentId,
-        reviewId: review.id,
+        criticId: critic.id,
         content: commentForm.content,
         authorName: authorName,
         userId: userId || undefined,
@@ -262,14 +262,14 @@ export default function ReviewDetailPage() {
     )
   }
 
-  if (!review) {
+  if (!critic) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center p-8">
-          <h1 className="text-2xl font-medium mb-4">Review Not Found</h1>
-          <p className="text-muted-foreground mb-6">The review you're looking for doesn't exist or has been removed.</p>
+          <h1 className="text-2xl font-medium mb-4">Critic Not Found</h1>
+          <p className="text-muted-foreground mb-6">The critic you're looking for doesn't exist or has been removed.</p>
           <Button asChild>
-            <Link href="/reviews">Back to Reviews</Link>
+            <Link href="/critics">Back to Critics</Link>
           </Button>
         </div>
       </div>
@@ -280,7 +280,7 @@ export default function ReviewDetailPage() {
     <div className="min-h-screen bg-background">
       <div className="container py-8">
         <Button variant="outline" asChild className="mb-8 border-border/50">
-          <Link href="/reviews">← Back to Reviews</Link>
+          <Link href="/critics">← Back to Critics</Link>
         </Button>
 
         <div className="max-w-4xl mx-auto">
@@ -289,10 +289,10 @@ export default function ReviewDetailPage() {
               <div className="flex flex-wrap items-start justify-between gap-6 mb-8 pb-6 border-b border-border/50">
                 <div>
                   <h1 className="text-2xl md:text-3xl font-medium tracking-tight mb-2">
-                    {review.title}
+                    {critic.title}
                   </h1>
                   <p className="text-muted-foreground">
-                    Review of {review.topic}
+                    Critic of {critic.topic}
                   </p>
                 </div>
                 
@@ -301,12 +301,12 @@ export default function ReviewDetailPage() {
                     {[...Array(5)].map((_, i) => (
                       <Star 
                         key={i} 
-                        className={`w-5 h-5 ${i < Math.round(review.rating || 0) ? 'fill-foreground' : 'fill-muted stroke-muted-foreground'}`}
+                        className={`w-5 h-5 ${i < Math.round(critic.rating || 0) ? 'fill-foreground' : 'fill-muted stroke-muted-foreground'}`}
                       />
                     ))}
                   </div>
                   <span className="font-medium ml-2">
-                    {review.rating}/5
+                    {critic.rating}/5
                   </span>
                 </div>
               </div>
@@ -315,28 +315,28 @@ export default function ReviewDetailPage() {
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                     <span className="font-medium text-sm">
-                      {review.authorName.charAt(0).toUpperCase()}
+                      {critic.authorName.charAt(0).toUpperCase()}
                     </span>
                   </div>
                   <div>
-                    <p className="font-medium">{review.authorName}</p>
-                    <p className="text-sm text-muted-foreground">{formatDate(review.createdAt)}</p>
+                    <p className="font-medium">{critic.authorName}</p>
+                    <p className="text-sm text-muted-foreground">{formatDate(critic.createdAt)}</p>
                   </div>
                 </div>
                 <span className="text-sm font-medium bg-muted px-3 py-1 rounded-full">
-                  {review.topic}
+                  {critic.topic}
                 </span>
               </div>
 
-              {review.images && review.images.length > 0 && (
+              {critic.images && critic.images.length > 0 && (
                 <div className="mb-8">
                   <h3 className="text-xl font-medium mb-4">Images</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {review.images.map((image, index) => (
+                    {critic.images.map((image, index) => (
                       <div key={index} className="overflow-hidden rounded-lg border border-border/50 aspect-square">
                         <Image 
                           src={image} 
-                          alt={`Review image ${index + 1}`}
+                          alt={`Critic image ${index + 1}`}
                           width={400}
                           height={400}
                           className="object-contain w-full h-full"
@@ -348,14 +348,14 @@ export default function ReviewDetailPage() {
                 </div>
               )}
 
-              {review.youtubeLink && (
+              {critic.youtubeLink && (
                 <div className="mb-8">
                   <h3 className="text-xl font-medium mb-4">Video</h3>
                   <div className="rounded-lg overflow-hidden border border-border/50">
-                    {extractYouTubeId(review.youtubeLink) ? (
+                    {extractYouTubeId(critic.youtubeLink) ? (
                       <iframe
                         className="w-full aspect-video"
-                        src={`https://www.youtube.com/embed/${extractYouTubeId(review.youtubeLink)}`}
+                        src={`https://www.youtube.com/embed/${extractYouTubeId(critic.youtubeLink)}`}
                         title="YouTube video player"
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -363,7 +363,7 @@ export default function ReviewDetailPage() {
                       ></iframe>
                     ) : (
                       <div className="bg-muted p-8 text-center">
-                        <p className="text-muted-foreground">Invalid YouTube URL: {review.youtubeLink}</p>
+                        <p className="text-muted-foreground">Invalid YouTube URL: {critic.youtubeLink}</p>
                       </div>
                     )}
                   </div>
@@ -373,7 +373,7 @@ export default function ReviewDetailPage() {
               <div className="prose prose-gray dark:prose-invert max-w-none mb-12">
                 <div 
                   className="text-foreground"
-                  dangerouslySetInnerHTML={{ __html: review.content }} 
+                  dangerouslySetInnerHTML={{ __html: critic.content }} 
                 />
               </div>
 

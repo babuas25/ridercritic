@@ -53,9 +53,9 @@ MOTORCYCLE FORM - MODULAR COMPONENTS STRUCTURE
     - SEO Meta Data
     - Tags, Related Models, Admin Notes
 
-13. ReviewValidationStep.tsx - Step 13
+13. CriticValidationStep.tsx - Step 13
     - Data Completion Summary
-    - Review Status
+    - Critic Status
     - System Information
 
 MAIN ORCHESTRATOR:

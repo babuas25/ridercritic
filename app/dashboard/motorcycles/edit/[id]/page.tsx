@@ -25,7 +25,7 @@ import FeaturesEquipmentStep from '@/components/motorcycle-form/FeaturesEquipmen
 import PricingMarketDataStep from '@/components/motorcycle-form/PricingMarketDataStep'
 import ColorOptionsStep from '@/components/motorcycle-form/ColorOptionsStep'
 import AdditionalInformationStep from '@/components/motorcycle-form/AdditionalInformationStep'
-import ReviewValidationStep from '@/components/motorcycle-form/ReviewValidationStep'
+import CriticValidationStep from '@/components/motorcycle-form/CriticValidationStep'
 
 export default function EditMotorcyclePage() {
   const { data: session } = useSession()
@@ -115,7 +115,7 @@ export default function EditMotorcyclePage() {
     { number: 10, title: 'Pricing & Market Data', component: PricingMarketDataStep },
     { number: 11, title: 'Color Options', component: ColorOptionsStep },
     { number: 12, title: 'Additional Information', component: AdditionalInformationStep },
-    { number: 13, title: 'Review & Validation', component: ReviewValidationStep }
+    { number: 13, title: 'Critic & Validation', component: CriticValidationStep }
   ]
 
   const totalSteps = steps.length

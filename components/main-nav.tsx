@@ -16,10 +16,10 @@ export default function MainNav() {
             Home
           </Link>
           <Link
-            href="/reviews"
+            href="/critics"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
           >
-            Reviews
+            Critics
           </Link>
           <Link
             href="/motorcycle"

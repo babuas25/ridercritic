@@ -5,15 +5,15 @@ import { CheckCircle2, AlertCircle } from 'lucide-react'
 import { MotorcycleFormData } from '@/types/motorcycle'
 import { useEffect } from 'react'
 
-interface ReviewValidationStepProps {
+interface CriticValidationStepProps {
   formData: MotorcycleFormData
   setFormData: (data: MotorcycleFormData) => void
 }
 
-export default function ReviewValidationStep({
+export default function CriticValidationStep({
   formData,
   setFormData
-}: ReviewValidationStepProps) {
+}: CriticValidationStepProps) {
   // Calculate data completion percentage
   useEffect(() => {
     const calculateCompletion = () => {
@@ -58,8 +58,8 @@ export default function ReviewValidationStep({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Review & Validation</h2>
-        <p className="text-muted-foreground">Final review and data validation status</p>
+        <h2 className="text-2xl font-bold mb-2">Critic & Validation</h2>
+        <p className="text-muted-foreground">Final critic and data validation status</p>
       </div>
 
       {/* Data Completion Status */}
@@ -127,17 +127,17 @@ export default function ReviewValidationStep({
 
       {/* Review Status */}
       <div className="space-y-2">
-        <Label htmlFor="reviewStatus">Review Status *</Label>
+        <Label htmlFor="reviewStatus">Critic Status *</Label>
         <Select 
           value={formData.reviewStatus} 
           onValueChange={(value) => setFormData({ ...formData, reviewStatus: value })}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select review status" />
+            <SelectValue placeholder="Select critic status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="Pending Review">Pending Review</SelectItem>
-            <SelectItem value="Under Review">Under Review</SelectItem>
+            <SelectItem value="Pending Review">Pending Critic</SelectItem>
+            <SelectItem value="Under Review">Under Critic</SelectItem>
             <SelectItem value="Approved">Approved</SelectItem>
             <SelectItem value="Published">Published</SelectItem>
             <SelectItem value="Rejected">Rejected</SelectItem>
@@ -148,7 +148,7 @@ export default function ReviewValidationStep({
 
       {/* System Information (Read-Only) */}
       <div className="border-t pt-6">
-        <h3 className="text-lg font-semibold mb-4">System Information (Read-Only)</h3>
+        <h3 className="text-lg font-semibold mb-4">Critic Status</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="lastUpdatedBy">Last Updated By</Label>
@@ -193,7 +193,7 @@ export default function ReviewValidationStep({
           <div className="flex items-start gap-3">
             <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
             <div>
-              <h4 className="text-sm font-semibold text-green-800 mb-1">Ready for Review</h4>
+              <h4 className="text-sm font-semibold text-green-800 mb-1">Ready for Critic</h4>
               <p className="text-sm text-green-700">
                 This motorcycle entry is {formData.dataCompletionPercentage}% complete and ready for publication.
               </p>
@@ -209,8 +209,8 @@ export default function ReviewValidationStep({
           <li>Ensure all mandatory fields (marked with *) are filled</li>
           <li>Add at least one cover image for better visibility</li>
           <li>Verify all technical specifications for accuracy</li>
-          <li>Review pricing information before publishing</li>
-          <li>Only Super Admin can change review status to "Published"</li>
+          <li>Critic pricing information before publishing</li>
+          <li>Only Super Admin can change critic status to "Published"</li>
         </ul>
       </div>
     </div>

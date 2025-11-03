@@ -227,7 +227,7 @@ export default function AdditionalInformationStep({
           <Label htmlFor="seoMetaTitle">Meta Title *</Label>
           <Input
             id="seoMetaTitle"
-            placeholder="e.g., TVS Apache RTR 160 4V - Price, Specs & Reviews"
+            placeholder="e.g., TVS Apache RTR 160 4V - Price, Specs & Critics"
             value={formData.seoMetaTitle}
             onChange={(e) => setFormData({ ...formData, seoMetaTitle: e.target.value })}
           />

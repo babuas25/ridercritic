@@ -15,7 +15,7 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith('/accessories') ||
       pathname.startsWith('/motorcycle') ||
       pathname.startsWith('/products') ||
-      pathname.startsWith('/reviews') && !pathname.startsWith('/dashboard/reviews/write') ||
+      pathname.startsWith('/critics') && !pathname.startsWith('/critics/write') ||
       pathname.startsWith('/login') ||
       pathname.startsWith('/register')) {
     return NextResponse.next()
@@ -33,8 +33,8 @@ export async function middleware(request: NextRequest) {
     const role = token.role as string
     // subRole is not used in this middleware
 
-    // Allow User Admin with any subrole to access review writing page
-    if (pathname.startsWith('/dashboard/reviews/write') && role === 'User Admin') {
+    // Allow User Admin with any subrole to access critic writing page
+    if (pathname.startsWith('/critics/write') && role === 'User Admin') {
       return NextResponse.next()
     }
 

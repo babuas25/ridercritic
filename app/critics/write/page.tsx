@@ -7,10 +7,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { createReview, uploadReviewImages } from '@/lib/reviews'
-import { auth } from '@/lib/firebase'
-import { onAuthStateChanged } from 'firebase/auth'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { createCritic, uploadCriticImages, getCritic, updateCritic } from '@/lib/critics'
 import Image from 'next/image'
 
 // Tiptap Editor Components
@@ -286,7 +284,7 @@ const Rating = ({
   )
 }
 
-export default function WriteReviewPage() {
+export default function WriteCriticPage() {
   const [title, setTitle] = useState("")
   const [topics, setTopics] = useState<string[]>([])
   const [topicInput, setTopicInput] = useState("")
@@ -308,12 +306,14 @@ export default function WriteReviewPage() {
   const [isClient, setIsClient] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState("")
-  const [isFirebaseAuthenticated, setIsFirebaseAuthenticated] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [criticId, setCriticId] = useState("")
   const isMounted = useRef(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const suggestionsRef = useRef<HTMLDivElement>(null)
   const { data: session, status } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   // Initialize Tiptap editor with SSR configuration
   const editor = useEditor({
@@ -321,7 +321,7 @@ export default function WriteReviewPage() {
     extensions: [
       StarterKit,
       Placeholder.configure({
-        placeholder: 'Write your review here...',
+        placeholder: 'Write your critic here...',
       }),
       TextAlign.configure({
         types: ['heading', 'paragraph'],
@@ -336,20 +336,42 @@ export default function WriteReviewPage() {
     },
   })
 
+  // Load critic data for editing
+  useEffect(() => {
+    const editParam = searchParams.get('edit')
+    if (editParam) {
+      setIsEditing(true)
+      setCriticId(editParam)
+      
+      // Load the critic data
+      const loadCritic = async () => {
+        try {
+          const criticData = await getCritic(editParam)
+          if (criticData) {
+            setTitle(criticData.title)
+            setTopics([criticData.topic])
+            setRating(criticData.rating)
+            setYoutubeUrl(criticData.youtubeLink || "")
+            setImages(criticData.images.map(url => new File([], url)) || [])
+            
+            // Set editor content
+            if (editor) {
+              editor.commands.setContent(criticData.content)
+            }
+          }
+        } catch (err) {
+          console.error('Error loading critic:', err)
+          setError("Failed to load critic for editing")
+        }
+      }
+      
+      loadCritic()
+    }
+  }, [searchParams, editor])
+
   useEffect(() => {
     setIsClient(true)
     isMounted.current = true
-    
-    // Check Firebase authentication state
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        console.log('Firebase user authenticated:', user)
-        setIsFirebaseAuthenticated(true)
-      } else {
-        console.log('No Firebase user authenticated')
-        setIsFirebaseAuthenticated(false)
-      }
-    })
     
     // Load motorcycle suggestions
     const loadMotorcycleSuggestions = async () => {
@@ -377,7 +399,6 @@ export default function WriteReviewPage() {
     
     return () => {
       isMounted.current = false
-      unsubscribe()
       document.removeEventListener('mousedown', handleClickOutside)
       if (editor) {
         editor.destroy()
@@ -388,37 +409,13 @@ export default function WriteReviewPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    console.log('Form submission started')
-    console.log('Session data:', session)
-    console.log('Status:', status)
-    console.log('Firebase authenticated:', isFirebaseAuthenticated)
-    
     if (!session?.user) {
-      setError("You must be logged in to submit a review")
-      return
-    }
-    
-    // Let's remove the Firebase authentication check for now to test
-    // if (!isFirebaseAuthenticated) {
-    //   setError("Firebase authentication required. Please refresh the page and try again.")
-    //   return
-    // }
-    
-    // Check if user has permission to write reviews
-    const userSubRole = session.user.subRole
-    // Allow all User Admin subroles to write reviews (NewStar, CriticStar, CriticMaster)
-    const canWrite = userSubRole === 'NewStar' || userSubRole === 'CriticStar' || userSubRole === 'CriticMaster'
-    
-    console.log('User subRole:', userSubRole)
-    console.log('Can write reviews:', canWrite)
-    
-    if (!canWrite) {
-      setError("You don't have permission to write reviews. All User Admin subroles can write reviews.")
+      setError("You must be logged in to submit a critic")
       return
     }
     
     if (!title.trim()) {
-      setError("Please enter a title for your review")
+      setError("Please enter a title for your critic")
       return
     }
     
@@ -434,7 +431,7 @@ export default function WriteReviewPage() {
     
     const content = editor ? editor.getHTML() : ''
     if (!content.trim()) {
-      setError("Please write your review content")
+      setError("Please write your critic content")
       return
     }
     
@@ -442,18 +439,21 @@ export default function WriteReviewPage() {
     setError("")
     
     try {
-      console.log('Submitting review with session:', session)
-      
       // Upload images if any
       let imageUrls: string[] = []
       if (images.length > 0) {
-        console.log('Uploading images...')
-        imageUrls = await uploadReviewImages(images)
-        console.log('Uploaded images:', imageUrls)
+        // Filter out existing images (they won't be File objects)
+        const newImages = images.filter(img => img instanceof File)
+        if (newImages.length > 0) {
+          imageUrls = await uploadCriticImages(newImages)
+        } else {
+          // Extract URLs from existing images
+          imageUrls = images.map(img => typeof img === 'string' ? img : '').filter(url => url !== '')
+        }
       }
       
-      // Create review data
-      const reviewData = {
+      // Create critic data
+      const criticData = {
         title,
         topic: topics[0], // Use the first topic for now
         rating,
@@ -462,22 +462,23 @@ export default function WriteReviewPage() {
         youtubeLink: youtubeUrl || undefined
       }
       
-      console.log('Review data to submit:', reviewData)
+      if (isEditing) {
+        // Update existing critic
+        await updateCritic(criticId, criticData)
+      } else {
+        // Create new critic
+        await createCritic(
+          criticData,
+          session.user.id,
+          session.user.name || 'Anonymous'
+        )
+      }
       
-      // Create the review in Firestore
-      const reviewId = await createReview(
-        reviewData,
-        session.user.id,
-        session.user.name || 'Anonymous'
-      )
-      
-      console.log('Review created with ID:', reviewId)
-      
-      // Redirect to reviews page
-      router.push('/reviews')
+      // Redirect to critics page
+      router.push('/critics')
     } catch (err) {
-      console.error('Error submitting review:', err)
-      setError("Failed to submit review. Please try again. Error: " + (err as Error).message)
+      console.error('Error submitting critic:', err)
+      setError("Failed to submit critic. Please try again. Error: " + (err as Error).message)
     } finally {
       setIsSubmitting(false)
     }
@@ -600,7 +601,7 @@ export default function WriteReviewPage() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto py-8 px-4">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight">Write Review</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{isEditing ? "Edit Critic" : "Write Critic"}</h1>
           <p className="text-muted-foreground mt-2">
             Share your thoughts on this motorcycle with our community
           </p>
@@ -629,7 +630,7 @@ export default function WriteReviewPage() {
                       id="title"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      placeholder="Give your review a title"
+                      placeholder="Give your critic a title"
                       className="border-border bg-background"
                     />
                   </div>
@@ -774,13 +775,23 @@ export default function WriteReviewPage() {
                       <div className="mt-4 grid grid-cols-3 gap-2">
                         {images.map((image, index) => (
                           <div key={index} className="relative">
-                            <Image 
-                              src={URL.createObjectURL(image)} 
-                              alt={`Preview ${index}`}
-                              width={96}
-                              height={96}
-                              className="object-cover rounded-md"
-                            />
+                            {image instanceof File ? (
+                              <Image 
+                                src={URL.createObjectURL(image)} 
+                                alt={`Preview ${index}`}
+                                width={96}
+                                height={96}
+                                className="object-cover rounded-md"
+                              />
+                            ) : (
+                              <Image 
+                                src={image as string} 
+                                alt={`Preview ${index}`}
+                                width={96}
+                                height={96}
+                                className="object-cover rounded-md"
+                              />
+                            )}
                             <button
                               type="button"
                               onClick={() => removeImage(index)}
@@ -835,7 +846,7 @@ export default function WriteReviewPage() {
                 <CardContent className="px-0 py-0">
                   <div className="border rounded-md bg-background h-full min-h-[600px]">
                     <div className="p-6">
-                      <h2 className="text-2xl font-bold mb-2">{title || "Review Title"}</h2>
+                      <h2 className="text-2xl font-bold mb-2">{title || "Critic Title"}</h2>
                       {topics.length > 0 && (
                         <div className="flex flex-wrap gap-2 mb-4">
                           {topics.map((topic, index) => (
@@ -885,10 +896,10 @@ export default function WriteReviewPage() {
               {isSubmitting ? (
                 <>
                   <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>
-                  Publishing...
+                  {isEditing ? "Updating..." : "Publishing..."}
                 </>
               ) : (
-                "Publish Review"
+                isEditing ? "Update Critic" : "Publish Critic"
               )}
             </Button>
           </div>

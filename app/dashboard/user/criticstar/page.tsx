@@ -34,7 +34,7 @@ export default function CriticStarDashboard() {
               Welcome back, CriticStar!
             </CardTitle>
             <CardDescription>
-              You now have the power to write reviews and share your motorcycle experiences with the community.
+              You now have the power to write critics and share your motorcycle experiences with the community.
               Help other riders make informed decisions!
             </CardDescription>
           </CardHeader>
@@ -44,7 +44,7 @@ export default function CriticStarDashboard() {
                 CriticStar Level
               </Badge>
               <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                Can Write Reviews
+                Can Write Critics
               </Badge>
             </div>
           </CardContent>
@@ -54,13 +54,13 @@ export default function CriticStarDashboard() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Reviews Written</CardTitle>
+              <CardTitle className="text-sm font-medium">Critics Written</CardTitle>
               <PenTool className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">0</div>
               <p className="text-xs text-muted-foreground">
-                Start writing your first review!
+                Start writing your first critic!
               </p>
             </CardContent>
           </Card>
@@ -73,7 +73,7 @@ export default function CriticStarDashboard() {
             <CardContent>
               <div className="text-2xl font-bold">-</div>
               <p className="text-xs text-muted-foreground">
-                Based on your reviews
+                Based on your critics
               </p>
             </CardContent>
           </Card>
@@ -109,7 +109,7 @@ export default function CriticStarDashboard() {
         <div className="grid gap-6 md:grid-cols-2">
           <Card>
             <CardHeader>
-              <CardTitle>Write Reviews</CardTitle>
+              <CardTitle>Write Critics</CardTitle>
               <CardDescription>
                 Share your motorcycle experiences and help other riders
               </CardDescription>
@@ -117,20 +117,20 @@ export default function CriticStarDashboard() {
             <CardContent className="space-y-4">
               <Button className="w-full">
                 <Plus className="w-4 h-4 mr-2" />
-                Write New Review
+                Write New Critic
               </Button>
               <Button variant="outline" className="w-full">
                 <FileText className="w-4 h-4 mr-2" />
-                My Draft Reviews
+                My Draft Critics
               </Button>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Review Guidelines</CardTitle>
+              <CardTitle>Critic Guidelines</CardTitle>
               <CardDescription>
-                Learn how to write helpful and informative reviews
+                Learn how to write helpful and informative critics
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -178,7 +178,7 @@ export default function CriticStarDashboard() {
                   <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-semibold">No recent activity</h3>
                   <p className="text-sm text-muted-foreground">
-                    Start writing reviews to see your activity here!
+                    Start writing critics to see your activity here!
                   </p>
                 </div>
               </TabsContent>
@@ -186,7 +186,7 @@ export default function CriticStarDashboard() {
                 <div className="space-y-4">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Reviews Written</span>
+                      <span className="text-sm font-medium">Critics Written</span>
                       <span className="text-sm text-muted-foreground">0 / 10</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
@@ -218,7 +218,7 @@ export default function CriticStarDashboard() {
                 <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <h4 className="font-medium text-blue-900 mb-2">Path to CriticMaster</h4>
                   <p className="text-sm text-blue-800">
-                    Write 10 quality reviews, engage with the community, and receive 50 helpful votes
+                    Write 10 quality critics, engage with the community, and receive 50 helpful votes
                     to unlock moderation powers and become a CriticMaster.
                   </p>
                 </div>
@@ -239,7 +239,7 @@ export default function CriticStarDashboard() {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <Button variant="outline" className="h-20 flex-col gap-2">
                 <PenTool className="h-6 w-6" />
-                Write Review
+                Write Critic
               </Button>
 
               <Button variant="outline" className="h-20 flex-col gap-2">
@@ -254,7 +254,7 @@ export default function CriticStarDashboard() {
 
               <Button variant="outline" className="h-20 flex-col gap-2">
                 <FileText className="h-6 w-6" />
-                Browse Reviews
+                Browse Critics
               </Button>
             </div>
           </CardContent>
