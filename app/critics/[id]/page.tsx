@@ -30,6 +30,39 @@ export default function CriticDetailPage() {
   const router = useRouter()
   const { id } = params
 
+  // JSON-LD structured data for the critic
+  const generateJsonLd = (critic: CriticData) => {
+    return {
+      "@context": "https://schema.org",
+      "@type": "Review",
+      "itemReviewed": {
+        "@type": "Product",
+        "name": critic.topic
+      },
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": critic.rating,
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "name": critic.title,
+      "reviewBody": critic.content ? critic.content.replace(/<[^>]*>/g, '').substring(0, 200) : "",
+      "author": {
+        "@type": "Person",
+        "name": critic.authorName
+      },
+      "datePublished": critic.createdAt instanceof Date ? critic.createdAt.toISOString() : 
+                     typeof critic.createdAt === 'object' && critic.createdAt && 'toDate' in critic.createdAt ? 
+                     (critic.createdAt as unknown as { toDate: () => Date }).toDate().toISOString() : 
+                     critic.createdAt ? new Date(critic.createdAt as string).toISOString() : new Date().toISOString(),
+      "publisher": {
+        "@type": "Organization",
+        "name": "ridercritic",
+        "sameAs": "https://ridercritic.com"
+      }
+    }
+  }
+
   useEffect(() => {
     const fetchCriticAndComments = async () => {
       if (!id || typeof id !== 'string') {
@@ -279,6 +312,10 @@ export default function CriticDetailPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(generateJsonLd(critic)) }}
+      />
       <div className="container py-8">
         <Button variant="outline" asChild className="mb-8 border-border/50">
           <Link href="/critics">← Back to Critics</Link>
