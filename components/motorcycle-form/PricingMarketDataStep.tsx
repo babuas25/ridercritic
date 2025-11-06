@@ -95,17 +95,15 @@ export default function PricingMarketDataStep({
 
         <div className="space-y-2">
           <Label htmlFor="currency">Currency *</Label>
-          <Select value={formData.currency} onValueChange={(value) => setFormData({ ...formData, currency: value })}>
+          <Select value={formData.currency} onValueChange={(value) => setFormData({ ...formData, currency: value })} disabled>
             <SelectTrigger>
               <SelectValue placeholder="Select currency" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="INR">INR (₹)</SelectItem>
-              <SelectItem value="USD">USD ($)</SelectItem>
-              <SelectItem value="EUR">EUR (€)</SelectItem>
-              <SelectItem value="GBP">GBP (£)</SelectItem>
+              <SelectItem value="BDT">BDT (৳)</SelectItem>
             </SelectContent>
           </Select>
+          <input type="hidden" value="BDT" onChange={(e) => setFormData({ ...formData, currency: e.target.value })} />
         </div>
 
         <div className="space-y-2">

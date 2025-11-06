@@ -185,7 +185,7 @@ export default function AddMotorcyclePage() {
     // 🔟 PRICING & MARKET DATA
     exShowroomPrice: '',
     onRoadPrice: '',
-    currency: 'INR',
+    currency: 'BDT',
     availability: '',
     launchDate: '',
     marketSegment: '',

@@ -283,3 +283,574 @@ export async function deleteDraft(draftId: string): Promise<void> {
     throw new Error('Failed to delete draft')
   }
 }
+
+/**
+ * Export all motorcycles as CSV
+ * @returns CSV string with all motorcycle data
+ */
+export async function exportMotorcyclesToCSV(): Promise<string> {
+  try {
+    const motorcycles = await getAllMotorcycles()
+    
+    if (motorcycles.length === 0) {
+      return ''
+    }
+    
+    // Define the fields to export (excluding functions and complex objects)
+    const fields = [
+      'id',
+      'brand',
+      'modelName',
+      'variantName',
+      'modelYear',
+      'category',
+      'segment',
+      'originCountry',
+      'assemblyCountry',
+      'status',
+      'coverImage',
+      'modelVideo',
+      'engineType',
+      'displacement',
+      'cylinderCount',
+      'valveSystem',
+      'valvesPerCylinder',
+      'strokeType',
+      'boreXStroke',
+      'compressionRatio',
+      'fuelType',
+      'fuelSupplySystem',
+      'ignitionType',
+      'lubricationSystem',
+      'engineCoolingType',
+      'radiatorFanType',
+      'airFilterType',
+      'startType',
+      'idleStopSystem',
+      'maxPowerHP',
+      'maxPowerKW',
+      'maxPowerRPM',
+      'maxTorqueNm',
+      'maxTorqueRPM',
+      'powerToWeightRatio',
+      'topSpeed',
+      'acceleration0to60',
+      'acceleration0to100',
+      'mileage',
+      'range',
+      'revLimiter',
+      'engineRedline',
+      'ecoModeEfficiency',
+      'transmissionType',
+      'numberOfGears',
+      'gearRatio',
+      'clutchType',
+      'finalDriveType',
+      'shiftPattern',
+      'quickShifter',
+      'autoBlipper',
+      'gearIndicator',
+      'emissionStandard',
+      'catalyticConverter',
+      'obd',
+      'fuelEconomyRideModes',
+      'fuelInjectionMapping',
+      'throttleResponse',
+      'absType',
+      'tractionControlSystem',
+      'launchControl',
+      'wheelieControl',
+      'cruiseControl',
+      'engineBrakingManagement',
+      'slipperClutchAssist',
+      'antiStallHillAssist',
+      'frameType',
+      'swingarmType',
+      'frontSuspension',
+      'rearSuspension',
+      'suspensionTravelFront',
+      'suspensionTravelRear',
+      'steeringAngle',
+      'turningRadius',
+      'frontBrakeType',
+      'frontBrakeSize',
+      'rearBrakeType',
+      'rearBrakeSize',
+      'absSupport',
+      'brakeCaliperType',
+      'cbs',
+      'wheelType',
+      'frontTyreSize',
+      'rearTyreSize',
+      'tyreType',
+      'tyreBrand',
+      'wheelSizeFront',
+      'wheelSizeRear',
+      'overallLength',
+      'overallWidth',
+      'overallHeight',
+      'wheelbase',
+      'groundClearance',
+      'seatHeight',
+      'kerbWeight',
+      'dryWeight',
+      'fuelTankCapacity',
+      'reserveFuelCapacity',
+      'loadCapacity',
+      'oilCapacity',
+      'batteryCapacity',
+      'centerOfGravityHeight',
+      'instrumentConsole',
+      'displaySize',
+      'connectivity',
+      'mobileAppIntegration',
+      'turnByTurnNavigation',
+      'ridingStatistics',
+      'headlightType',
+      'drl',
+      'tailLightType',
+      'indicatorType',
+      'adjustableWindshield',
+      'seatType',
+      'handleType',
+      'footpegPosition',
+      'sideStandEngineCutoff',
+      'tpms',
+      'keylessIgnition',
+      'immobilizer',
+      'centralLocking',
+      'sosCrashDetection',
+      'adjustableSuspension',
+      'ridingModes',
+      'warrantyYears',
+      'warrantyKm',
+      'freeServiceCount',
+      'serviceIntervalKm',
+      'serviceIntervalMonths',
+      'exShowroomPrice',
+      'onRoadPrice',
+      'currency',
+      'availability',
+      'launchDate',
+      'marketSegment',
+      'specialEditions',
+      'description',
+      'seoMetaTitle',
+      'seoMetaDescription',
+      'adminNotes',
+      'dataCompletionPercentage',
+      'reviewStatus',
+      'lastUpdatedBy',
+      'lastUpdatedDate'
+    ]
+    
+    // Create CSV header
+    const csvHeader = fields.join(',')
+    
+    // Create CSV rows
+    const csvRows = motorcycles.map(motorcycle => {
+      return fields.map(field => {
+        const value = motorcycle[field as keyof MotorcycleFormData]
+        if (value === undefined || value === null) {
+          return ''
+        }
+        // Handle arrays - convert to JSON string
+        if (Array.isArray(value)) {
+          return `"${JSON.stringify(value).replace(/"/g, '""')}"`
+        }
+        // Handle booleans - convert to string
+        if (typeof value === 'boolean') {
+          return value.toString()
+        }
+        // Handle strings - escape quotes and wrap in quotes
+        if (typeof value === 'string') {
+          return `"${value.replace(/"/g, '""')}"`
+        }
+        // Handle other values
+        return `"${String(value).replace(/"/g, '""')}"`
+      }).join(',')
+    })
+    
+    return [csvHeader, ...csvRows].join('\n')
+  } catch (error) {
+    console.error('Error exporting motorcycles to CSV:', error)
+    throw new Error('Failed to export motorcycles')
+  }
+}
+
+/**
+ * Import motorcycles from CSV data
+ * @param csvData - CSV string with motorcycle data
+ * @param userId - ID of the user importing the motorcycles
+ * @returns Array of imported motorcycle IDs
+ */
+export async function importMotorcyclesFromCSV(csvData: string, userId: string): Promise<string[]> {
+  try {
+    const lines = csvData.split('\n').filter(line => line.trim() !== '')
+    if (lines.length < 2) {
+      throw new Error('Invalid CSV format')
+    }
+    
+    // Parse header
+    const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim())
+    
+    // Parse rows
+    const importedIds: string[] = []
+    
+    for (let i = 1; i < lines.length; i++) {
+      const values = lines[i].split(',').map(v => {
+        // Remove surrounding quotes and unescape
+        return v.replace(/^"(.*)"$/, '$1').replace(/""/g, '"')
+      })
+      
+      // Create motorcycle object
+      const motorcycleData: Record<string, unknown> = {}
+      
+      headers.forEach((header, index) => {
+        const value = values[index]
+        if (value === undefined) return
+        
+        // Handle special fields
+        if (header === 'galleryImages' || header === 'competitorModels' || header === 'availableColors' || header === 'colorImages' || header === 'keyHighlights' || header === 'pros' || header === 'cons' || header === 'tags' || header === 'relatedModels' || header === 'variants') {
+          // Parse JSON arrays
+          try {
+            motorcycleData[header] = JSON.parse(value)
+          } catch {
+            motorcycleData[header] = []
+          }
+        } else if (header === 'idleStopSystem' || header === 'catalyticConverter' || header === 'mobileAppIntegration' || header === 'turnByTurnNavigation' || header === 'ridingStatistics' || header === 'drl' || header === 'adjustableWindshield' || header === 'sideStandEngineCutoff' || header === 'tpms' || header === 'keylessIgnition' || header === 'immobilizer' || header === 'centralLocking' || header === 'sosCrashDetection' || header === 'adjustableSuspension' || header === 'ridingModes' || header === 'tractionControlSystem' || header === 'launchControl' || header === 'wheelieControl' || header === 'cruiseControl' || header === 'engineBrakingManagement' || header === 'slipperClutchAssist' || header === 'antiStallHillAssist' || header === 'quickShifter' || header === 'autoBlipper' || header === 'gearIndicator' || header === 'cbs') {
+          // Parse booleans
+          motorcycleData[header] = value.toLowerCase() === 'true'
+        } else if (header === 'dataCompletionPercentage') {
+          // Parse numbers
+          motorcycleData[header] = parseInt(value) || 0
+        } else {
+          // Keep as string
+          motorcycleData[header] = value
+        }
+      })
+      
+      // Skip if essential fields are missing
+      if (!motorcycleData.brand || !motorcycleData.modelName || !motorcycleData.modelYear) {
+        console.warn(`Skipping row ${i} due to missing required fields`)
+        continue
+      }
+      
+      // Remove ID if present to create a new motorcycle
+      delete motorcycleData.id
+      
+      // Create the motorcycle
+      const motorcycleId = await createMotorcycle(motorcycleData as unknown as MotorcycleFormData, userId)
+      importedIds.push(motorcycleId)
+    }
+    
+    return importedIds
+  } catch (error) {
+    console.error('Error importing motorcycles from CSV:', error)
+    throw new Error('Failed to import motorcycles')
+  }
+}
+
+/**
+ * Export a single motorcycle as JSON
+ * @param motorcycleId - Motorcycle ID to export
+ * @returns JSON string with motorcycle data
+ */
+export async function exportMotorcycleToJSON(motorcycleId: string): Promise<string> {
+  try {
+    const motorcycle = await getMotorcycle(motorcycleId)
+    if (!motorcycle) {
+      throw new Error('Motorcycle not found')
+    }
+    
+    return JSON.stringify(motorcycle, null, 2)
+  } catch (error) {
+    console.error('Error exporting motorcycle to JSON:', error)
+    throw new Error('Failed to export motorcycle')
+  }
+}
+
+/**
+ * Export a single motorcycle as CSV
+ * @param motorcycleId - Motorcycle ID to export
+ * @returns CSV string with motorcycle data
+ */
+export async function exportMotorcycleToCSV(motorcycleId: string): Promise<string> {
+  try {
+    const motorcycle = await getMotorcycle(motorcycleId)
+    if (!motorcycle) {
+      throw new Error('Motorcycle not found')
+    }
+    
+    // Define the fields to export
+    const fields = [
+      'id',
+      'brand',
+      'modelName',
+      'variantName',
+      'modelYear',
+      'category',
+      'segment',
+      'originCountry',
+      'assemblyCountry',
+      'status',
+      'coverImage',
+      'modelVideo',
+      'engineType',
+      'displacement',
+      'cylinderCount',
+      'valveSystem',
+      'valvesPerCylinder',
+      'strokeType',
+      'boreXStroke',
+      'compressionRatio',
+      'fuelType',
+      'fuelSupplySystem',
+      'ignitionType',
+      'lubricationSystem',
+      'engineCoolingType',
+      'radiatorFanType',
+      'airFilterType',
+      'startType',
+      'idleStopSystem',
+      'maxPowerHP',
+      'maxPowerKW',
+      'maxPowerRPM',
+      'maxTorqueNm',
+      'maxTorqueRPM',
+      'powerToWeightRatio',
+      'topSpeed',
+      'acceleration0to60',
+      'acceleration0to100',
+      'mileage',
+      'range',
+      'revLimiter',
+      'engineRedline',
+      'ecoModeEfficiency',
+      'transmissionType',
+      'numberOfGears',
+      'gearRatio',
+      'clutchType',
+      'finalDriveType',
+      'shiftPattern',
+      'quickShifter',
+      'autoBlipper',
+      'gearIndicator',
+      'emissionStandard',
+      'catalyticConverter',
+      'obd',
+      'fuelEconomyRideModes',
+      'fuelInjectionMapping',
+      'throttleResponse',
+      'absType',
+      'tractionControlSystem',
+      'launchControl',
+      'wheelieControl',
+      'cruiseControl',
+      'engineBrakingManagement',
+      'slipperClutchAssist',
+      'antiStallHillAssist',
+      'frameType',
+      'swingarmType',
+      'frontSuspension',
+      'rearSuspension',
+      'suspensionTravelFront',
+      'suspensionTravelRear',
+      'steeringAngle',
+      'turningRadius',
+      'frontBrakeType',
+      'frontBrakeSize',
+      'rearBrakeType',
+      'rearBrakeSize',
+      'absSupport',
+      'brakeCaliperType',
+      'cbs',
+      'wheelType',
+      'frontTyreSize',
+      'rearTyreSize',
+      'tyreType',
+      'tyreBrand',
+      'wheelSizeFront',
+      'wheelSizeRear',
+      'overallLength',
+      'overallWidth',
+      'overallHeight',
+      'wheelbase',
+      'groundClearance',
+      'seatHeight',
+      'kerbWeight',
+      'dryWeight',
+      'fuelTankCapacity',
+      'reserveFuelCapacity',
+      'loadCapacity',
+      'oilCapacity',
+      'batteryCapacity',
+      'centerOfGravityHeight',
+      'instrumentConsole',
+      'displaySize',
+      'connectivity',
+      'mobileAppIntegration',
+      'turnByTurnNavigation',
+      'ridingStatistics',
+      'headlightType',
+      'drl',
+      'tailLightType',
+      'indicatorType',
+      'adjustableWindshield',
+      'seatType',
+      'handleType',
+      'footpegPosition',
+      'sideStandEngineCutoff',
+      'tpms',
+      'keylessIgnition',
+      'immobilizer',
+      'centralLocking',
+      'sosCrashDetection',
+      'adjustableSuspension',
+      'ridingModes',
+      'warrantyYears',
+      'warrantyKm',
+      'freeServiceCount',
+      'serviceIntervalKm',
+      'serviceIntervalMonths',
+      'exShowroomPrice',
+      'onRoadPrice',
+      'currency',
+      'availability',
+      'launchDate',
+      'marketSegment',
+      'specialEditions',
+      'description',
+      'seoMetaTitle',
+      'seoMetaDescription',
+      'adminNotes',
+      'dataCompletionPercentage',
+      'reviewStatus',
+      'lastUpdatedBy',
+      'lastUpdatedDate'
+    ]
+    
+    // Create CSV header
+    const csvHeader = fields.join(',')
+    
+    // Create CSV row
+    const csvRow = fields.map(field => {
+      const value = motorcycle[field as keyof MotorcycleFormData]
+      if (value === undefined || value === null) {
+        return ''
+      }
+      // Handle arrays - convert to JSON string
+      if (Array.isArray(value)) {
+        return `"${JSON.stringify(value).replace(/"/g, '""')}"`
+      }
+      // Handle booleans - convert to string
+      if (typeof value === 'boolean') {
+        return value.toString()
+      }
+      // Handle strings - escape quotes and wrap in quotes
+      if (typeof value === 'string') {
+        return `"${value.replace(/"/g, '""')}"`
+      }
+      // Handle other values
+      return `"${String(value).replace(/"/g, '""')}"`
+    }).join(',')
+    
+    return [csvHeader, csvRow].join('\n')
+  } catch (error) {
+    console.error('Error exporting motorcycle to CSV:', error)
+    throw new Error('Failed to export motorcycle')
+  }
+}
+
+/**
+ * Import a single motorcycle from JSON data
+ * @param jsonData - JSON string with motorcycle data
+ * @param userId - ID of the user importing the motorcycle
+ * @returns Imported motorcycle ID
+ */
+export async function importMotorcycleFromJSON(jsonData: string, userId: string): Promise<string> {
+  try {
+    const motorcycleData = JSON.parse(jsonData) as MotorcycleFormData
+    
+    // Validate required fields
+    if (!motorcycleData.brand || !motorcycleData.modelName || !motorcycleData.modelYear) {
+      throw new Error('Missing required fields: brand, modelName, or modelYear')
+    }
+    
+    // Remove ID if present to create a new motorcycle
+    delete motorcycleData.id
+    
+    // Create the motorcycle
+    const motorcycleId = await createMotorcycle(motorcycleData, userId)
+    return motorcycleId
+  } catch (error) {
+    console.error('Error importing motorcycle from JSON:', error)
+    throw new Error('Failed to import motorcycle')
+  }
+}
+
+/**
+ * Import a single motorcycle from CSV data
+ * @param csvData - CSV string with motorcycle data
+ * @param userId - ID of the user importing the motorcycle
+ * @returns Imported motorcycle ID
+ */
+export async function importMotorcycleFromCSV(csvData: string, userId: string): Promise<string> {
+  try {
+    const lines = csvData.split('\n').filter(line => line.trim() !== '')
+    if (lines.length < 2) {
+      throw new Error('Invalid CSV format')
+    }
+    
+    // Parse header
+    const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim())
+    
+    // Parse first row (should be only one for single motorcycle)
+    const values = lines[1].split(',').map(v => {
+      // Remove surrounding quotes and unescape
+      return v.replace(/^"(.*)"$/, '$1').replace(/""/g, '"')
+    })
+    
+    // Create motorcycle object
+    const motorcycleData: Record<string, unknown> = {}
+    
+    headers.forEach((header, index) => {
+      const value = values[index]
+      if (value === undefined) return
+      
+      // Handle special fields
+      if (header === 'galleryImages' || header === 'competitorModels' || header === 'availableColors' || header === 'colorImages' || header === 'keyHighlights' || header === 'pros' || header === 'cons' || header === 'tags' || header === 'relatedModels' || header === 'variants') {
+        // Parse JSON arrays
+        try {
+          motorcycleData[header] = JSON.parse(value)
+        } catch {
+          motorcycleData[header] = []
+        }
+      } else if (header === 'idleStopSystem' || header === 'catalyticConverter' || header === 'mobileAppIntegration' || header === 'turnByTurnNavigation' || header === 'ridingStatistics' || header === 'drl' || header === 'adjustableWindshield' || header === 'sideStandEngineCutoff' || header === 'tpms' || header === 'keylessIgnition' || header === 'immobilizer' || header === 'centralLocking' || header === 'sosCrashDetection' || header === 'adjustableSuspension' || header === 'ridingModes' || header === 'tractionControlSystem' || header === 'launchControl' || header === 'wheelieControl' || header === 'cruiseControl' || header === 'engineBrakingManagement' || header === 'slipperClutchAssist' || header === 'antiStallHillAssist' || header === 'quickShifter' || header === 'autoBlipper' || header === 'gearIndicator' || header === 'cbs') {
+        // Parse booleans
+        motorcycleData[header] = value.toLowerCase() === 'true'
+      } else if (header === 'dataCompletionPercentage') {
+        // Parse numbers
+        motorcycleData[header] = parseInt(value) || 0
+      } else {
+        // Keep as string
+        motorcycleData[header] = value
+      }
+    })
+    
+    // Validate required fields
+    if (!motorcycleData.brand || !motorcycleData.modelName || !motorcycleData.modelYear) {
+      throw new Error('Missing required fields: brand, modelName, or modelYear')
+    }
+    
+    // Remove ID if present to create a new motorcycle
+    delete motorcycleData.id
+    
+    // Create the motorcycle
+    const motorcycleId = await createMotorcycle(motorcycleData as unknown as MotorcycleFormData, userId)
+    return motorcycleId
+  } catch (error) {
+    console.error('Error importing motorcycle from CSV:', error)
+    throw new Error('Failed to import motorcycle')
+  }
+}

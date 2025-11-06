@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import DashboardLayout from '@/components/layouts/DashboardLayout'
@@ -32,9 +32,20 @@ import {
   Trash2,
   Eye,
   TrendingUp,
-  Loader2
+  Loader2,
+  Download,
+  Upload,
+  FileJson,
+  FileSpreadsheet
 } from 'lucide-react'
-import { getAllMotorcycles, deleteMotorcycle } from '@/lib/motorcycles'
+import { 
+  getAllMotorcycles, 
+  deleteMotorcycle, 
+  exportMotorcyclesToCSV, 
+  importMotorcyclesFromCSV,
+  exportMotorcycleToJSON,
+  exportMotorcycleToCSV as exportSingleMotorcycleToCSV
+} from '@/lib/motorcycles'
 import { MotorcycleFormData } from '@/types/motorcycle'
 
 export default function MotorcyclesManagementPage() {
@@ -44,6 +55,8 @@ export default function MotorcyclesManagementPage() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [exportDropdownOpen, setExportDropdownOpen] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Check if user is Admin or Super Admin - use useEffect to avoid rendering issues
   useEffect(() => {
@@ -103,6 +116,103 @@ export default function MotorcyclesManagementPage() {
     }
   }
 
+  // Handle bulk export
+  const handleBulkExport = async () => {
+    try {
+      const csvData = await exportMotorcyclesToCSV()
+      if (!csvData) {
+        alert('No motorcycles to export')
+        return
+      }
+      
+      // Create blob and download
+      const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.setAttribute('href', url)
+      link.setAttribute('download', `motorcycles-export-${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } catch (error) {
+      console.error('Error exporting motorcycles:', error)
+      alert('Failed to export motorcycles')
+    }
+  }
+
+  // Handle individual export (JSON)
+  const handleIndividualExportJSON = async (motorcycleId: string, motorcycleName: string) => {
+    try {
+      const jsonData = await exportMotorcycleToJSON(motorcycleId)
+      
+      // Create blob and download
+      const blob = new Blob([jsonData], { type: 'application/json;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.setAttribute('href', url)
+      link.setAttribute('download', `motorcycle-${motorcycleName.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.json`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      // Close dropdown
+      setExportDropdownOpen(null)
+    } catch (error) {
+      console.error('Error exporting motorcycle:', error)
+      alert('Failed to export motorcycle')
+    }
+  }
+
+  // Handle individual export (CSV)
+  const handleIndividualExportCSV = async (motorcycleId: string, motorcycleName: string) => {
+    try {
+      const csvData = await exportSingleMotorcycleToCSV(motorcycleId)
+      
+      // Create blob and download
+      const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.setAttribute('href', url)
+      link.setAttribute('download', `motorcycle-${motorcycleName.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      // Close dropdown
+      setExportDropdownOpen(null)
+    } catch (error) {
+      console.error('Error exporting motorcycle:', error)
+      alert('Failed to export motorcycle')
+    }
+  }
+
+  // Handle bulk import
+  const handleBulkImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    try {
+      const text = await file.text()
+      const importedIds = await importMotorcyclesFromCSV(text, session!.user.id)
+      alert(`Successfully imported ${importedIds.length} motorcycles`)
+      
+      // Refresh the list
+      const data = await getAllMotorcycles()
+      setMotorcycles(data)
+    } catch (error) {
+      console.error('Error importing motorcycles:', error)
+      alert('Failed to import motorcycles. Please check the file format.')
+    } finally {
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'published': return 'bg-green-100 text-green-800'
@@ -130,11 +240,34 @@ export default function MotorcyclesManagementPage() {
             <h1 className="text-3xl font-bold text-gray-900">Motorcycle Management</h1>
             <p className="text-gray-600">Manage motorcycle models, specifications, and pricing</p>
           </div>
-          <Button onClick={() => router.push('/dashboard/motorcycles/add')}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add New Motorcycle
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => router.push('/dashboard/motorcycles/import')}>
+              <Upload className="w-4 h-4 mr-2" />
+              Import Individual
+            </Button>
+            <Button variant="outline" onClick={handleBulkExport}>
+              <Download className="w-4 h-4 mr-2" />
+              Export All
+            </Button>
+            <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+              <Upload className="w-4 h-4 mr-2" />
+              Import Bulk
+            </Button>
+            <Button onClick={() => router.push('/dashboard/motorcycles/add')}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add New Motorcycle
+            </Button>
+          </div>
         </div>
+
+        {/* Hidden file input for import */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleBulkImport}
+          accept=".csv"
+          className="hidden"
+        />
 
         {/* Stats */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -284,6 +417,34 @@ export default function MotorcyclesManagementPage() {
                         <Button variant="outline" size="sm" onClick={() => router.push(`/dashboard/motorcycles/edit/${motorcycle.id}`)}>
                           <Edit className="w-4 h-4" />
                         </Button>
+                        {/* Export dropdown */}
+                        <div className="relative">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => setExportDropdownOpen(exportDropdownOpen === motorcycle.id ? null : (motorcycle.id || null))}
+                          >
+                            <Download className="w-4 h-4" />
+                          </Button>
+                          {exportDropdownOpen === motorcycle.id && (
+                            <div className="absolute right-0 mt-1 w-48 bg-white rounded-md shadow-lg py-1 z-10 border">
+                              <button
+                                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                onClick={() => handleIndividualExportJSON(motorcycle.id!, `${motorcycle.brand} ${motorcycle.modelName}`)}
+                              >
+                                <FileJson className="w-4 h-4 mr-2" />
+                                Export as JSON
+                              </button>
+                              <button
+                                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                onClick={() => handleIndividualExportCSV(motorcycle.id!, `${motorcycle.brand} ${motorcycle.modelName}`)}
+                              >
+                                <FileSpreadsheet className="w-4 h-4 mr-2" />
+                                Export as CSV
+                              </button>
+                            </div>
+                          )}
+                        </div>
                         <Button 
                           variant="outline" 
                           size="sm"
