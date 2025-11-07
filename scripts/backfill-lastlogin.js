@@ -3,10 +3,13 @@
 // This sets lastLogin to createdAt for users who don't have a lastLogin timestamp
 
 const admin = require('firebase-admin');
-const path = require('path');
 
-// Initialize Firebase Admin
-const serviceAccount = require(path.join(__dirname, '..', 'ridercritics-386df-firebase-adminsdk-fbsvc-eadd2b019f.json'));
+// Initialize Firebase Admin using environment variables (similar to lib/firebase-admin.ts)
+const serviceAccount = {
+  projectId: process.env.NEXT_PUBLIC_PROJECT_ID,
+  privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+  clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+};
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
