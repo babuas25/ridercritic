@@ -1,100 +1,123 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
 import Link from "next/link"
 import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Star, Gauge, Settings, Weight, Zap, Loader2 } from "lucide-react"
+import { Loader2, ArrowLeft, Star, Gauge, Zap, Settings, Weight } from 'lucide-react'
 import { getMotorcycle } from '@/lib/motorcycles'
 import { MotorcycleFormData } from '@/types/motorcycle'
 
-export default function MotorcycleDetailPage() {
-  const params = useParams()
-  const router = useRouter()
-  const motorcycleId = params?.id as string
-  
+export default function MotorcycleDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const [motorcycle, setMotorcycle] = useState<MotorcycleFormData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
+  // Fetch motorcycle data
   useEffect(() => {
     const fetchMotorcycle = async () => {
-      if (!motorcycleId) return
-      
       try {
         setLoading(true)
-        const data = await getMotorcycle(motorcycleId)
+        // Resolve the params promise
+        const resolvedParams = await params;
+        const data = await getMotorcycle(resolvedParams.id)
         if (data) {
           setMotorcycle(data)
         } else {
-          alert('Motorcycle not found')
-          router.push('/motorcycle')
+          setError('Motorcycle not found')
         }
-      } catch (error) {
-        console.error('Error fetching motorcycle:', error)
-        alert('Failed to load motorcycle')
-        router.push('/motorcycle')
+      } catch (err) {
+        console.error('Error fetching motorcycle:', err)
+        setError('Failed to load motorcycle details')
       } finally {
         setLoading(false)
       }
     }
 
     fetchMotorcycle()
-  }, [motorcycleId, router])
+  }, [params])
 
-  if (loading || !motorcycle) {
+  // Function to get valid cover image (show all images now)
+  const getValidCoverImage = () => {
+    return motorcycle?.coverImage || null
+  }
+  
+  // Function to get valid gallery images (show all images now)
+  const getValidGalleryImages = () => {
+    return motorcycle?.galleryImages || []
+  }
+  
+  // Function to render credit line for Honda images
+  const renderCreditLine = (imageUrl: string) => {
+    if (!imageUrl || !motorcycle?.brand) return null
+    
+    // Check if it's a Honda motorcycle (show credit line for ALL Honda motorcycles)
+    const isHonda = motorcycle.brand.toLowerCase() === 'honda'
+    
+    if (isHonda) {
+      return (
+        <div className="text-xs text-gray-600 dark:text-gray-300 mt-2 text-center py-1 px-2 bg-gray-100 dark:bg-gray-800 rounded">
+          Image © Honda Bangladesh (used under fair review purpose)
+        </div>
+      )
+    }
+    
+    return null
+  }
+
+  if (loading) {
     return (
-      <div className="container py-8 max-w-6xl mx-auto">
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+      <div className="container py-8 max-w-6xl mx-auto px-4 flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    )
+  }
+
+  if (error || !motorcycle) {
+    return (
+      <div className="container py-8 max-w-6xl mx-auto px-4">
+        <div className="text-center py-12">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Motorcycle Not Found</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">The motorcycle you're looking for doesn't exist or has been removed.</p>
+          <Link href="/motorcycle">
+            <Button>Back to Motorcycles</Button>
+          </Link>
         </div>
       </div>
     )
   }
 
-  // Generate JSON-LD structured data
+  // JSON-LD Structured Data
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
     "name": `${motorcycle.brand} ${motorcycle.modelName}`,
-    "description": motorcycle.description || `Detailed specifications and reviews for the ${motorcycle.brand} ${motorcycle.modelName} ${motorcycle.modelYear}`,
+    "image": [
+      getValidCoverImage(),
+      ...getValidGalleryImages()
+    ].filter(Boolean),
+    "description": motorcycle.description,
     "brand": {
       "@type": "Brand",
       "name": motorcycle.brand
     },
-    "model": motorcycle.modelName,
-    "sku": motorcycle.id,
-    "category": motorcycle.category,
-    "releaseDate": motorcycle.launchDate,
-    "image": motorcycle.coverImage ? [motorcycle.coverImage, ...(motorcycle.galleryImages || [])] : undefined,
     "offers": {
       "@type": "Offer",
-      "priceCurrency": motorcycle.currency || "BDT",
+      "priceCurrency": "BDT",
       "price": motorcycle.exShowroomPrice ? parseFloat(motorcycle.exShowroomPrice.replace(/[^0-9.]/g, '')) : undefined,
-      "availability": motorcycle.availability === "available" ? "InStock" : 
-                     motorcycle.availability === "upcoming" ? "PreOrder" : "OutOfStock",
-      "url": `https://ridercritic.com/motorcycle/${motorcycle.id}`
+      "availability": "InStock"
     },
     "review": {
       "@type": "Review",
       "reviewRating": {
         "@type": "Rating",
         "ratingValue": "4.8",
-        "bestRating": "5"
-      },
-      "author": {
-        "@type": "Organization",
-        "name": "RiderCritic"
+        "reviewCount": "127",
+        "bestRating": "5",
+        "worstRating": "1"
       }
-    },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "reviewCount": "127",
-      "bestRating": "5",
-      "worstRating": "1"
     }
   };
 
@@ -118,9 +141,9 @@ export default function MotorcycleDetailPage() {
         <div className="space-y-6">
           {/* Main Image */}
           <div className="w-full aspect-video relative overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800">
-            {motorcycle.coverImage ? (
+            {getValidCoverImage() ? (
               <Image 
-                src={motorcycle.coverImage} 
+                src={getValidCoverImage() as string} 
                 alt={motorcycle.modelName}
                 fill
                 className="object-cover"
@@ -139,21 +162,27 @@ export default function MotorcycleDetailPage() {
               </div>
             )}
           </div>
+          {/* Credit line outside the image container */}
+          {renderCreditLine(motorcycle.coverImage)}
 
           {/* Gallery Thumbnails */}
           <div className="grid grid-cols-4 gap-3">
-            {motorcycle.galleryImages && motorcycle.galleryImages.length > 0 ? (
-              motorcycle.galleryImages.slice(0, 4).map((img, i) => (
-                <div key={i} className="aspect-square relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
-                  <Image 
-                    src={img} 
-                    alt={`View ${i + 1}`} 
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 25vw, 10vw"
-                    quality={80}
-                    loading="lazy"
-                  />
+            {getValidGalleryImages().length > 0 ? (
+              getValidGalleryImages().slice(0, 4).map((img, i) => (
+                <div key={i}>
+                  <div className="aspect-square relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+                    <Image 
+                      src={img} 
+                      alt={`View ${i + 1}`} 
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 25vw, 10vw"
+                      quality={80}
+                      loading="lazy"
+                    />
+                  </div>
+                  {/* Credit line outside the image container */}
+                  {renderCreditLine(img)}
                 </div>
               ))
             ) : (
@@ -341,6 +370,22 @@ export default function MotorcycleDetailPage() {
                       </span>
                     </div>
                   )}
+                  {motorcycle.fuelSupplySystem && (
+                    <div className="flex justify-between items-start">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Fuel Supply</span>
+                      <span className="text-sm text-gray-900 dark:text-white text-right">
+                        {motorcycle.fuelSupplySystem}
+                      </span>
+                    </div>
+                  )}
+                  {motorcycle.engineCoolingType && (
+                    <div className="flex justify-between items-start">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Cooling</span>
+                      <span className="text-sm text-gray-900 dark:text-white text-right">
+                        {motorcycle.engineCoolingType}
+                      </span>
+                    </div>
+                  )}
                   {motorcycle.compressionRatio && (
                     <div className="flex justify-between items-start">
                       <span className="text-sm text-gray-500 dark:text-gray-400">Compression Ratio</span>
@@ -357,39 +402,15 @@ export default function MotorcycleDetailPage() {
                       </span>
                     </div>
                   )}
-                  {motorcycle.fuelSupplySystem && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Fuel System</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.fuelSupplySystem}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.engineCoolingType && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Cooling</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.engineCoolingType}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.startType && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Starting</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.startType}
-                      </span>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             )}
 
             {/* Performance Metrics */}
-            {(motorcycle.topSpeed || motorcycle.mileage || motorcycle.acceleration0to60 || motorcycle.acceleration0to100 || motorcycle.powerToWeightRatio) && (
+            {(motorcycle.topSpeed || motorcycle.acceleration0to60 || motorcycle.acceleration0to100 || motorcycle.mileage || motorcycle.range) && (
               <Card className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Performance</CardTitle>
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Performance Metrics</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {motorcycle.topSpeed && (
@@ -424,11 +445,11 @@ export default function MotorcycleDetailPage() {
                       </span>
                     </div>
                   )}
-                  {motorcycle.powerToWeightRatio && (
+                  {motorcycle.range && (
                     <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Power/Weight</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Range</span>
                       <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.powerToWeightRatio}
+                        {motorcycle.range} km
                       </span>
                     </div>
                   )}
@@ -437,7 +458,7 @@ export default function MotorcycleDetailPage() {
             )}
 
             {/* Transmission & Drive */}
-            {(motorcycle.transmissionType || motorcycle.numberOfGears || motorcycle.clutchType || motorcycle.finalDriveType) && (
+            {(motorcycle.transmissionType || motorcycle.numberOfGears || motorcycle.finalDriveType) && (
               <Card className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Transmission & Drive</CardTitle>
@@ -447,74 +468,23 @@ export default function MotorcycleDetailPage() {
                     <div className="flex justify-between items-start">
                       <span className="text-sm text-gray-500 dark:text-gray-400">Transmission</span>
                       <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.numberOfGears && `${motorcycle.numberOfGears}-speed `}{motorcycle.transmissionType}
+                        {motorcycle.transmissionType}
                       </span>
                     </div>
                   )}
-                  {motorcycle.clutchType && (
+                  {motorcycle.numberOfGears && (
                     <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Clutch</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Gears</span>
                       <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.clutchType}
+                        {motorcycle.numberOfGears}
                       </span>
                     </div>
                   )}
                   {motorcycle.finalDriveType && (
                     <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Final Drive</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Drive Type</span>
                       <span className="text-sm text-gray-900 dark:text-white text-right">
                         {motorcycle.finalDriveType}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.gearIndicator && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Gear Indicator</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Chassis & Suspension */}
-            {(motorcycle.frameType || motorcycle.frontSuspension || motorcycle.rearSuspension || motorcycle.swingarmType) && (
-              <Card className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Chassis & Suspension</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {motorcycle.frameType && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Frame</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.frameType}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.swingarmType && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Swingarm</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.swingarmType}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.frontSuspension && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Front Suspension</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.frontSuspension}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.rearSuspension && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Rear Suspension</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.rearSuspension}
                       </span>
                     </div>
                   )}
@@ -523,7 +493,7 @@ export default function MotorcycleDetailPage() {
             )}
 
             {/* Brakes & Wheels */}
-            {(motorcycle.frontBrakeType || motorcycle.rearBrakeType || motorcycle.absSupport || motorcycle.frontTyreSize || motorcycle.rearTyreSize) && (
+            {(motorcycle.frontBrakeType || motorcycle.rearBrakeType || motorcycle.absSupport || motorcycle.wheelType) && (
               <Card className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Brakes & Wheels</CardTitle>
@@ -533,7 +503,7 @@ export default function MotorcycleDetailPage() {
                     <div className="flex justify-between items-start">
                       <span className="text-sm text-gray-500 dark:text-gray-400">Front Brake</span>
                       <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.frontBrakeSize} {motorcycle.frontBrakeType}
+                        {motorcycle.frontBrakeType}{motorcycle.frontBrakeSize && ` (${motorcycle.frontBrakeSize}mm)`}
                       </span>
                     </div>
                   )}
@@ -541,7 +511,7 @@ export default function MotorcycleDetailPage() {
                     <div className="flex justify-between items-start">
                       <span className="text-sm text-gray-500 dark:text-gray-400">Rear Brake</span>
                       <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.rearBrakeSize} {motorcycle.rearBrakeType}
+                        {motorcycle.rearBrakeType}{motorcycle.rearBrakeSize && ` (${motorcycle.rearBrakeSize}mm)`}
                       </span>
                     </div>
                   )}
@@ -553,25 +523,9 @@ export default function MotorcycleDetailPage() {
                       </span>
                     </div>
                   )}
-                  {motorcycle.frontTyreSize && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Front Tyre</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.frontTyreSize}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.rearTyreSize && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Rear Tyre</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.rearTyreSize}
-                      </span>
-                    </div>
-                  )}
                   {motorcycle.wheelType && (
                     <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Wheel Type</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Wheels</span>
                       <span className="text-sm text-gray-900 dark:text-white text-right">
                         {motorcycle.wheelType}
                       </span>
@@ -582,25 +536,41 @@ export default function MotorcycleDetailPage() {
             )}
 
             {/* Dimensions & Weight */}
-            {(motorcycle.kerbWeight || motorcycle.fuelTankCapacity || motorcycle.seatHeight || motorcycle.groundClearance || motorcycle.wheelbase || motorcycle.overallLength || motorcycle.overallWidth || motorcycle.overallHeight) && (
+            {(motorcycle.overallLength || motorcycle.overallWidth || motorcycle.overallHeight || motorcycle.kerbWeight) && (
               <Card className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Dimensions & Weight</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
+                  {motorcycle.overallLength && (
+                    <div className="flex justify-between items-start">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Length</span>
+                      <span className="text-sm text-gray-900 dark:text-white text-right">
+                        {motorcycle.overallLength} mm
+                      </span>
+                    </div>
+                  )}
+                  {motorcycle.overallWidth && (
+                    <div className="flex justify-between items-start">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Width</span>
+                      <span className="text-sm text-gray-900 dark:text-white text-right">
+                        {motorcycle.overallWidth} mm
+                      </span>
+                    </div>
+                  )}
+                  {motorcycle.overallHeight && (
+                    <div className="flex justify-between items-start">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Height</span>
+                      <span className="text-sm text-gray-900 dark:text-white text-right">
+                        {motorcycle.overallHeight} mm
+                      </span>
+                    </div>
+                  )}
                   {motorcycle.kerbWeight && (
                     <div className="flex justify-between items-start">
                       <span className="text-sm text-gray-500 dark:text-gray-400">Kerb Weight</span>
                       <span className="text-sm text-gray-900 dark:text-white text-right">
                         {motorcycle.kerbWeight} kg
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.fuelTankCapacity && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Fuel Tank</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.fuelTankCapacity} liters
                       </span>
                     </div>
                   )}
@@ -620,54 +590,30 @@ export default function MotorcycleDetailPage() {
                       </span>
                     </div>
                   )}
-                  {motorcycle.wheelbase && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Wheelbase</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.wheelbase} mm
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.overallLength && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Length x Width x Height</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.overallLength} x {motorcycle.overallWidth} x {motorcycle.overallHeight} mm
-                      </span>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             )}
 
             {/* Features & Equipment */}
-            {(motorcycle.instrumentConsole || motorcycle.headlightType || motorcycle.drl || motorcycle.connectivity) && (
+            {(motorcycle.headlightType || motorcycle.indicatorType || motorcycle.tailLightType) && (
               <Card className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Features & Equipment</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {motorcycle.instrumentConsole && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Instrument Console</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.instrumentConsole}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.displaySize && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Display Size</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.displaySize}
-                      </span>
-                    </div>
-                  )}
                   {motorcycle.headlightType && (
                     <div className="flex justify-between items-start">
                       <span className="text-sm text-gray-500 dark:text-gray-400">Headlight</span>
                       <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.headlightType}{motorcycle.drl && ' with DRL'}
+                        {motorcycle.headlightType}
+                      </span>
+                    </div>
+                  )}
+                  {motorcycle.indicatorType && (
+                    <div className="flex justify-between items-start">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Indicators</span>
+                      <span className="text-sm text-gray-900 dark:text-white text-right">
+                        {motorcycle.indicatorType}
                       </span>
                     </div>
                   )}
@@ -679,473 +625,325 @@ export default function MotorcycleDetailPage() {
                       </span>
                     </div>
                   )}
-                  {motorcycle.indicatorType && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Indicator</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.indicatorType}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.connectivity && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Connectivity</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.connectivity}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.mobileAppIntegration && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Mobile App</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.turnByTurnNavigation && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Turn-by-Turn Navigation</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.ridingStatistics && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Riding Statistics</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.adjustableWindshield && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Adjustable Windshield</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.seatType && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Seat Type</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.seatType}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.handleType && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Handle Type</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.handleType}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.footpegPosition && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Footpeg Position</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.footpegPosition}
-                      </span>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             )}
 
-            {/* Electronics & Safety */}
-            {(motorcycle.absType || motorcycle.tractionControlSystem || motorcycle.launchControl || motorcycle.wheelieControl || motorcycle.cruiseControl || motorcycle.engineBrakingManagement || motorcycle.slipperClutchAssist || motorcycle.antiStallHillAssist || motorcycle.sideStandEngineCutoff || motorcycle.tpms || motorcycle.keylessIgnition || motorcycle.immobilizer || motorcycle.centralLocking || motorcycle.sosCrashDetection || motorcycle.adjustableSuspension || motorcycle.ridingModes) && (
-              <Card className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Electronics & Safety</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {motorcycle.ridingModes && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Riding Modes</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.tractionControlSystem && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Traction Control</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.launchControl && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Launch Control</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.wheelieControl && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Wheelie Control</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.cruiseControl && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Cruise Control</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.engineBrakingManagement && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Engine Braking Mgmt</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.slipperClutchAssist && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Slipper Clutch</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.antiStallHillAssist && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Hill Assist</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.sideStandEngineCutoff && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Side Stand Cutoff</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.tpms && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">TPMS</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.keylessIgnition && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Keyless Ignition</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.immobilizer && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Immobilizer</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.centralLocking && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Central Locking</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.sosCrashDetection && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">SOS Crash Detection</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.adjustableSuspension && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Adjustable Suspension</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
+            {/* Step Images Gallery */}
+            {motorcycle.stepImages && Object.values(motorcycle.stepImages).some(step => step && step.length > 0) && (
+              <div className="space-y-6">
+                {/* Basic Information Images */}
+                {motorcycle.stepImages.step1 && motorcycle.stepImages.step1.length > 0 && (
+                  <Card className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Basic Information</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {motorcycle.stepImages.step1.map((img, i) => (
+                          <div key={i} className="aspect-video relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+                            <Image 
+                              src={img} 
+                              alt={`Basic Information ${i + 1}`} 
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 50vw, 33vw"
+                              quality={80}
+                            />
+                            {renderCreditLine(img)}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-            {/* Emission & Environment */}
-            {(motorcycle.emissionStandard || motorcycle.catalyticConverter || motorcycle.obd || motorcycle.fuelEconomyRideModes || motorcycle.fuelInjectionMapping || motorcycle.throttleResponse || motorcycle.ecoModeEfficiency) && (
-              <Card className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Emission & Environment</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {motorcycle.emissionStandard && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Emission Standard</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.emissionStandard.toUpperCase()}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.catalyticConverter && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Catalytic Converter</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.obd && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">OBD</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.obd}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.fuelEconomyRideModes && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Eco Mode</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.fuelEconomyRideModes}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.ecoModeEfficiency && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Eco Efficiency</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.ecoModeEfficiency}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.fuelInjectionMapping && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Fuel Injection</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.fuelInjectionMapping}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.throttleResponse && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Throttle Response</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.throttleResponse}
-                      </span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
+                {/* Engine Specifications Images */}
+                {motorcycle.stepImages.step2 && motorcycle.stepImages.step2.length > 0 && (
+                  <Card className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Engine Specifications</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {motorcycle.stepImages.step2.map((img, i) => (
+                          <div key={i} className="aspect-video relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+                            <Image 
+                              src={img} 
+                              alt={`Engine Specifications ${i + 1}`} 
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 50vw, 33vw"
+                              quality={80}
+                            />
+                            {renderCreditLine(img)}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-            {/* Advanced Technical Details */}
-            {(motorcycle.suspensionTravelFront || motorcycle.suspensionTravelRear || motorcycle.steeringAngle || motorcycle.turningRadius || motorcycle.centerOfGravityHeight || motorcycle.radiatorFanType || motorcycle.lubricationSystem || motorcycle.airFilterType || motorcycle.idleStopSystem || motorcycle.engineRedline || motorcycle.revLimiter || motorcycle.gearRatio || motorcycle.quickShifter || motorcycle.autoBlipper || motorcycle.shiftPattern || motorcycle.brakeCaliperType || motorcycle.cbs || motorcycle.tyreBrand || motorcycle.reserveFuelCapacity || motorcycle.oilCapacity || motorcycle.batteryCapacity || motorcycle.loadCapacity || motorcycle.dryWeight || motorcycle.range) && (
-              <Card className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Advanced Technical Details</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {motorcycle.suspensionTravelFront && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Suspension Travel (F/R)</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.suspensionTravelFront} / {motorcycle.suspensionTravelRear}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.steeringAngle && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Steering Angle</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.steeringAngle}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.turningRadius && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Turning Radius</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.turningRadius}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.centerOfGravityHeight && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Center of Gravity</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.centerOfGravityHeight}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.radiatorFanType && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Radiator/Cooling</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.radiatorFanType}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.lubricationSystem && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Lubrication</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.lubricationSystem}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.airFilterType && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Air Filter</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.airFilterType}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.idleStopSystem && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Idle Stop System</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.engineRedline && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Engine Redline</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.engineRedline}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.revLimiter && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Rev Limiter</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.revLimiter}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.gearRatio && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Gear Ratio</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right whitespace-pre-line">
-                        {motorcycle.gearRatio}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.quickShifter && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Quick Shifter</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.autoBlipper && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Auto Blipper</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.shiftPattern && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Shift Pattern</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.shiftPattern}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.brakeCaliperType && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Brake Caliper</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.brakeCaliperType}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.cbs && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">CBS</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        Yes
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.tyreBrand && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Tyre Brand</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.tyreBrand}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.reserveFuelCapacity && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Reserve Fuel</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.reserveFuelCapacity} liters
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.oilCapacity && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Oil Capacity</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.oilCapacity} liters
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.batteryCapacity && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Battery</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.batteryCapacity}
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.loadCapacity && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Load Capacity</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.loadCapacity} kg
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.dryWeight && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Dry Weight</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.dryWeight} kg
-                      </span>
-                    </div>
-                  )}
-                  {motorcycle.range && (
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">Range</span>
-                      <span className="text-sm text-gray-900 dark:text-white text-right">
-                        {motorcycle.range} km
-                      </span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                {/* Performance Metrics Images */}
+                {motorcycle.stepImages.step3 && motorcycle.stepImages.step3.length > 0 && (
+                  <Card className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Performance Metrics</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {motorcycle.stepImages.step3.map((img, i) => (
+                          <div key={i} className="aspect-video relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+                            <Image 
+                              src={img} 
+                              alt={`Performance Metrics ${i + 1}`} 
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 50vw, 33vw"
+                              quality={80}
+                            />
+                            {renderCreditLine(img)}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Transmission & Drive Images */}
+                {motorcycle.stepImages.step4 && motorcycle.stepImages.step4.length > 0 && (
+                  <Card className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Transmission & Drive</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {motorcycle.stepImages.step4.map((img, i) => (
+                          <div key={i} className="aspect-video relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+                            <Image 
+                              src={img} 
+                              alt={`Transmission & Drive ${i + 1}`} 
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 50vw, 33vw"
+                              quality={80}
+                            />
+                            {renderCreditLine(img)}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Electronics & Control Images */}
+                {motorcycle.stepImages.step5 && motorcycle.stepImages.step5.length > 0 && (
+                  <Card className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Electronics & Control</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {motorcycle.stepImages.step5.map((img, i) => (
+                          <div key={i} className="aspect-video relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+                            <Image 
+                              src={img} 
+                              alt={`Electronics & Control ${i + 1}`} 
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 50vw, 33vw"
+                              quality={80}
+                            />
+                            {renderCreditLine(img)}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Chassis & Suspension Images */}
+                {motorcycle.stepImages.step6 && motorcycle.stepImages.step6.length > 0 && (
+                  <Card className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Chassis & Suspension</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {motorcycle.stepImages.step6.map((img, i) => (
+                          <div key={i} className="aspect-video relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+                            <Image 
+                              src={img} 
+                              alt={`Chassis & Suspension ${i + 1}`} 
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 50vw, 33vw"
+                              quality={80}
+                            />
+                            {renderCreditLine(img)}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Brakes, Wheels & Tyres Images */}
+                {motorcycle.stepImages.step7 && motorcycle.stepImages.step7.length > 0 && (
+                  <Card className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Brakes, Wheels & Tyres</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {motorcycle.stepImages.step7.map((img, i) => (
+                          <div key={i} className="aspect-video relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+                            <Image 
+                              src={img} 
+                              alt={`Brakes, Wheels & Tyres ${i + 1}`} 
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 50vw, 33vw"
+                              quality={80}
+                            />
+                            {renderCreditLine(img)}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Dimensions & Weight Images */}
+                {motorcycle.stepImages.step8 && motorcycle.stepImages.step8.length > 0 && (
+                  <Card className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Dimensions & Weight</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {motorcycle.stepImages.step8.map((img, i) => (
+                          <div key={i} className="aspect-video relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+                            <Image 
+                              src={img} 
+                              alt={`Dimensions & Weight ${i + 1}`} 
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 50vw, 33vw"
+                              quality={80}
+                            />
+                            {renderCreditLine(img)}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Features & Equipment Images */}
+                {motorcycle.stepImages.step9 && motorcycle.stepImages.step9.length > 0 && (
+                  <Card className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Features & Equipment</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {motorcycle.stepImages.step9.map((img, i) => (
+                          <div key={i} className="aspect-video relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+                            <Image 
+                              src={img} 
+                              alt={`Features & Equipment ${i + 1}`} 
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 50vw, 33vw"
+                              quality={80}
+                            />
+                            {renderCreditLine(img)}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Pricing & Market Data Images */}
+                {motorcycle.stepImages.step10 && motorcycle.stepImages.step10.length > 0 && (
+                  <Card className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Pricing & Market Data</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {motorcycle.stepImages.step10.map((img, i) => (
+                          <div key={i} className="aspect-video relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+                            <Image 
+                              src={img} 
+                              alt={`Pricing & Market Data ${i + 1}`} 
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 50vw, 33vw"
+                              quality={80}
+                            />
+                            {renderCreditLine(img)}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Color Options Images */}
+                {motorcycle.stepImages.step11 && motorcycle.stepImages.step11.length > 0 && (
+                  <Card className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Color Options</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {motorcycle.stepImages.step11.map((img, i) => (
+                          <div key={i} className="aspect-video relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+                            <Image 
+                              src={img} 
+                              alt={`Color Options ${i + 1}`} 
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 50vw, 33vw"
+                              quality={80}
+                            />
+                            {renderCreditLine(img)}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Additional Information Images */}
+                {motorcycle.stepImages.step12 && motorcycle.stepImages.step12.length > 0 && (
+                  <Card className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">Additional Information</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {motorcycle.stepImages.step12.map((img, i) => (
+                          <div key={i} className="aspect-video relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+                            <Image 
+                              src={img} 
+                              alt={`Additional Information ${i + 1}`} 
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 50vw, 33vw"
+                              quality={80}
+                            />
+                            {renderCreditLine(img)}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             )}
           </div>
         </div>

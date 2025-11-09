@@ -2,6 +2,20 @@ import { storage } from './firebase'
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
 
 /**
+ * Sanitize storage path by replacing spaces and special characters
+ * @param path - The path to sanitize
+ * @returns Sanitized path
+ */
+export function sanitizeStoragePath(path: string): string {
+  return path
+    .split('/')
+    .map(segment => 
+      segment.replace(/[^a-zA-Z0-9.-]/g, '_').replace(/_+/g, '_')
+    )
+    .join('/')
+}
+
+/**
  * Upload a single image to Firebase Storage
  * @param file - The file to upload
  * @param path - Storage path (e.g., 'motorcycles/brand/model')

@@ -2,8 +2,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
-import { Upload, Bike, X, Plus, Trash2 } from 'lucide-react'
+import { ImageUploader } from '@/components/ui/image-uploader'
+import { Plus, Trash2 } from 'lucide-react'
 import { MotorcycleFormData, VariantData } from '@/types/motorcycle'
+import { sanitizeStoragePath } from '@/lib/storage'
 
 interface PricingMarketDataStepProps {
   formData: MotorcycleFormData
@@ -263,33 +265,14 @@ export default function PricingMarketDataStep({
       {/* Image Upload */}
       <div className="space-y-2 mt-6">
         <Label>Upload Pricing Images (Optional)</Label>
-        <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-blue-500 transition-colors cursor-pointer">
-          <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-          <p className="text-sm text-gray-600 mb-1">Price tags, showroom images, variant comparison</p>
-          <Button type="button" variant="outline" size="sm" className="mt-3">
-            Choose Files
-          </Button>
-        </div>
-        {stepImages.length > 0 && (
-          <div className="grid grid-cols-4 gap-3 mt-3">
-            {stepImages.map((img, index) => (
-              <div key={index} className="relative border rounded-lg overflow-hidden group">
-                <div className="aspect-video bg-gray-100 flex items-center justify-center">
-                  <Bike className="w-8 h-8 text-gray-400" />
-                </div>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => setStepImages(stepImages.filter((_, i) => i !== index))}
-                >
-                  <X className="w-3 h-3" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
+        <ImageUploader
+          storagePath={sanitizeStoragePath(`motorcycles/${formData.brand}/${formData.modelName}/pricing`)}
+          currentImages={stepImages}
+          onUpload={(urls) => setStepImages([...stepImages, ...urls])}
+          onRemove={(url) => setStepImages(stepImages.filter((img: string) => img !== url))}
+          multiple={true}
+          maxFiles={10}
+        />
       </div>
     </div>
   )

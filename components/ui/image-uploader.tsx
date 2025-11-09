@@ -33,6 +33,9 @@ export function ImageUploader({
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Ensure currentImages is always an array
+  const safeCurrentImages = Array.isArray(currentImages) ? currentImages : []
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files || files.length === 0) return
@@ -60,7 +63,7 @@ export function ImageUploader({
       }
 
       // Check max files limit
-      if (currentImages.length + validFiles.length > maxFiles) {
+      if (safeCurrentImages.length + validFiles.length > maxFiles) {
         setError(`Maximum ${maxFiles} images allowed`)
         setUploading(false)
         return
@@ -143,9 +146,9 @@ export function ImageUploader({
       )}
 
       {/* Image Preview Grid */}
-      {currentImages.length > 0 && (
+      {safeCurrentImages.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {currentImages.map((url, index) => (
+          {safeCurrentImages.map((url, index) => (
             <div key={index} className="relative border rounded-lg overflow-hidden group">
               <div className="aspect-video bg-gray-100 relative">
                 <Image 

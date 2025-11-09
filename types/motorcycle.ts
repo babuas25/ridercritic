@@ -24,6 +24,9 @@ export interface MotorcycleFormData {
   galleryImages: string[]
   modelVideo: string
   
+  // Step Images
+  stepImages: StepImages
+  
   // 2️⃣ ENGINE SPECIFICATIONS
   // 2.1 Engine Architecture
   engineType: string
@@ -186,7 +189,7 @@ export interface MotorcycleFormData {
   
   // 1️⃣1️⃣ COLOR OPTIONS
   availableColors: string[]
-  colorImages: string[]
+  colorImages: string[][]
   specialEditions: string
   
   // 1️⃣2️⃣ ADDITIONAL INFORMATION

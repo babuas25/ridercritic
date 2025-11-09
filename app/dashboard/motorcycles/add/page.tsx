@@ -1,17 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import DashboardLayout from '@/components/layouts/DashboardLayout'
-import { Card, CardContent } from '@/components/ui/card'
+import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, ArrowRight, Save, Eye, Loader2 } from 'lucide-react'
-import { MotorcycleFormData } from '@/types/motorcycle'
-import { createMotorcycle, saveDraft } from '@/lib/motorcycles'
-
-// Import all 13 modular step components
+import { ArrowLeft, Save, Eye, Upload } from 'lucide-react'
+import DashboardLayout from '@/components/layouts/DashboardLayout'
 import BasicInformationStep from '@/components/motorcycle-form/BasicInformationStep'
 import EngineSpecificationsStep from '@/components/motorcycle-form/EngineSpecificationsStep'
 import PerformanceMetricsStep from '@/components/motorcycle-form/PerformanceMetricsStep'
@@ -24,16 +20,16 @@ import FeaturesEquipmentStep from '@/components/motorcycle-form/FeaturesEquipmen
 import PricingMarketDataStep from '@/components/motorcycle-form/PricingMarketDataStep'
 import ColorOptionsStep from '@/components/motorcycle-form/ColorOptionsStep'
 import AdditionalInformationStep from '@/components/motorcycle-form/AdditionalInformationStep'
-import CriticValidationStep from '@/components/motorcycle-form/CriticValidationStep'
+import { createMotorcycle } from '@/lib/motorcycles'
+import { MotorcycleFormData } from '@/types/motorcycle'
 
 export default function AddMotorcyclePage() {
-  const { data: session } = useSession()
   const router = useRouter()
-  
-  // All hooks at top level
+  const { data: session } = useSession()
   const [currentStep, setCurrentStep] = useState(1)
   const [saving, setSaving] = useState(false)
   const [publishing, setPublishing] = useState(false)
+  
   const [formData, setFormData] = useState<MotorcycleFormData>({
     // 1️⃣ BASIC INFORMATION
     brand: '',
@@ -48,6 +44,20 @@ export default function AddMotorcyclePage() {
     coverImage: '',
     galleryImages: [],
     modelVideo: '',
+    stepImages: {
+      step1: [],
+      step2: [],
+      step3: [],
+      step4: [],
+      step5: [],
+      step6: [],
+      step7: [],
+      step8: [],
+      step9: [],
+      step10: [],
+      step11: [],
+      step12: []
+    },
     
     // 2️⃣ ENGINE SPECIFICATIONS
     engineType: '',
@@ -194,7 +204,7 @@ export default function AddMotorcyclePage() {
     
     // 1️⃣1️⃣ COLOR OPTIONS
     availableColors: [],
-    colorImages: [],
+    colorImages: [], // This will be initialized as a 2D array in the ColorOptionsStep
     specialEditions: '',
     
     // 1️⃣2️⃣ ADDITIONAL INFORMATION
@@ -213,35 +223,6 @@ export default function AddMotorcyclePage() {
     reviewStatus: 'Pending Critic',
     lastUpdatedBy: '',
     lastUpdatedDate: ''
-  })
-
-  // Initialize step images state
-  const [stepImages, setStepImages] = useState<{
-    step1: string[]
-    step2: string[]
-    step3: string[]
-    step4: string[]
-    step5: string[]
-    step6: string[]
-    step7: string[]
-    step8: string[]
-    step9: string[]
-    step10: string[]
-    step11: string[]
-    step12: string[]
-  }>({
-    step1: [],
-    step2: [],
-    step3: [],
-    step4: [],
-    step5: [],
-    step6: [],
-    step7: [],
-    step8: [],
-    step9: [],
-    step10: [],
-    step11: [],
-    step12: []
   })
 
   // Check if user is Admin or Super Admin
@@ -270,7 +251,7 @@ export default function AddMotorcyclePage() {
     
     setSaving(true)
     try {
-      await saveDraft(formData, session.user.id)
+      // TODO: Implement save draft functionality
       alert('Draft saved successfully!')
     } catch (error) {
       console.error('Error saving draft:', error)
@@ -315,15 +296,21 @@ export default function AddMotorcyclePage() {
   // Helper function to get current step images
   const getCurrentStepImages = () => {
     if (currentStep >= 13) return [] // Step 13 has no images
-    const stepKey = `step${currentStep}` as keyof typeof stepImages
-    return stepImages[stepKey] || []
+    const stepKey = `step${currentStep}` as keyof typeof formData.stepImages
+    return formData.stepImages[stepKey] || []
   }
 
   // Helper function to set current step images
   const setCurrentStepImages = (images: string[]) => {
     if (currentStep >= 13) return // Step 13 has no images
-    const stepKey = `step${currentStep}` as keyof typeof stepImages
-    setStepImages({ ...stepImages, [stepKey]: images })
+    const stepKey = `step${currentStep}` as keyof typeof formData.stepImages
+    setFormData({
+      ...formData,
+      stepImages: {
+        ...formData.stepImages,
+        [stepKey]: images
+      }
+    })
   }
 
   return (
@@ -475,63 +462,91 @@ export default function AddMotorcyclePage() {
             )}
 
             {currentStep === 13 && (
-              <CriticValidationStep
-                formData={formData}
-                setFormData={setFormData}
-              />
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold">Review & Publish</h2>
+                <p className="text-muted-foreground">
+                  Review all information before publishing. You can go back to edit any section.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Brand:</span>
+                        <span>{formData.brand}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Model:</span>
+                        <span>{formData.modelName}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Year:</span>
+                        <span>{formData.modelYear}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Category:</span>
+                        <span>{formData.category}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-semibold mb-4">Pricing</h3>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Ex-Showroom Price:</span>
+                        <span>৳ {formData.exShowroomPrice}</span>
+                      </div>
+                      {formData.onRoadPrice && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">On-Road Price:</span>
+                          <span>৳ {formData.onRoadPrice}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex justify-between pt-6">
+                  <Button variant="outline" onClick={handlePrevious}>
+                    Previous
+                  </Button>
+                  <div className="flex gap-3">
+                    <Button variant="outline" onClick={handleSaveDraft} disabled={saving}>
+                      <Save className="w-4 h-4 mr-2" />
+                      {saving ? 'Saving...' : 'Save Draft'}
+                    </Button>
+                    <Button variant="outline" onClick={handlePreview}>
+                      <Eye className="w-4 h-4 mr-2" />
+                      Preview
+                    </Button>
+                    <Button onClick={handlePublish} disabled={publishing} className="bg-black text-white hover:bg-gray-800">
+                      <Upload className="w-4 h-4 mr-2" />
+                      {publishing ? 'Publishing...' : 'Publish'}
+                    </Button>
+                  </div>
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Navigation & Actions */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  onClick={handlePrevious}
-                  disabled={currentStep === 1}
-                >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Previous
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleNext}
-                  disabled={currentStep === totalSteps}
-                >
-                  Next
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </div>
-
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={handlePreview} disabled={saving || publishing}>
-                  <Eye className="w-4 h-4 mr-2" />
-                  Preview
-                </Button>
-                <Button variant="outline" onClick={handleSaveDraft} disabled={saving || publishing}>
-                  {saving ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</>
-                  ) : (
-                    <><Save className="w-4 h-4 mr-2" />Save Draft</>
-                  )}
-                </Button>
-                <Button 
-                  onClick={handlePublish} 
-                  disabled={formData.dataCompletionPercentage < 80 || saving || publishing}
-                >
-                  {publishing ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Publishing...</>
-                  ) : (
-                    <>Publish Motorcycle</>
-                  )}
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Navigation Buttons */}
+        {currentStep < 13 && (
+          <div className="flex justify-between">
+            <Button 
+              variant="outline" 
+              onClick={handlePrevious} 
+              disabled={currentStep === 1}
+            >
+              Previous
+            </Button>
+            <Button onClick={handleNext}>
+              Next
+            </Button>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   )

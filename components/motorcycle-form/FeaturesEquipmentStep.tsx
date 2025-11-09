@@ -1,9 +1,9 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Button } from '@/components/ui/button'
-import { Upload, Bike, X } from 'lucide-react'
+import { ImageUploader } from '@/components/ui/image-uploader'
 import { MotorcycleFormData } from '@/types/motorcycle'
+import { sanitizeStoragePath } from '@/lib/storage'
 
 interface FeaturesEquipmentStepProps {
   formData: MotorcycleFormData
@@ -22,50 +22,44 @@ export default function FeaturesEquipmentStep({
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold mb-2">Features & Equipment</h2>
-        <p className="text-muted-foreground">Console, lighting, safety features, and warranty</p>
+        <p className="text-muted-foreground">Instrumentation, lighting, comfort, and safety features</p>
       </div>
 
-      {/* 9.1 Console & Connectivity */}
+      {/* 9.1 Instrumentation & Connectivity */}
       <div>
-        <h3 className="text-lg font-semibold mb-4">9.1 Console & Connectivity</h3>
+        <h3 className="text-lg font-semibold mb-4">9.1 Instrumentation & Connectivity</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="instrumentConsole">Instrument Console *</Label>
-            <Select value={formData.instrumentConsole} onValueChange={(value) => setFormData({ ...formData, instrumentConsole: value })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select console type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="analog">Analog</SelectItem>
-                <SelectItem value="digital">Digital</SelectItem>
-                <SelectItem value="semi-digital">Semi-Digital</SelectItem>
-                <SelectItem value="tft">TFT Display</SelectItem>
-                <SelectItem value="lcd">LCD</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label htmlFor="instrumentConsole">Instrument Console Type</Label>
+            <Input
+              id="instrumentConsole"
+              placeholder="e.g., TFT, LCD, Analog"
+              value={formData.instrumentConsole}
+              onChange={(e) => setFormData({ ...formData, instrumentConsole: e.target.value })}
+            />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="displaySize">Display Size (inches)</Label>
+            <Label htmlFor="displaySize">Display Size (inch)</Label>
             <Input
               id="displaySize"
-              placeholder="e.g., 5"
+              placeholder="e.g., 4.3"
               value={formData.displaySize}
               onChange={(e) => setFormData({ ...formData, displaySize: e.target.value })}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="connectivity">Connectivity</Label>
+            <Label htmlFor="connectivity">Connectivity Options</Label>
             <Input
               id="connectivity"
-              placeholder="e.g., Bluetooth, WiFi"
+              placeholder="e.g., Bluetooth, USB, Wi-Fi"
               value={formData.connectivity}
               onChange={(e) => setFormData({ ...formData, connectivity: e.target.value })}
             />
           </div>
 
-          <div className="flex items-center space-x-2 pt-8">
+          <div className="flex items-center space-x-2">
             <input
               type="checkbox"
               id="mobileAppIntegration"
@@ -100,7 +94,7 @@ export default function FeaturesEquipmentStep({
               className="h-4 w-4"
             />
             <Label htmlFor="ridingStatistics" className="font-normal cursor-pointer">
-              Riding Statistics
+              Riding Statistics / Trip Computer
             </Label>
           </div>
         </div>
@@ -111,7 +105,7 @@ export default function FeaturesEquipmentStep({
         <h3 className="text-lg font-semibold mb-4">9.2 Lighting & Comfort</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="headlightType">Headlight Type *</Label>
+            <Label htmlFor="headlightType">Headlight Type</Label>
             <Select value={formData.headlightType} onValueChange={(value) => setFormData({ ...formData, headlightType: value })}>
               <SelectTrigger>
                 <SelectValue placeholder="Select headlight type" />
@@ -119,12 +113,13 @@ export default function FeaturesEquipmentStep({
               <SelectContent>
                 <SelectItem value="led">LED</SelectItem>
                 <SelectItem value="halogen">Halogen</SelectItem>
-                <SelectItem value="projector">Projector LED</SelectItem>
+                <SelectItem value="xenon">Xenon</SelectItem>
+                <SelectItem value="laser">Laser</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="flex items-center space-x-2 pt-8">
+          <div className="flex items-center space-x-2">
             <input
               type="checkbox"
               id="drl"
@@ -141,11 +136,11 @@ export default function FeaturesEquipmentStep({
             <Label htmlFor="tailLightType">Tail Light Type</Label>
             <Select value={formData.tailLightType} onValueChange={(value) => setFormData({ ...formData, tailLightType: value })}>
               <SelectTrigger>
-                <SelectValue placeholder="Select tail light" />
+                <SelectValue placeholder="Select tail light type" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="led">LED</SelectItem>
-                <SelectItem value="bulb">Bulb</SelectItem>
+                <SelectItem value="halogen">Halogen</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -154,11 +149,12 @@ export default function FeaturesEquipmentStep({
             <Label htmlFor="indicatorType">Indicator Type</Label>
             <Select value={formData.indicatorType} onValueChange={(value) => setFormData({ ...formData, indicatorType: value })}>
               <SelectTrigger>
-                <SelectValue placeholder="Select indicator" />
+                <SelectValue placeholder="Select indicator type" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="led">LED</SelectItem>
-                <SelectItem value="bulb">Bulb</SelectItem>
+                <SelectItem value="halogen">Halogen</SelectItem>
+                <SelectItem value="lens">Lens</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -180,7 +176,7 @@ export default function FeaturesEquipmentStep({
             <Label htmlFor="seatType">Seat Type</Label>
             <Input
               id="seatType"
-              placeholder="e.g., Split, Single, Step-up"
+              placeholder="e.g., Single, Dual, Split"
               value={formData.seatType}
               onChange={(e) => setFormData({ ...formData, seatType: e.target.value })}
             />
@@ -190,7 +186,7 @@ export default function FeaturesEquipmentStep({
             <Label htmlFor="handleType">Handle Type</Label>
             <Input
               id="handleType"
-              placeholder="e.g., Flat, Raised, Clip-on"
+              placeholder="e.g., Clip-on, Wide, Touring"
               value={formData.handleType}
               onChange={(e) => setFormData({ ...formData, handleType: e.target.value })}
             />
@@ -377,33 +373,14 @@ export default function FeaturesEquipmentStep({
       {/* Image Upload */}
       <div className="space-y-2 mt-6">
         <Label>Upload Feature Images (Optional)</Label>
-        <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-blue-500 transition-colors cursor-pointer">
-          <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-          <p className="text-sm text-gray-600 mb-1">Console, display, lights, connectivity features</p>
-          <Button type="button" variant="outline" size="sm" className="mt-3">
-            Choose Files
-          </Button>
-        </div>
-        {stepImages.length > 0 && (
-          <div className="grid grid-cols-4 gap-3 mt-3">
-            {stepImages.map((img, index) => (
-              <div key={index} className="relative border rounded-lg overflow-hidden group">
-                <div className="aspect-video bg-gray-100 flex items-center justify-center">
-                  <Bike className="w-8 h-8 text-gray-400" />
-                </div>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => setStepImages(stepImages.filter((_, i) => i !== index))}
-                >
-                  <X className="w-3 h-3" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
+        <ImageUploader
+          storagePath={sanitizeStoragePath(`motorcycles/${formData.brand}/${formData.modelName}/features`)}
+          currentImages={stepImages}
+          onUpload={(urls) => setStepImages([...stepImages, ...urls])}
+          onRemove={(url) => setStepImages(stepImages.filter((img: string) => img !== url))}
+          multiple={true}
+          maxFiles={10}
+        />
       </div>
     </div>
   )

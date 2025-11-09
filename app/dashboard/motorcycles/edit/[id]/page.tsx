@@ -38,21 +38,6 @@ export default function EditMotorcyclePage() {
   const [publishing, setPublishing] = useState(false)
   const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState<MotorcycleFormData | null>(null)
-  
-  // Step-specific image states (for ImageUploader components)
-  const [step1Images, setStep1Images] = useState<string[]>([])
-  const [step2Images, setStep2Images] = useState<string[]>([])
-  const [step3Images, setStep3Images] = useState<string[]>([])
-  const [step4Images, setStep4Images] = useState<string[]>([])
-  const [step5Images, setStep5Images] = useState<string[]>([])
-  const [step6Images, setStep6Images] = useState<string[]>([])
-  const [step7Images, setStep7Images] = useState<string[]>([])
-  const [step8Images, setStep8Images] = useState<string[]>([])
-  const [step9Images, setStep9Images] = useState<string[]>([])
-  const [step10Images, setStep10Images] = useState<string[]>([])
-  const [step11Images, setStep11Images] = useState<string[]>([])
-  const [step12Images, setStep12Images] = useState<string[]>([])
-  const [step13Images, setStep13Images] = useState<string[]>([])
 
   // Fetch motorcycle data on mount
   useEffect(() => {
@@ -63,6 +48,23 @@ export default function EditMotorcyclePage() {
         setLoading(true)
         const data = await getMotorcycle(motorcycleId)
         if (data) {
+          // Ensure stepImages exists
+          if (!data.stepImages) {
+            data.stepImages = {
+              step1: [],
+              step2: [],
+              step3: [],
+              step4: [],
+              step5: [],
+              step6: [],
+              step7: [],
+              step8: [],
+              step9: [],
+              step10: [],
+              step11: [],
+              step12: []
+            }
+          }
           setFormData(data)
         } else {
           alert('Motorcycle not found')
@@ -124,21 +126,21 @@ export default function EditMotorcyclePage() {
 
   // Step-specific image getters
   const getStepImages = (step: number) => {
-    const imageStates = [
-      step1Images, step2Images, step3Images, step4Images, step5Images,
-      step6Images, step7Images, step8Images, step9Images, step10Images,
-      step11Images, step12Images, step13Images
-    ]
-    return imageStates[step - 1]
+    if (!formData) return []
+    const stepKey = `step${step}` as keyof typeof formData.stepImages
+    return formData.stepImages[stepKey] || []
   }
 
   const setStepImages = (step: number, images: string[]) => {
-    const setters = [
-      setStep1Images, setStep2Images, setStep3Images, setStep4Images, setStep5Images,
-      setStep6Images, setStep7Images, setStep8Images, setStep9Images, setStep10Images,
-      setStep11Images, setStep12Images, setStep13Images
-    ]
-    setters[step - 1](images)
+    if (!formData) return
+    const stepKey = `step${step}` as keyof typeof formData.stepImages
+    setFormData({
+      ...formData,
+      stepImages: {
+        ...formData.stepImages,
+        [stepKey]: images
+      }
+    })
   }
 
   // Navigation handlers

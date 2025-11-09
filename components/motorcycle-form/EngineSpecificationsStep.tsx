@@ -3,6 +3,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ImageUploader } from '@/components/ui/image-uploader'
 import { MotorcycleFormData } from '@/types/motorcycle'
+import { sanitizeStoragePath } from '@/lib/storage'
 
 interface EngineSpecificationsStepProps {
   formData: MotorcycleFormData
@@ -258,7 +259,7 @@ export default function EngineSpecificationsStep({
       <div className="space-y-2 mt-6">
         <Label>Upload Engine Images (Optional)</Label>
         <ImageUploader
-          storagePath={`motorcycles/${formData.brand}/${formData.modelName}/engine`}
+          storagePath={sanitizeStoragePath(`motorcycles/${formData.brand}/${formData.modelName}/engine`)}
           currentImages={stepImages}
           onUpload={(urls) => setStepImages([...stepImages, ...urls])}
           onRemove={(url) => setStepImages(stepImages.filter(img => img !== url))}

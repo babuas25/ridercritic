@@ -1,9 +1,12 @@
+import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
-import { Upload, Bike, X, Plus, Trash2 } from 'lucide-react'
+import { ImageUploader } from '@/components/ui/image-uploader'
+import { Plus, Trash2 } from 'lucide-react'
 import { MotorcycleFormData } from '@/types/motorcycle'
+import { sanitizeStoragePath } from '@/lib/storage'
 
 interface AdditionalInformationStepProps {
   formData: MotorcycleFormData
@@ -18,11 +21,21 @@ export default function AdditionalInformationStep({
   stepImages,
   setStepImages
 }: AdditionalInformationStepProps) {
+  const [newHighlight, setNewHighlight] = useState('')
+  const [newPro, setNewPro] = useState('')
+  const [newCon, setNewCon] = useState('')
+  const [newTag, setNewTag] = useState('')
+  const [newRelatedModel, setNewRelatedModel] = useState('')
+
+  // Key Highlights
   const addHighlight = () => {
-    setFormData({ 
-      ...formData, 
-      keyHighlights: [...formData.keyHighlights, ''] 
-    })
+    if (newHighlight.trim()) {
+      setFormData({ 
+        ...formData, 
+        keyHighlights: [...formData.keyHighlights, newHighlight.trim()] 
+      })
+      setNewHighlight('')
+    }
   }
 
   const removeHighlight = (index: number) => {
@@ -33,15 +46,21 @@ export default function AdditionalInformationStep({
   }
 
   const updateHighlight = (index: number, value: string) => {
-    const updated = formData.keyHighlights.map((h, i) => i === index ? value : h)
-    setFormData({ ...formData, keyHighlights: updated })
+    const updatedHighlights = formData.keyHighlights.map((highlight, i) => 
+      i === index ? value : highlight
+    )
+    setFormData({ ...formData, keyHighlights: updatedHighlights })
   }
 
+  // Pros
   const addPro = () => {
-    setFormData({ 
-      ...formData, 
-      pros: [...formData.pros, ''] 
-    })
+    if (newPro.trim()) {
+      setFormData({ 
+        ...formData, 
+        pros: [...formData.pros, newPro.trim()] 
+      })
+      setNewPro('')
+    }
   }
 
   const removePro = (index: number) => {
@@ -52,15 +71,21 @@ export default function AdditionalInformationStep({
   }
 
   const updatePro = (index: number, value: string) => {
-    const updated = formData.pros.map((p, i) => i === index ? value : p)
-    setFormData({ ...formData, pros: updated })
+    const updatedPros = formData.pros.map((pro, i) => 
+      i === index ? value : pro
+    )
+    setFormData({ ...formData, pros: updatedPros })
   }
 
+  // Cons
   const addCon = () => {
-    setFormData({ 
-      ...formData, 
-      cons: [...formData.cons, ''] 
-    })
+    if (newCon.trim()) {
+      setFormData({ 
+        ...formData, 
+        cons: [...formData.cons, newCon.trim()] 
+      })
+      setNewCon('')
+    }
   }
 
   const removeCon = (index: number) => {
@@ -71,15 +96,21 @@ export default function AdditionalInformationStep({
   }
 
   const updateCon = (index: number, value: string) => {
-    const updated = formData.cons.map((c, i) => i === index ? value : c)
-    setFormData({ ...formData, cons: updated })
+    const updatedCons = formData.cons.map((con, i) => 
+      i === index ? value : con
+    )
+    setFormData({ ...formData, cons: updatedCons })
   }
 
+  // Tags
   const addTag = () => {
-    setFormData({ 
-      ...formData, 
-      tags: [...formData.tags, ''] 
-    })
+    if (newTag.trim()) {
+      setFormData({ 
+        ...formData, 
+        tags: [...formData.tags, newTag.trim()] 
+      })
+      setNewTag('')
+    }
   }
 
   const removeTag = (index: number) => {
@@ -90,15 +121,21 @@ export default function AdditionalInformationStep({
   }
 
   const updateTag = (index: number, value: string) => {
-    const updated = formData.tags.map((t, i) => i === index ? value : t)
-    setFormData({ ...formData, tags: updated })
+    const updatedTags = formData.tags.map((tag, i) => 
+      i === index ? value : tag
+    )
+    setFormData({ ...formData, tags: updatedTags })
   }
 
+  // Related Models
   const addRelatedModel = () => {
-    setFormData({ 
-      ...formData, 
-      relatedModels: [...formData.relatedModels, ''] 
-    })
+    if (newRelatedModel.trim()) {
+      setFormData({ 
+        ...formData, 
+        relatedModels: [...formData.relatedModels, newRelatedModel.trim()] 
+      })
+      setNewRelatedModel('')
+    }
   }
 
   const removeRelatedModel = (index: number) => {
@@ -109,43 +146,50 @@ export default function AdditionalInformationStep({
   }
 
   const updateRelatedModel = (index: number, value: string) => {
-    const updated = formData.relatedModels.map((m, i) => i === index ? value : m)
-    setFormData({ ...formData, relatedModels: updated })
+    const updatedModels = formData.relatedModels.map((model, i) => 
+      i === index ? value : model
+    )
+    setFormData({ ...formData, relatedModels: updatedModels })
   }
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold mb-2">Additional Information</h2>
-        <p className="text-muted-foreground">Description, highlights, SEO metadata, and notes</p>
+        <p className="text-muted-foreground">Key highlights, pros/cons, SEO metadata, and related models</p>
       </div>
 
       {/* Description */}
       <div className="space-y-2">
-        <Label htmlFor="description">Description *</Label>
+        <Label htmlFor="description">Detailed Description *</Label>
         <Textarea
           id="description"
-          placeholder="Detailed description of the motorcycle..."
+          placeholder="Comprehensive description of the motorcycle..."
           rows={6}
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
         />
-        <p className="text-xs text-gray-500">Rich text description for product page</p>
       </div>
 
       {/* Key Highlights */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <Label>Key Highlights (Bullet Points)</Label>
-          <Button type="button" onClick={addHighlight} size="sm" variant="outline">
+        <div className="flex items-center gap-2">
+          <Input
+            placeholder="Add a key highlight (e.g., Fuel injected engine)"
+            value={newHighlight}
+            onChange={(e) => setNewHighlight(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && addHighlight()}
+            className="flex-1"
+          />
+          <Button type="button" onClick={addHighlight} size="sm">
             <Plus className="w-4 h-4 mr-1" />
-            Add Highlight
+            Add
           </Button>
         </div>
         {formData.keyHighlights.map((highlight, index) => (
           <div key={index} className="flex gap-2">
             <Input
-              placeholder="e.g., BS6 compliant engine"
+              placeholder="e.g., Fuel injected engine"
               value={highlight}
               onChange={(e) => updateHighlight(index, e.target.value)}
               className="flex-1"
@@ -322,33 +366,14 @@ export default function AdditionalInformationStep({
       {/* Image Upload */}
       <div className="space-y-2 mt-6">
         <Label>Upload Additional Images (Optional)</Label>
-        <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-blue-500 transition-colors cursor-pointer">
-          <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-          <p className="text-sm text-gray-600 mb-1">Brochures, certificates, awards</p>
-          <Button type="button" variant="outline" size="sm" className="mt-3">
-            Choose Files
-          </Button>
-        </div>
-        {stepImages.length > 0 && (
-          <div className="grid grid-cols-4 gap-3 mt-3">
-            {stepImages.map((img, index) => (
-              <div key={index} className="relative border rounded-lg overflow-hidden group">
-                <div className="aspect-video bg-gray-100 flex items-center justify-center">
-                  <Bike className="w-8 h-8 text-gray-400" />
-                </div>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => setStepImages(stepImages.filter((_, i) => i !== index))}
-                >
-                  <X className="w-3 h-3" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
+        <ImageUploader
+          storagePath={sanitizeStoragePath(`motorcycles/${formData.brand}/${formData.modelName}/additional`)}
+          currentImages={stepImages}
+          onUpload={(urls) => setStepImages([...stepImages, ...urls])}
+          onRemove={(url) => setStepImages(stepImages.filter((img: string) => img !== url))}
+          multiple={true}
+          maxFiles={10}
+        />
       </div>
     </div>
   )

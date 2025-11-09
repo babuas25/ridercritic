@@ -6,6 +6,7 @@ import { MotorcycleFormData } from '@/types/motorcycle'
 import { useState, useEffect } from 'react'
 import { getAllBrands, getAllTypes } from '@/lib/brands-types'
 import type { Brand, MotorcycleType } from '@/lib/brands-types'
+import { sanitizeStoragePath } from '@/lib/storage'
 
 interface BasicInformationStepProps {
   formData: MotorcycleFormData
@@ -190,7 +191,7 @@ export default function BasicInformationStep({
           <div className="space-y-2">
             <Label>Upload Cover Image *</Label>
             <ImageUploader
-              storagePath={`motorcycles/${formData.brand}/${formData.modelName}/cover`}
+              storagePath={sanitizeStoragePath(`motorcycles/${formData.brand}/${formData.modelName}/cover`)}
               currentImages={formData.coverImage ? [formData.coverImage] : []}
               onUpload={(urls) => setFormData({ ...formData, coverImage: urls[0] })}
               onRemove={() => setFormData({ ...formData, coverImage: '' })}
@@ -202,7 +203,7 @@ export default function BasicInformationStep({
           <div className="space-y-2">
             <Label>Upload Gallery (Multiple Images)</Label>
             <ImageUploader
-              storagePath={`motorcycles/${formData.brand}/${formData.modelName}/gallery`}
+              storagePath={sanitizeStoragePath(`motorcycles/${formData.brand}/${formData.modelName}/gallery`)}
               currentImages={formData.galleryImages}
               onUpload={(urls) => setFormData({ ...formData, galleryImages: [...formData.galleryImages, ...urls] })}
               onRemove={(url) => setFormData({ ...formData, galleryImages: formData.galleryImages.filter(img => img !== url) })}

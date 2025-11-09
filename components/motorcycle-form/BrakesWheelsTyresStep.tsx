@@ -1,9 +1,9 @@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Button } from '@/components/ui/button'
-import { Upload, Bike, X } from 'lucide-react'
+import { ImageUploader } from '@/components/ui/image-uploader'
 import { MotorcycleFormData } from '@/types/motorcycle'
+import { sanitizeStoragePath } from '@/lib/storage'
 
 interface BrakesWheelsTyresStepProps {
   formData: MotorcycleFormData
@@ -22,7 +22,7 @@ export default function BrakesWheelsTyresStep({
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold mb-2">Brakes, Wheels & Tyres</h2>
-        <p className="text-muted-foreground">Braking system and wheel configuration</p>
+        <p className="text-muted-foreground">Braking system, wheel specifications, and tyre details</p>
       </div>
 
       {/* 7.1 Braking System */}
@@ -30,15 +30,15 @@ export default function BrakesWheelsTyresStep({
         <h3 className="text-lg font-semibold mb-4">7.1 Braking System</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="frontBrakeType">Front Brake Type *</Label>
+            <Label htmlFor="frontBrakeType">Front Brake Type</Label>
             <Select value={formData.frontBrakeType} onValueChange={(value) => setFormData({ ...formData, frontBrakeType: value })}>
               <SelectTrigger>
-                <SelectValue placeholder="Select brake type" />
+                <SelectValue placeholder="Select front brake type" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="disc">Disc</SelectItem>
-                <SelectItem value="dual-disc">Dual Disc</SelectItem>
                 <SelectItem value="drum">Drum</SelectItem>
+                <SelectItem value="dual-disc">Dual Disc</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -47,17 +47,17 @@ export default function BrakesWheelsTyresStep({
             <Label htmlFor="frontBrakeSize">Front Brake Size (mm)</Label>
             <Input
               id="frontBrakeSize"
-              placeholder="e.g., 300"
+              placeholder="e.g., 282"
               value={formData.frontBrakeSize}
               onChange={(e) => setFormData({ ...formData, frontBrakeSize: e.target.value })}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="rearBrakeType">Rear Brake Type *</Label>
+            <Label htmlFor="rearBrakeType">Rear Brake Type</Label>
             <Select value={formData.rearBrakeType} onValueChange={(value) => setFormData({ ...formData, rearBrakeType: value })}>
               <SelectTrigger>
-                <SelectValue placeholder="Select brake type" />
+                <SelectValue placeholder="Select rear brake type" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="disc">Disc</SelectItem>
@@ -80,12 +80,13 @@ export default function BrakesWheelsTyresStep({
             <Label htmlFor="absSupport">ABS Support</Label>
             <Select value={formData.absSupport} onValueChange={(value) => setFormData({ ...formData, absSupport: value })}>
               <SelectTrigger>
-                <SelectValue placeholder="Select ABS" />
+                <SelectValue placeholder="Select ABS support" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="yes">Yes</SelectItem>
-                <SelectItem value="no">No</SelectItem>
-                <SelectItem value="optional">Optional</SelectItem>
+                <SelectItem value="single-channel">Single Channel</SelectItem>
+                <SelectItem value="dual-channel">Dual Channel</SelectItem>
+                <SelectItem value="cornering">Cornering ABS</SelectItem>
+                <SelectItem value="none">None</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -94,13 +95,13 @@ export default function BrakesWheelsTyresStep({
             <Label htmlFor="brakeCaliperType">Brake Caliper Type</Label>
             <Input
               id="brakeCaliperType"
-              placeholder="e.g., Radial, Axial"
+              placeholder="e.g., Single Piston, Dual Piston"
               value={formData.brakeCaliperType}
               onChange={(e) => setFormData({ ...formData, brakeCaliperType: e.target.value })}
             />
           </div>
 
-          <div className="flex items-center space-x-2 pt-8">
+          <div className="flex items-center space-x-2">
             <input
               type="checkbox"
               id="cbs"
@@ -120,7 +121,7 @@ export default function BrakesWheelsTyresStep({
         <h3 className="text-lg font-semibold mb-4">7.2 Wheel & Tyre Setup</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="wheelType">Wheel Type *</Label>
+            <Label htmlFor="wheelType">Wheel Type</Label>
             <Select value={formData.wheelType} onValueChange={(value) => setFormData({ ...formData, wheelType: value })}>
               <SelectTrigger>
                 <SelectValue placeholder="Select wheel type" />
@@ -201,33 +202,14 @@ export default function BrakesWheelsTyresStep({
       {/* Image Upload */}
       <div className="space-y-2 mt-6">
         <Label>Upload Brake & Wheel Images (Optional)</Label>
-        <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-blue-500 transition-colors cursor-pointer">
-          <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-          <p className="text-sm text-gray-600 mb-1">Brake calipers, discs, wheels, tyres</p>
-          <Button type="button" variant="outline" size="sm" className="mt-3">
-            Choose Files
-          </Button>
-        </div>
-        {stepImages.length > 0 && (
-          <div className="grid grid-cols-4 gap-3 mt-3">
-            {stepImages.map((img, index) => (
-              <div key={index} className="relative border rounded-lg overflow-hidden group">
-                <div className="aspect-video bg-gray-100 flex items-center justify-center">
-                  <Bike className="w-8 h-8 text-gray-400" />
-                </div>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => setStepImages(stepImages.filter((_, i) => i !== index))}
-                >
-                  <X className="w-3 h-3" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
+        <ImageUploader
+          storagePath={sanitizeStoragePath(`motorcycles/${formData.brand}/${formData.modelName}/brakes-wheels`)}
+          currentImages={stepImages}
+          onUpload={(urls) => setStepImages([...stepImages, ...urls])}
+          onRemove={(url) => setStepImages(stepImages.filter((img: string) => img !== url))}
+          multiple={true}
+          maxFiles={10}
+        />
       </div>
     </div>
   )
