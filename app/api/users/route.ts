@@ -4,33 +4,55 @@ import { adminDb } from '@/lib/firebase-admin'
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('API GET /api/users - Starting request processing');
+    
     // Get JWT token from cookies
     const token = await getToken({ 
       req: request,
       secret: process.env.NEXTAUTH_SECRET 
     })
     
+    console.log('API GET /api/users - Token received:', token);
+    
     if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      console.log('API GET /api/users - No token found, returning 401');
+      return NextResponse.json({ 
+        error: 'Unauthorized - No valid session token',
+        details: 'Session token is missing or invalid'
+      }, { status: 401 })
     }
 
     // Check if user is admin or super admin
     const userRole = token.role
-    console.log('API GET - Token role:', userRole, 'Token data:', token)
+    console.log('API GET /api/users - Token role:', userRole);
     const isAdmin = ['Super Admin', 'Admin'].includes(userRole as string)
 
     if (!isAdmin) {
-      console.log('API GET - User is not admin')
-      return NextResponse.json({ error: 'Forbidden', details: { role: userRole } }, { status: 403 })
+      console.log('API GET /api/users - User is not admin, returning 403');
+      return NextResponse.json({ 
+        error: 'Forbidden - Insufficient permissions', 
+        details: { 
+          role: userRole, 
+          required: ['Super Admin', 'Admin'],
+          isAdminCheck: isAdmin
+        } 
+      }, { status: 403 })
     }
 
     // Check if Admin SDK is configured
     if (!adminDb) {
-      return NextResponse.json({ error: 'Admin SDK not configured' }, { status: 500 })
+      console.log('API GET /api/users - Admin SDK not configured, returning 500');
+      return NextResponse.json({ 
+        error: 'Server configuration error - Admin SDK not configured',
+        details: 'Missing Firebase Admin credentials'
+      }, { status: 500 })
     }
 
+    console.log('API GET /api/users - Fetching users from Firestore');
     // Fetch all users from Firestore
     const usersSnapshot = await adminDb.collection('users').get()
+    
+    console.log('API GET /api/users - Users fetched:', usersSnapshot.size);
     
     const users = usersSnapshot.docs.map(doc => {
       const data = doc.data()
@@ -46,11 +68,16 @@ export async function GET(request: NextRequest) {
       }
     })
 
+    console.log('API GET /api/users - Returning users:', users.length);
     return NextResponse.json({ users })
-  } catch (error) {
-    console.error('Error fetching users:', error)
+  } catch (error: unknown) {
+    console.error('API GET /api/users - Error fetching users:', error)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to fetch users' },
+      { 
+        error: error instanceof Error ? error.message : 'Failed to fetch users',
+        stack: error instanceof Error && process.env.NODE_ENV === 'development' ? error.stack : undefined,
+        name: error && typeof error === 'object' && 'name' in error ? (error as { name?: string }).name : 'UnknownError'
+      },
       { status: 500 }
     )
   }
@@ -58,37 +85,65 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    console.log('API PUT /api/users - Starting request processing');
+    
     // Get JWT token from cookies
     const token = await getToken({ 
       req: request,
       secret: process.env.NEXTAUTH_SECRET 
     })
     
+    console.log('API PUT /api/users - Token received:', token);
+    
     if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      console.log('API PUT /api/users - No token found, returning 401');
+      return NextResponse.json({ 
+        error: 'Unauthorized - No valid session token',
+        details: 'Session token is missing or invalid'
+      }, { status: 401 })
     }
 
     // Check if user is admin or super admin
     const userRole = token.role
+    console.log('API PUT /api/users - Token role:', userRole);
     const isAdmin = ['Super Admin', 'Admin'].includes(userRole as string)
 
     if (!isAdmin) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      console.log('API PUT /api/users - User is not admin, returning 403');
+      return NextResponse.json({ 
+        error: 'Forbidden - Insufficient permissions', 
+        details: { 
+          role: userRole, 
+          required: ['Super Admin', 'Admin'],
+          isAdminCheck: isAdmin
+        } 
+      }, { status: 403 })
     }
 
     // Check if Admin SDK is configured
     if (!adminDb) {
-      return NextResponse.json({ error: 'Admin SDK not configured' }, { status: 500 })
+      console.log('API PUT /api/users - Admin SDK not configured, returning 500');
+      return NextResponse.json({ 
+        error: 'Server configuration error - Admin SDK not configured',
+        details: 'Missing Firebase Admin credentials'
+      }, { status: 500 })
     }
 
     const body = await request.json()
+    console.log('API PUT /api/users - Request body:', body);
+    
     const { uid, displayName, role, subRole } = body
 
     if (!uid) {
-      return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
+      console.log('API PUT /api/users - Missing UID, returning 400');
+      return NextResponse.json({ 
+        error: 'Bad Request - User ID is required',
+        details: 'The uid field is missing from the request body'
+      }, { status: 400 })
     }
 
     // Update user in Firestore
+    console.log('API PUT /api/users - Updating user in Firestore:', uid);
     const userRef = adminDb.collection('users').doc(uid)
     await userRef.update({
       displayName,
@@ -96,12 +151,17 @@ export async function PUT(request: NextRequest) {
       subRole,
       updatedAt: new Date(),
     })
-
+    
+    console.log('API PUT /api/users - User updated successfully:', uid);
     return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error('Error updating user:', error)
+  } catch (error: unknown) {
+    console.error('API PUT /api/users - Error updating user:', error)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to update user' },
+      { 
+        error: error instanceof Error ? error.message : 'Failed to update user',
+        stack: error instanceof Error && process.env.NODE_ENV === 'development' ? error.stack : undefined,
+        name: error && typeof error === 'object' && 'name' in error ? (error as { name?: string }).name : 'UnknownError'
+      },
       { status: 500 }
     )
   }

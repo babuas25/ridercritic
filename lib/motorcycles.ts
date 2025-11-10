@@ -59,14 +59,18 @@ export async function createMotorcycle(
  */
 export async function getMotorcycle(motorcycleId: string): Promise<MotorcycleFormData | null> {
   try {
-    const motorcycleRef = doc(db, MOTORCYCLES_COLLECTION, motorcycleId)
-    const motorcycleSnap = await getDoc(motorcycleRef)
+    const motorcycleRef = doc(db, MOTORCYCLES_COLLECTION, motorcycleId);
+    const motorcycleSnap = await getDoc(motorcycleRef);
     
     if (motorcycleSnap.exists()) {
-      return motorcycleSnap.data() as MotorcycleFormData
+      const data = motorcycleSnap.data() as MotorcycleFormData;
+      console.log('Fetched motorcycle data:', data); // Debug log
+      console.log('Gallery images in fetched data:', data.galleryImages); // Specific debug for gallery images
+      return data;
     }
     
-    return null
+    console.log('Motorcycle not found'); // Debug log
+    return null;
   } catch (error) {
     console.error('Error fetching motorcycle:', error)
     throw new Error('Failed to fetch motorcycle')
@@ -85,19 +89,24 @@ export async function updateMotorcycle(
   userId: string
 ): Promise<void> {
   try {
-    const motorcycleRef = doc(db, MOTORCYCLES_COLLECTION, motorcycleId)
+    console.log('Updating motorcycle with data:', motorcycleData); // Debug log
+    console.log('Gallery images in update data:', motorcycleData.galleryImages); // Specific debug for gallery images
+    
+    const motorcycleRef = doc(db, MOTORCYCLES_COLLECTION, motorcycleId);
     
     const updateData = {
       ...motorcycleData,
       updatedAt: serverTimestamp(),
       lastUpdatedBy: userId,
       lastUpdatedDate: new Date().toISOString()
-    }
+    };
     
-    await updateDoc(motorcycleRef, updateData)
+    console.log('Update data being sent to Firestore:', updateData); // Debug log
+    await updateDoc(motorcycleRef, updateData);
+    console.log('Motorcycle updated successfully'); // Success log
   } catch (error) {
-    console.error('Error updating motorcycle:', error)
-    throw new Error('Failed to update motorcycle')
+    console.error('Error updating motorcycle:', error);
+    throw new Error('Failed to update motorcycle');
   }
 }
 

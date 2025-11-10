@@ -202,14 +202,33 @@ export default function BasicInformationStep({
 
           <div className="space-y-2">
             <Label>Upload Gallery (Multiple Images)</Label>
-            <ImageUploader
-              storagePath={sanitizeStoragePath(`motorcycles/${formData.brand}/${formData.modelName}/gallery`)}
-              currentImages={formData.galleryImages}
-              onUpload={(urls) => setFormData({ ...formData, galleryImages: [...formData.galleryImages, ...urls] })}
-              onRemove={(url) => setFormData({ ...formData, galleryImages: formData.galleryImages.filter(img => img !== url) })}
-              multiple={true}
-              maxFiles={10}
-            />
+            {(() => {
+              // Ensure brand and model name are properly formatted for storage paths
+              const brand = formData.brand || 'unknown-brand';
+              const modelName = formData.modelName || 'unknown-model';
+              const storagePath = sanitizeStoragePath(`motorcycles/${brand}/${modelName}/gallery`);
+              console.log('Gallery storage path:', storagePath);
+              return (
+                <ImageUploader
+                  storagePath={storagePath}
+                  currentImages={Array.isArray(formData.galleryImages) ? formData.galleryImages : []}
+                  onUpload={(urls) => {
+                    console.log('Gallery images uploaded:', urls);
+                    // Ensure we're not adding duplicates
+                    const currentGalleryImages = Array.isArray(formData.galleryImages) ? formData.galleryImages : [];
+                    const newGalleryImages = [...currentGalleryImages, ...urls];
+                    setFormData({ ...formData, galleryImages: newGalleryImages });
+                  }}
+                  onRemove={(url) => {
+                    const currentGalleryImages = Array.isArray(formData.galleryImages) ? formData.galleryImages : [];
+                    const updatedGalleryImages = currentGalleryImages.filter(img => img !== url);
+                    setFormData({ ...formData, galleryImages: updatedGalleryImages });
+                  }}
+                  multiple={true}
+                  maxFiles={10}
+                />
+              );
+            })()}
           </div>
 
           <div className="space-y-2">

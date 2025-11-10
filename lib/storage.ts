@@ -1,5 +1,5 @@
 import { storage } from './firebase'
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage'
+import { ref, uploadBytes, getDownloadURL, deleteObject, listAll } from 'firebase/storage'
 
 /**
  * Sanitize storage path by replacing spaces and special characters
@@ -7,12 +7,17 @@ import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage
  * @returns Sanitized path
  */
 export function sanitizeStoragePath(path: string): string {
-  return path
+  console.log('Original path:', path);
+  const sanitized = path
     .split('/')
-    .map(segment => 
-      segment.replace(/[^a-zA-Z0-9.-]/g, '_').replace(/_+/g, '_')
-    )
-    .join('/')
+    .map(segment => {
+      // Replace spaces with hyphens instead of underscores for better readability
+      // Keep alphanumeric characters, dots, and hyphens
+      return segment.replace(/[^a-zA-Z0-9.-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    })
+    .join('/');
+  console.log('Sanitized path:', sanitized);
+  return sanitized;
 }
 
 /**
@@ -23,12 +28,20 @@ export function sanitizeStoragePath(path: string): string {
  */
 export async function uploadImage(file: File, path: string): Promise<string> {
   try {
+    console.log('Uploading image to path:', path); // Debug log
+    console.log('File name:', file.name); // Debug log
     const timestamp = Date.now()
-    const fileName = `${timestamp}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+    // Use hyphens instead of underscores for consistency
+    const fileName = `${timestamp}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '-')}`
+      .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+      .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+    console.log('Generated file name:', fileName); // Debug log
     const storageRef = ref(storage, `${path}/${fileName}`)
+    console.log('Storage reference path:', storageRef.toString()); // Debug log
     
     await uploadBytes(storageRef, file)
     const downloadURL = await getDownloadURL(storageRef)
+    console.log('Download URL:', downloadURL); // Debug log
     
     return downloadURL
   } catch (error) {
@@ -79,6 +92,41 @@ export async function deleteMultipleImages(imageUrls: string[]): Promise<void> {
   } catch (error) {
     console.error('Error deleting multiple images:', error)
     throw new Error('Failed to delete images')
+  }
+}
+
+/**
+ * List all image download URLs under a storage folder
+ * @param path - Storage folder path
+ * @returns Array of download URLs
+ */
+export async function listFolderImages(path: string): Promise<string[]> {
+  try {
+    const folderRef = ref(storage, path)
+    const res = await listAll(folderRef)
+    const urlPromises = res.items.map(itemRef => getDownloadURL(itemRef))
+    const urls = await Promise.all(urlPromises)
+    // Keep only plausible image URLs
+    return urls.filter(Boolean)
+  } catch (error) {
+    console.error('Error listing folder images:', error)
+    return []
+  }
+}
+
+/**
+ * List images from multiple folders beneath a basePath.
+ * Returns a flat list preserving the provided folder order.
+ */
+export async function listImagesFromFolders(basePath: string, folders: string[]): Promise<string[]> {
+  try {
+    const results = await Promise.all(
+      folders.map(folder => listFolderImages(`${basePath}/${folder}`))
+    )
+    return results.flat().filter(Boolean)
+  } catch (error) {
+    console.error('Error listing images from folders:', error)
+    return []
   }
 }
 

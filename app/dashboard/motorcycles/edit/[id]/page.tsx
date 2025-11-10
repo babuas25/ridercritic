@@ -1,5 +1,4 @@
 'use client'
-'use client'
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
@@ -47,6 +46,7 @@ export default function EditMotorcyclePage() {
       try {
         setLoading(true)
         const data = await getMotorcycle(motorcycleId)
+        console.log('Fetched motorcycle data for editing:', data) // Debug log
         if (data) {
           // Ensure stepImages exists
           if (!data.stepImages) {
@@ -183,7 +183,8 @@ export default function EditMotorcyclePage() {
 
       await updateMotorcycle(motorcycleId, { ...formData, status: 'published' }, session.user.id)
       alert('Motorcycle updated and published successfully!')
-      router.push('/dashboard/motorcycles')
+      // Redirect to the motorcycle detail page to see the updated images
+      router.push(`/motorcycle/${motorcycleId}`)
     } catch (error) {
       console.error('Error publishing motorcycle:', error)
       alert('Failed to publish motorcycle')

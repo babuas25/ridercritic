@@ -22,16 +22,38 @@ if (!getApps().length && hasAdminCredentials) {
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
     privateKey: process.env.FIREBASE_PRIVATE_KEY ? '***' : 'MISSING'
   });
+  
   try {
+    // Process the private key to ensure proper formatting
+    let privateKey = process.env.FIREBASE_PRIVATE_KEY!
+    
+    // Remove surrounding quotes if present
+    if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+      privateKey = privateKey.slice(1, -1)
+    }
+    
+    // Replace escaped newlines with actual newlines
+    privateKey = privateKey.replace(/\\n/g, '\n')
+    
+    // Additional processing to ensure proper format
+    privateKey = privateKey.trim()
+    
+    console.log('Processed private key length:', privateKey.length)
+    
     initializeApp({
       credential: cert({
         projectId: process.env.NEXT_PUBLIC_PROJECT_ID!,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY!.replace(/\\n/g, '\n'),
+        privateKey: privateKey,
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL!,
       }),
     })
-  } catch (error) {
+    console.log('Firebase Admin SDK initialized successfully')
+  } catch (error: unknown) {
     console.error('Failed to initialize Firebase Admin SDK:', error)
+    const err = error as { name?: string; message?: string; stack?: string }
+    console.error('Error name:', err?.name || 'Unknown')
+    console.error('Error message:', err?.message || 'No message')
+    console.error('Error stack:', err?.stack || 'No stack trace')
   }
 }
 

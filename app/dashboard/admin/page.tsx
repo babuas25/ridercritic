@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import DashboardLayout from '@/components/layouts/DashboardLayout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -55,42 +56,102 @@ interface User {
 }
 
 export default function AdminDashboard() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
+  const router = useRouter()
   const [users, setUsers] = useState<User[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedRole, setSelectedRole] = useState<string>('all')
   const [isAddUserOpen, setIsAddUserOpen] = useState(false)
   const [isEditUserOpen, setIsEditUserOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Redirect if not authenticated or not authorized
+  useEffect(() => {
+    if (status === 'loading') return
+    
+    if (!session) {
+      router.push('/login')
+      return
+    }
+    
+    // Check if user has admin rights
+    if (!canManageRoles(session.user.role)) {
+      router.push('/dashboard/user')
+      return
+    }
+  }, [session, status, router])
 
   // Fetch real users from API
   useEffect(() => {
+    if (!session || status !== 'authenticated' || !canManageRoles(session.user.role)) {
+      return
+    }
+    
     const fetchUsers = async () => {
       try {
+        setLoading(true)
+        setError(null)
+        console.log('Fetching users from API...')
+        
         const response = await fetch('/api/users')
+        console.log('API Response status:', response.status)
+        
         if (!response.ok) {
-          throw new Error('Failed to fetch users')
+          const errorData = await response.json().catch(() => ({}))
+          console.error('API Error Response:', errorData)
+          throw new Error(`Failed to fetch users: ${response.status} ${response.statusText} - ${errorData.error || 'Unknown error'}`)
         }
+        
         const data = await response.json()
+        console.log('API Response data:', data)
+        
         // Convert date strings back to Date objects
         const usersWithDates = data.users.map((user: User & { createdAt: string | Date; lastLogin?: string | Date }) => ({
           ...user,
           createdAt: user.createdAt ? new Date(user.createdAt) : new Date(),
           lastLogin: user.lastLogin ? new Date(user.lastLogin) : undefined,
         }))
+        
         setUsers(usersWithDates)
       } catch (error) {
         console.error('Error fetching users:', error)
+        setError(error instanceof Error ? error.message : 'Failed to load users')
+        // Show error to user
+        alert(`Failed to load users: ${error instanceof Error ? error.message : 'Unknown error'}`)
         // Fallback to empty array on error
         setUsers([])
+      } finally {
+        setLoading(false)
       }
     }
 
     fetchUsers()
-  }, [])
+  }, [session, status])
+
+  if (status === 'loading') {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg">Loading...</div>
+        </div>
+      </DashboardLayout>
+    )
+  }
 
   if (!session) {
     return null
+  }
+
+  if (!canManageRoles(session.user.role)) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg text-red-500">Access denied. You do not have permission to view this page.</div>
+        </div>
+      </DashboardLayout>
+    )
   }
 
   const filteredUsers = users.filter(user => {
@@ -144,7 +205,8 @@ export default function AdminDashboard() {
         })
 
         if (!response.ok) {
-          throw new Error('Failed to update user')
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(`Failed to update user: ${errorData.error || 'Unknown error'}`)
         }
 
         // Update local state
@@ -295,59 +357,69 @@ export default function AdminDashboard() {
             </div>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Sub Role</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Last Login</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.uid}>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{user.displayName}</div>
-                        <div className="text-sm text-muted-foreground">{user.email}</div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getRoleColor(user.role)}>
-                        {getRoleIcon(user.role)}
-                        <span className="ml-1">{user.role}</span>
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{user.subRole}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      {user.createdAt.toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      {user.lastLogin ? user.lastLogin.toLocaleDateString() : 'Never'}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEditUser(user)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+            {loading ? (
+              <div className="flex items-center justify-center h-32">
+                <div>Loading users...</div>
+              </div>
+            ) : error ? (
+              <div className="flex items-center justify-center h-32 text-red-500">
+                <div>Error: {error}</div>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Sub Role</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead>Last Login</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filteredUsers.map((user) => (
+                    <TableRow key={user.uid}>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{user.displayName}</div>
+                          <div className="text-sm text-muted-foreground">{user.email}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getRoleColor(user.role)}>
+                          {getRoleIcon(user.role)}
+                          <span className="ml-1">{user.role}</span>
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{user.subRole}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        {user.createdAt.toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        {user.lastLogin ? user.lastLogin.toLocaleDateString() : 'Never'}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditUser(user)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
 

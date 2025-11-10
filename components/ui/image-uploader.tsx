@@ -42,6 +42,7 @@ export function ImageUploader({
 
     setError(null)
     setUploading(true)
+    console.log('Files selected for upload:', files) // Debug log
 
     try {
       // Validate files
@@ -72,12 +73,15 @@ export function ImageUploader({
       // Upload files
       let urls: string[]
       if (multiple) {
+        console.log('Uploading multiple images to path:', storagePath) // Debug log
         urls = await uploadMultipleImages(validFiles, storagePath)
       } else {
+        console.log('Uploading single image to path:', storagePath) // Debug log
         const url = await uploadImage(validFiles[0], storagePath)
         urls = [url]
       }
 
+      console.log('Uploaded image URLs:', urls) // Debug log
       onUpload(urls)
     } catch (err) {
       console.error('Upload error:', err)
@@ -149,7 +153,7 @@ export function ImageUploader({
       {safeCurrentImages.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {safeCurrentImages.map((url, index) => (
-            <div key={index} className="relative border rounded-lg overflow-hidden group">
+            <div key={`${url}-${index}`} className="relative border rounded-lg overflow-hidden group">
               <div className="aspect-video bg-gray-100 relative">
                 <Image 
                   src={url} 
