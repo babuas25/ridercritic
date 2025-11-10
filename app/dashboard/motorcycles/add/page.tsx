@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
@@ -225,11 +225,14 @@ export default function AddMotorcyclePage() {
     lastUpdatedDate: ''
   })
 
-  // Check if user is Admin or Super Admin
-  if (!session || (session.user.role !== 'Admin' && session.user.role !== 'Super Admin')) {
-    router.push('/dashboard')
-    return null
-  }
+  // Redirect non-admins on client after session loads
+  useEffect(() => {
+    if (session && session.user && session.user.role !== 'Admin' && session.user.role !== 'Super Admin') {
+      router.push('/dashboard')
+    }
+  }, [session, router])
+
+  if (!session) return null
 
   const totalSteps = 13
   const completionPercentage = Math.round((currentStep / totalSteps) * 100)

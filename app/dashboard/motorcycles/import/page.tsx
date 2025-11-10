@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import DashboardLayout from '@/components/layouts/DashboardLayout'
@@ -27,11 +27,14 @@ export default function ImportMotorcyclePage() {
   const [importMessage, setImportMessage] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Check if user is Admin or Super Admin
-  if (!session || (session.user.role !== 'Admin' && session.user.role !== 'Super Admin')) {
-    router.push('/dashboard')
-    return null
-  }
+  // Redirect non-admins on client after session loads
+  useEffect(() => {
+    if (session && session.user && session.user.role !== 'Admin' && session.user.role !== 'Super Admin') {
+      router.push('/dashboard')
+    }
+  }, [session, router])
+
+  if (!session) return null
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
