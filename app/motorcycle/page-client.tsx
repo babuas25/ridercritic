@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Link from "next/link"
-import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -11,6 +10,41 @@ import { getAllMotorcycles } from '@/lib/motorcycles'
 import { getAllBrands, getAllTypes } from '@/lib/brands-types'
 import { MotorcycleFormData } from '@/types/motorcycle'
 import { Brand, MotorcycleType } from '@/lib/brands-types'
+
+// Safe Image Component with error handling
+// Uses native img tag for better error handling when unoptimized
+function SafeImageWrapper({
+  src,
+  alt,
+  className,
+  onError,
+}: {
+  src: string
+  alt: string
+  className?: string
+  onError?: () => void
+}) {
+  const [hasError, setHasError] = useState(false)
+
+  if (hasError) {
+    return null // Return null to trigger parent fallback
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+      onError={(e) => {
+        e.preventDefault()
+        setHasError(true)
+        onError?.()
+      }}
+    />
+  )
+}
 
 export default function MotorcyclesPage() {
   const [motorcycles, setMotorcycles] = useState<MotorcycleFormData[]>([])
@@ -27,9 +61,14 @@ export default function MotorcyclesPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const motorcyclesPerPage = 12
   
-  // Function to get valid cover image (show all images now)
-  const getValidCoverImage = (motorcycle: MotorcycleFormData) => {
-    return motorcycle.coverImage || null
+  // Track failed image loads to prevent retries
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set())
+  
+
+  
+  // Handle image load error
+  const handleImageError = (imageUrl: string) => {
+    setFailedImages(prev => new Set(prev).add(imageUrl))
   }
   
   // Function to render credit line for Honda images
@@ -119,6 +158,8 @@ export default function MotorcyclesPage() {
             <input
               type="text"
               placeholder="Search motorcycles..."
+              id="motorcycle-search"
+              name="motorcycleSearch"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -127,6 +168,8 @@ export default function MotorcyclesPage() {
           
           {/* Brand Filter */}
           <select
+            id="brand-filter"
+            name="brand"
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
             value={selectedBrand || ''}
             onChange={(e) => setSelectedBrand(e.target.value || null)}
@@ -141,6 +184,8 @@ export default function MotorcyclesPage() {
           
           {/* Type Filter */}
           <select
+            id="type-filter"
+            name="type"
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
             value={selectedType || ''}
             onChange={(e) => setSelectedType(e.target.value || null)}
@@ -187,30 +232,47 @@ export default function MotorcyclesPage() {
                 <CardContent className="p-0">
                   {/* Image */}
                   <div className="aspect-video relative overflow-hidden rounded-t-xl bg-gray-100 dark:bg-gray-800">
-                    {getValidCoverImage(motorcycle) ? (
-                      <Image 
-                        src={getValidCoverImage(motorcycle) as string} 
-                        alt={`${motorcycle.brand} ${motorcycle.modelName}`}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        quality={80}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div className="text-center">
-                          <div className="text-lg font-bold mb-1 capitalize text-gray-900 dark:text-white">
-                            {motorcycle.brand}
-                          </div>
-                          <div className="text-sm text-gray-700 dark:text-gray-300">
-                            {motorcycle.modelName}
+                    {(() => {
+                      const imageUrl = motorcycle.coverImage
+                      const hasValidImage = imageUrl && !failedImages.has(imageUrl)
+                      
+                      if (hasValidImage) {
+                        return (
+                          <>
+                            <SafeImageWrapper
+                              src={imageUrl}
+                              alt={`${motorcycle.brand} ${motorcycle.modelName}`}
+                              className="object-cover"
+                              onError={() => {
+                                if (imageUrl) handleImageError(imageUrl)
+                              }}
+                            />
+                            {/* Credit line - shown only when image loads successfully */}
+                            {renderCreditLine(motorcycle, imageUrl)}
+                          </>
+                        )
+                      }
+                      
+                      // Fallback when no image or image failed
+                      return (
+                        <div className="w-full h-full flex items-center justify-center absolute inset-0">
+                          <div className="text-center px-4">
+                            <div className="text-lg font-bold mb-1 capitalize text-gray-900 dark:text-white">
+                              {motorcycle.brand}
+                            </div>
+                            <div className="text-sm text-gray-700 dark:text-gray-300">
+                              {motorcycle.modelName}
+                            </div>
+                            {motorcycle.modelYear && (
+                              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                {motorcycle.modelYear}
+                              </div>
+                            )}
                           </div>
                         </div>
-                      </div>
-                    )}
+                      )
+                    })()}
                   </div>
-                  {/* Credit line outside the image container */}
-                  {renderCreditLine(motorcycle, motorcycle.coverImage)}
                   
                   {/* Content */}
                   <div className="p-5">

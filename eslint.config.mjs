@@ -3,6 +3,7 @@ import tseslint from "typescript-eslint";
 import tsParser from "@typescript-eslint/parser";
 import globals from "globals";
 import nextPlugin from "@next/eslint-plugin-next";
+import eslintConfigPrettier from "eslint-config-prettier";
 
 export default [
   js.configs.recommended,
@@ -40,4 +41,6 @@ export default [
   {
     ignores: ["node_modules", ".next", "out"],
   },
+  // Turn off rules that might conflict with Prettier
+  eslintConfigPrettier,
 ];
