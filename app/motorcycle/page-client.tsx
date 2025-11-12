@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -46,16 +47,17 @@ function SafeImageWrapper({
   )
 }
 
-export default function MotorcyclesPage() {
+export default function MotorcyclesPageClient() {
+  const searchParams = useSearchParams()
   const [motorcycles, setMotorcycles] = useState<MotorcycleFormData[]>([])
   const [brands, setBrands] = useState<Brand[]>([])
   const [types, setTypes] = useState<MotorcycleType[]>([])
   const [loading, setLoading] = useState(true)
   
-  // Filter states
+  // Filter states - initialize searchQuery from URL params
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null)
   const [selectedType, setSelectedType] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '')
   
   // Pagination
   const [currentPage, setCurrentPage] = useState(1)
@@ -64,7 +66,13 @@ export default function MotorcyclesPage() {
   // Track failed image loads to prevent retries
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set())
   
-
+  // Update search query when URL params change
+  useEffect(() => {
+    const queryParam = searchParams.get('q')
+    if (queryParam !== null) {
+      setSearchQuery(queryParam)
+    }
+  }, [searchParams])
   
   // Handle image load error
   const handleImageError = (imageUrl: string) => {

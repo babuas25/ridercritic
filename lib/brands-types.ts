@@ -5,6 +5,7 @@ export interface Brand {
   id: string
   name: string
   distributor?: string
+  logoUrl?: string
   createdAt?: Date | null
   updatedAt?: Date | null
 }

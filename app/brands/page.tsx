@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { Loader2 } from 'lucide-react'
-import MotorcyclesPageClient from './page-client'
+import BrandsPageClient from './page-client'
 
 export { generateMetadata } from './page.server'
 
@@ -12,10 +12,11 @@ function LoadingFallback() {
   )
 }
 
-export default function MotorcyclesPage() {
+export default function BrandsPage() {
   return (
     <Suspense fallback={<LoadingFallback />}>
-      <MotorcyclesPageClient />
+      <BrandsPageClient />
     </Suspense>
   )
 }
+

@@ -1,8 +1,10 @@
 "use client"
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { uploadImage } from '@/lib/storage'
 import {
   Table,
   TableBody,
@@ -17,10 +19,13 @@ export default function BrandsPage() {
     id: string;
     name: string;
     distributor: string;
+    logoUrl?: string;
   }>>([])
   const [newBrand, setNewBrand] = useState('')
   const [newDistributor, setNewDistributor] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [newLogoFile, setNewLogoFile] = useState<File | null>(null)
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false)
 
   useEffect(() => {
     fetchBrands()
@@ -50,16 +55,23 @@ export default function BrandsPage() {
     if (!newBrand.trim() || !newDistributor.trim()) return
     
     try {
+      let logoUrl: string | undefined
+      if (newLogoFile) {
+        setIsUploadingLogo(true)
+        logoUrl = await uploadImage(newLogoFile, `brands/${newBrand.trim().toLowerCase()}`)
+        setIsUploadingLogo(false)
+      }
       const response = await fetch('/api/brands', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newBrand, distributor: newDistributor })
+        body: JSON.stringify({ name: newBrand, distributor: newDistributor, ...(logoUrl ? { logoUrl } : {}) })
       })
       
       if (!response.ok) throw new Error('Failed to add brand')
       
       setNewBrand('')
       setNewDistributor('')
+      setNewLogoFile(null)
       fetchBrands()
     } catch (error) {
       console.error('Error adding brand:', error)
@@ -82,7 +94,7 @@ export default function BrandsPage() {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Brands Management</h1>
       
-      <div className="mb-6 flex gap-4">
+      <div className="mb-6 flex flex-wrap items-end gap-4">
         <Input
           placeholder="Brand Name"
           value={newBrand}
@@ -93,6 +105,11 @@ export default function BrandsPage() {
           value={newDistributor}
           onChange={(e) => setNewDistributor(e.target.value)}
         />
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium">Logo (optional)</label>
+          <Input type="file" accept="image/*" onChange={(e) => setNewLogoFile(e.target.files?.[0] || null)} />
+          {isUploadingLogo && <span className="text-xs text-muted-foreground">Uploading...</span>}
+        </div>
         <Button onClick={handleAddBrand}>Add Brand</Button>
       </div>
       
@@ -102,7 +119,8 @@ export default function BrandsPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">ID</TableHead>
+              <TableHead className="w-[80px]">#</TableHead>
+              <TableHead className="w-[90px]">Logo</TableHead>
               <TableHead>Brand Name</TableHead>
               <TableHead>Distributor</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -112,9 +130,30 @@ export default function BrandsPage() {
             {brands.map((brand, index) => (
               <TableRow key={brand.id}>
                 <TableCell className="font-medium">{index + 1}</TableCell>
+                <TableCell>
+                  {brand.logoUrl ? (
+                    <Image src={brand.logoUrl} alt={`${brand.name} logo`} width={40} height={40} className="rounded bg-muted object-contain" />
+                  ) : (
+                    <div className="h-10 w-10 rounded bg-muted flex items-center justify-center text-xs text-muted-foreground">N/A</div>
+                  )}
+                </TableCell>
                 <TableCell>{brand.name}</TableCell>
                 <TableCell>{brand.distributor}</TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right space-x-2">
+                  <a
+                    href={`/dashboard/brands/${brand.id}`}
+                    className="inline-flex items-center px-3 py-1 rounded-md border text-sm hover:bg-accent"
+                  >
+                    Edit
+                  </a>
+                  <a
+                    href={`/brands/${encodeURIComponent(brand.name.toLowerCase())}`}
+                    className="inline-flex items-center px-3 py-1 rounded-md border text-sm hover:bg-accent"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    View
+                  </a>
                   <Button 
                     variant="destructive"
                     onClick={() => {
