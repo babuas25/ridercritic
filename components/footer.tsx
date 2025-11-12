@@ -1,4 +1,4 @@
-import { Facebook, Instagram, Users } from "lucide-react"
+import { Facebook, Instagram, Users, Twitter } from "lucide-react"
 import Link from 'next/link';
 
 export default function Footer() {
@@ -27,6 +27,15 @@ export default function Footer() {
               <span className="sr-only">Instagram</span>
             </a>
             <a 
+              href="https://x.com/ridercritics" 
+              target="_blank" 
+              rel="noreferrer" 
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Twitter className="h-4 w-4" />
+              <span className="sr-only">X (Twitter)</span>
+            </a>
+            <a 
               href="https://www.facebook.com/groups/ridercritic" 
               target="_blank" 
               rel="noreferrer" 
@@ -40,7 +49,7 @@ export default function Footer() {
           {/* Policy Links */}
           <div className="flex space-x-4">
             <Link 
-              href="/privacy-policy"
+              href="/privacy"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Privacy Policy
@@ -49,7 +58,7 @@ export default function Footer() {
               href="/terms"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              Terms & Conditions
+              Terms of Service
             </Link>
           </div>
 

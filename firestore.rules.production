@@ -1,0 +1,191 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions for role-based access control
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    function getUserSubRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.subRole;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && (getUserRole() == 'Super Admin' || getUserRole() == 'Admin');
+    }
+    
+    function isSuperAdmin() {
+      return isAuthenticated() && getUserRole() == 'Super Admin';
+    }
+    
+    function canWriteReviews() {
+      return isAuthenticated() && (getUserSubRole() == 'CriticStar' || getUserSubRole() == 'CriticMaster');
+    }
+    
+    function canModerate() {
+      return isAuthenticated() && getUserSubRole() == 'CriticMaster';
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Users can read their own data
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Users can update their own profile (except role/subRole)
+      allow update: if isAuthenticated() && request.auth.uid == userId 
+                    && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'subRole']);
+      
+      // Only Super Admin can create users or modify roles
+      allow create: if isSuperAdmin();
+      allow update: if isSuperAdmin();
+      allow delete: if isSuperAdmin();
+      
+      // Admins can read all users
+      allow read: if isAdmin();
+    }
+    
+    // Motorcycles collection
+    match /motorcycles/{motorcycleId} {
+      // Public read access for published motorcycles
+      allow read: if resource.data.published == true || isAuthenticated();
+      
+      // Only authenticated users can create
+      allow create: if isAuthenticated();
+      
+      // Only owner or admin can update
+      allow update: if isAuthenticated() && (
+        resource.data.createdBy == request.auth.uid || 
+        isAdmin()
+      );
+      
+      // Only admin can delete
+      allow delete: if isAdmin();
+    }
+    
+    // Motorcycle drafts collection
+    match /motorcycle_drafts/{draftId} {
+      // Only owner can read/write their drafts
+      allow read, write: if isAuthenticated() && resource.data.createdBy == request.auth.uid;
+      
+      // Allow creating new drafts
+      allow create: if isAuthenticated();
+    }
+    
+    // Reviews/Critics collection
+    match /reviews/{reviewId} {
+      // Public read for published reviews
+      allow read: if resource.data.published == true || isAuthenticated();
+      
+      // Only authenticated users with CriticStar or CriticMaster can create
+      allow create: if isAuthenticated() && canWriteReviews();
+      
+      // Only owner or CriticMaster can update
+      allow update: if isAuthenticated() && (
+        resource.data.authorId == request.auth.uid || 
+        canModerate()
+      );
+      
+      // Only owner or admin can delete
+      allow delete: if isAuthenticated() && (
+        resource.data.authorId == request.auth.uid || 
+        isAdmin()
+      );
+    }
+    
+    // Comments collection
+    match /comments/{commentId} {
+      // Public read
+      allow read: if true;
+      
+      // Only authenticated users can create
+      allow create: if isAuthenticated();
+      
+      // Only owner can update/delete
+      allow update, delete: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // Comments collection (nested under reviews) - for backward compatibility
+    match /reviews/{reviewId}/comments/{commentId} {
+      // Public read
+      allow read: if true;
+      
+      // Only authenticated users can create
+      allow create: if isAuthenticated();
+      
+      // Only owner can update/delete
+      allow update, delete: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // Brands collection
+    match /brands/{brandId} {
+      // Public read
+      allow read: if true;
+      
+      // Only admin can write
+      allow write: if isAdmin();
+    }
+    
+    // Categories collection
+    match /categories/{categoryId} {
+      // Public read
+      allow read: if true;
+      
+      // Only admin can write
+      allow write: if isAdmin();
+    }
+    
+    // Types collection (motorcycle types/categories)
+    match /types/{typeId} {
+      // Public read
+      allow read: if true;
+      
+      // Only admin can write
+      allow write: if isAdmin();
+    }
+    
+    // User activity logs
+    match /activity_logs/{logId} {
+      // Users can read their own logs
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      
+      // Only authenticated users can create logs
+      allow create: if isAuthenticated();
+      
+      // Only admin can read all logs
+      allow read: if isAdmin();
+    }
+    
+    // Notifications collection
+    match /notifications/{notificationId} {
+      // Users can read their own notifications
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      
+      // Only system (via Admin SDK) can create notifications
+      // Users can update their own notifications (mark as read)
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+    
+    // Settings collection (global app settings)
+    match /settings/{settingId} {
+      // Public read for certain settings
+      allow read: if true;
+      
+      // Only admin can write
+      allow write: if isAdmin();
+    }
+    
+    // Default: deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+

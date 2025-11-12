@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "pre-launch": "node scripts/pre-launch-check.js",
+    "pre-launch:quick": "node scripts/pre-launch-check.js --skip-build --skip-lint"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -43,6 +45,7 @@
     "eslint-config-next": "^16.0.0",
     "firebase": "^12.4.0",
     "firebase-admin": "^13.5.0",
+    "logrocket": "^10.1.0",
     "lucide-react": "^0.358.0",
     "next": "^15.5.6",
     "next-auth": "^4.24.12",
@@ -64,11 +67,11 @@
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
     "babel-loader": "^10.0.0",
+    "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "globals": "^16.4.0",
-    "typescript-eslint": "^8.46.2",
     "prettier": "^3.3.3",
-    "eslint-config-prettier": "^9.1.0"
+    "typescript-eslint": "^8.46.2"
   }
 }

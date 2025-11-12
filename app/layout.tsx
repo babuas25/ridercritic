@@ -5,9 +5,11 @@ import { Providers } from '@/components/providers';
 import Header from '@/components/header';
 import MainNav from '@/components/main-nav';
 import Sidebar from '@/components/sidebar';
+import Footer from '@/components/footer';
 import { cn } from '@/lib/utils';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Analytics } from '@vercel/analytics/next';
+import { LogRocketProvider } from '@/components/logrocket-provider';
 
 export const metadata: Metadata = {
   title: 'ridercritic — It\'s Not Just a Ride, It\'s an Emotion',
@@ -85,8 +87,10 @@ export default function RootLayout({
               <Sidebar />
               <main className="flex-1 p-4 md:p-6 overflow-y-auto">{children}</main>
             </div>
+            <Footer />
           </div>
         </Providers>
+        <LogRocketProvider />
         <SpeedInsights />
         <Analytics />
       </body>

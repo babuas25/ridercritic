@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
 // Script to backfill lastLogin for existing users
 // This sets lastLogin to createdAt for users who don't have a lastLogin timestamp
 

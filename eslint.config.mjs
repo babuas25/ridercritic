@@ -39,6 +39,13 @@ export default [
     },
   },
   {
+    files: ["scripts/**/*.js"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+      "@typescript-eslint/no-unused-vars": "warn",
+    },
+  },
+  {
     ignores: ["node_modules", ".next", "out"],
   },
   // Turn off rules that might conflict with Prettier
