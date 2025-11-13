@@ -1,15 +1,39 @@
 'use client'
 
-import { useState, FormEvent, useEffect } from 'react'
+import { useState, FormEvent, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Search, Mic, GitCompare, Calculator, CreditCard, Users, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react'
+import { Search, Mic, MicOff, GitCompare, Calculator, CreditCard, Users, ArrowRight, ArrowLeft, Loader2, Pause, Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { getAllBrands } from '@/lib/brands-types'
 import { Brand } from '@/lib/brands-types'
 import { cn } from '@/lib/utils'
+
+type SpeechRecognitionAlternativeLike = { transcript: string; confidence?: number }
+type SpeechRecognitionResultLike = { length: number; [index: number]: SpeechRecognitionAlternativeLike }
+type SpeechRecognitionResultListLike = { length: number; [index: number]: SpeechRecognitionResultLike }
+interface ISpeechRecognitionEvent extends Event { results: SpeechRecognitionResultListLike }
+interface ISpeechRecognition extends EventTarget {
+  lang: string
+  continuous: boolean
+  interimResults: boolean
+  onresult: ((event: ISpeechRecognitionEvent) => void) | null
+  onstart: (() => void) | null
+  onend: (() => void) | null
+  onerror: ((ev: Event) => void) | null
+  start: () => void
+  stop: () => void
+}
+
+declare global {
+  interface Window {
+    webkitSpeechRecognition?: new () => ISpeechRecognition
+    SpeechRecognition?: new () => ISpeechRecognition
+  }
+}
 
 export default function Home() {
   const router = useRouter()
@@ -18,6 +42,17 @@ export default function Home() {
   const [loadingBrands, setLoadingBrands] = useState(true)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
+  const [suggestions, setSuggestions] = useState<Array<{id:string;title:string;subtitle?:string;image?:string;href:string;type:'motorcycle'|'brand'|'review'}>>([])
+  const [showSuggest, setShowSuggest] = useState(false)
+  const [activeIndex, setActiveIndex] = useState(-1)
+  const [loadingSuggest, setLoadingSuggest] = useState(false)
+  const containerRef = useRef<HTMLFormElement | null>(null)
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  const [listening, setListening] = useState(false)
+  const recognitionRef = useRef<ISpeechRecognition | null>(null)
+  const [voiceError, setVoiceError] = useState<string | null>(null)
+  const [voiceOpen, setVoiceOpen] = useState(false)
+  const [isMuted, setIsMuted] = useState(false)
 
   const handleSearch = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -41,6 +76,39 @@ export default function Home() {
     }
 
     fetchBrands()
+  }, [])
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSuggestions([])
+      return
+    }
+    setLoadingSuggest(true)
+    const t = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/search/suggest?q=${encodeURIComponent(searchQuery.trim())}`)
+        const data = await res.json()
+        setSuggestions(data.suggestions || [])
+        setShowSuggest(true)
+        setActiveIndex(-1)
+      } catch {
+        setSuggestions([])
+      } finally {
+        setLoadingSuggest(false)
+      }
+    }, 250)
+    return () => clearTimeout(t)
+  }, [searchQuery])
+
+  useEffect(() => {
+    function onDocClick(e: MouseEvent) {
+      if (!containerRef.current) return
+      if (!containerRef.current.contains(e.target as Node)) {
+        setShowSuggest(false)
+      }
+    }
+    document.addEventListener('mousedown', onDocClick)
+    return () => document.removeEventListener('mousedown', onDocClick)
   }, [])
 
   const scrollBrands = (direction: 'left' | 'right') => {
@@ -96,7 +164,7 @@ export default function Home() {
         </div>
 
         {/* Google-style Search Bar */}
-        <form onSubmit={handleSearch} className="w-full">
+        <form onSubmit={handleSearch} className="w-full" ref={containerRef}>
           <div className="relative group">
             <div
               className={cn(
@@ -106,16 +174,32 @@ export default function Home() {
                 "px-4 py-3 md:px-6 md:py-4"
               )}
             >
-              {/* Search Icon */}
               <Search className="h-5 w-5 md:h-6 md:w-6 text-muted-foreground mr-3 md:mr-4 flex-shrink-0" />
-              
-              {/* Search Input */}
               <Input
+                ref={inputRef}
                 type="text"
                 id="home-search"
                 name="q"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => suggestions.length && setShowSuggest(true)}
+                onKeyDown={(e) => {
+                  if (!showSuggest) return
+                  if (e.key === 'ArrowDown') {
+                    e.preventDefault()
+                    setActiveIndex((i) => Math.min(i + 1, suggestions.length - 1))
+                  } else if (e.key === 'ArrowUp') {
+                    e.preventDefault()
+                    setActiveIndex((i) => Math.max(i - 1, 0))
+                  } else if (e.key === 'Enter' && activeIndex >= 0) {
+                    e.preventDefault()
+                    const item = suggestions[activeIndex]
+                    router.push(item.href)
+                    setShowSuggest(false)
+                  } else if (e.key === 'Escape') {
+                    setShowSuggest(false)
+                  }
+                }}
                 placeholder="Search motorcycles..."
                 className={cn(
                   "flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0",
@@ -123,19 +207,215 @@ export default function Home() {
                   "px-0"
                 )}
                 autoFocus
+                autoComplete="off"
               />
-              
-              {/* Voice Search Icon (optional, can be removed if not needed) */}
               <button
                 type="button"
-                className="ml-2 md:ml-4 p-2 hover:bg-muted rounded-full transition-colors"
+                className={cn("ml-2 md:ml-4 p-2 rounded-full transition-colors", listening ? 'bg-muted text-foreground' : 'hover:bg-muted')}
                 aria-label="Voice search"
-                title="Voice search (coming soon)"
+                title="Voice search"
+                onClick={() => {
+                  setVoiceError(null)
+                  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+                  if (!SpeechRecognition) {
+                    setVoiceError('Voice search not supported in this browser')
+                    return
+                  }
+                  if (!recognitionRef.current) {
+                    recognitionRef.current = new SpeechRecognition()
+                    recognitionRef.current.lang = 'en-US'
+                    recognitionRef.current.continuous = false
+                    recognitionRef.current.interimResults = false
+                    recognitionRef.current.onresult = (event: ISpeechRecognitionEvent) => {
+                      const transcript = event.results?.[0]?.[0]?.transcript
+                      if (transcript) {
+                        setSearchQuery(transcript)
+                        setShowSuggest(true)
+                        inputRef.current?.focus()
+                      }
+                    }
+                    recognitionRef.current.onstart = () => {
+                      setListening(true)
+                      setVoiceOpen(true)
+                      setIsMuted(false)
+                    }
+                    recognitionRef.current.onend = () => {
+                      setListening(false)
+                      setVoiceOpen(false)
+                    }
+                    recognitionRef.current.onerror = (ev: Event) => {
+                      const err = (ev as unknown as { error?: string }).error
+                      if (err === 'not-allowed') setVoiceError('Microphone permission blocked')
+                      else if (err === 'no-speech') setVoiceError('No speech detected')
+                      else if (err === 'audio-capture') setVoiceError('Microphone not found')
+                      else setVoiceError('Voice search error')
+                      setListening(false)
+                      setVoiceOpen(false)
+                    }
+                  }
+                  if (!listening) {
+                    // Optimistically show the listening UI immediately
+                    setVoiceOpen(true)
+                    setListening(true)
+                    setIsMuted(false)
+                    const startRecognition = async () => {
+                      try {
+                        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                          const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+                          stream.getTracks().forEach(t => t.stop())
+                        }
+                        recognitionRef.current?.start()
+                      } catch {
+                        setVoiceError('Microphone permission denied')
+                        setListening(false)
+                        setVoiceOpen(false)
+                        setIsMuted(false)
+                      }
+                    }
+                    void startRecognition()
+                  } else {
+                    recognitionRef.current.stop()
+                    setListening(false)
+                    setVoiceOpen(false)
+                    setIsMuted(false)
+                  }
+                }}
               >
-                <Mic className="h-5 w-5 md:h-6 md:w-6 text-muted-foreground" />
+                {listening ? (
+                  <MicOff className="h-5 w-5 md:h-6 md:w-6" />
+                ) : (
+                  <Mic className="h-5 w-5 md:h-6 md:w-6 text-muted-foreground" />
+                )}
               </button>
             </div>
+
+            {showSuggest && (suggestions.length > 0 || loadingSuggest) && (
+              <div className="absolute z-50 left-0 right-0 mt-2 rounded-xl border bg-popover text-popover-foreground shadow-xl overflow-hidden">
+                {loadingSuggest && (
+                  <div className="flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" /> Searching...
+                  </div>
+                )}
+                {!loadingSuggest && suggestions.map((s, idx) => (
+                  <button
+                    type="button"
+                    key={s.href}
+                    onMouseEnter={() => setActiveIndex(idx)}
+                    onClick={() => {
+                      router.push(s.href)
+                      setShowSuggest(false)
+                    }}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-3 hover:bg-accent transition-colors text-left",
+                      idx === activeIndex && 'bg-accent'
+                    )}
+                  >
+                    {s.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={s.image} alt={s.title} className="h-10 w-10 rounded object-cover flex-shrink-0" />
+                    ) : (
+                      <div className="h-10 w-10 rounded bg-muted flex items-center justify-center text-xs text-muted-foreground">{s.type}</div>
+                    )}
+                    <div className="flex-1 overflow-hidden">
+                      <div className="font-medium truncate">{s.title}</div>
+                      {s.subtitle ? (
+                        <div className="text-xs text-muted-foreground truncate">{s.subtitle}</div>
+                      ) : null}
+                    </div>
+                    <div className={cn("text-[10px] px-2 py-1 rounded-full border", s.type === 'motorcycle' ? 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-950/30 dark:text-blue-300 dark:border-blue-900' : s.type === 'brand' ? 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-900' : 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-900')}>{s.type}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+            {voiceError && (
+              <div className="mt-2 text-xs text-red-600 dark:text-red-400">
+                {voiceError}
+              </div>
+            )}
           </div>
+
+          {/* Voice listening modal */}
+          <Dialog open={voiceOpen} onOpenChange={(open) => {
+            setVoiceOpen(open)
+            if (!open && listening) {
+              recognitionRef.current?.stop()
+              setListening(false)
+              setIsMuted(false)
+            }
+          }}>
+            <DialogContent className="sm:max-w-[720px] border-0 bg-black text-white p-0 overflow-hidden" aria-describedby="voice-desc">
+              <DialogTitle className="sr-only">Voice Search</DialogTitle>
+              <DialogDescription id="voice-desc" className="sr-only">Speak your query. Use pause to mute, and the red button to stop.</DialogDescription>
+              <div className="grid grid-cols-1 md:grid-cols-2">
+                {/* Left: saying indicator */}
+                <div className="relative p-8 flex flex-col gap-6">
+                  <div className="text-sm opacity-70">Saying</div>
+                  <div className="flex items-center gap-3">
+                    <span className="h-7 w-10 rounded-full bg-white/15" />
+                    <span className="h-7 w-10 rounded-full bg-white/15" />
+                    <span className="h-7 w-10 rounded-full bg-white/15" />
+                    <span className="h-7 w-10 rounded-full bg-white/15" />
+                  </div>
+                  <div className="mt-auto text-xs opacity-60">You can change this later</div>
+                </div>
+
+                {/* Right: listening bubble + controls */}
+                <div className="relative p-8 flex flex-col items-center justify-center bg-black/95">
+                  <div className="relative w-44 h-44">
+                    <div className="absolute inset-0 rounded-full bg-white/10 animate-pulse" />
+                    <div className="absolute inset-6 rounded-full bg-white/10 animate-[pulse_2s_ease-in-out_infinite]" />
+                    <div className="absolute inset-12 rounded-full bg-white/10 animate-[pulse_3s_ease-in-out_infinite]" />
+                  </div>
+                  <div className="mt-6 text-sm opacity-80">{isMuted ? 'Muted' : 'Listening'}</div>
+
+                  <div className="mt-8 flex items-center gap-6">
+                    {/* Mute/Unmute toggle */}
+                    <button
+                      type="button"
+                      aria-label={isMuted ? 'Unmute' : 'Mute'}
+                      className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center"
+                      onClick={() => {
+                        if (isMuted) {
+                          setIsMuted(false)
+                          const restart = async () => {
+                            try {
+                              recognitionRef.current?.start()
+                            } catch {
+                              /* noop */
+                            }
+                          }
+                          void restart()
+                        } else {
+                          recognitionRef.current?.stop()
+                          setIsMuted(true)
+                          setListening(false)
+                        }
+                      }}
+                    >
+                      {isMuted ? <Play className="w-5 h-5" /> : <Pause className="w-5 h-5" />}
+                    </button>
+
+                    {/* Stop */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        recognitionRef.current?.stop()
+                        setListening(false)
+                        setVoiceOpen(false)
+                        setIsMuted(false)
+                      }}
+                      className="w-14 h-14 rounded-full bg-red-600 hover:bg-red-500 active:bg-red-700 transition-colors flex items-center justify-center"
+                    >
+                      <span className="sr-only">Stop</span>
+                      <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor"><path d="M8 8h8v8H8z"/></svg>
+                    </button>
+                  </div>
+
+                  <div className="mt-3 text-xs opacity-60">Tap to {isMuted ? 'resume' : 'stop'}</div>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Search Buttons */}
           <div className="flex items-center justify-center gap-4 mt-6">
