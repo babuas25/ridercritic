@@ -70,6 +70,12 @@ export default function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning className={fonts.geist.className}>
+      <head>
+        {/* Preconnect to critical third-party origins for faster auth and APIs */}
+        <link rel="preconnect" href="https://ridercritics-386df.firebaseapp.com" />
+        <link rel="preconnect" href="https://apis.google.com" />
+        <link rel="preconnect" href="https://www.googleapis.com" />
+      </head>
       <body className={cn(
         "min-h-screen bg-background antialiased",
         fonts.nordique.variable

@@ -1043,7 +1043,7 @@ export default function Home() {
                             {critic.topic}
                           </p>
                           {'rating' in critic && (
-                            <div className="text-xs text-amber-500 font-medium">
+                            <div className="text-xs text-amber-700 dark:text-amber-300 font-medium">
                               Rating: {critic.rating.toFixed(1)} / 5
                             </div>
                           )}

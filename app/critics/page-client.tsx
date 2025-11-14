@@ -187,6 +187,7 @@ export default function CriticsPage() {
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       priority={index === 0} // Add priority to first image
+                      fetchPriority={index === 0 ? 'high' : 'auto'}
                     />
                   </div>
                 ) : (
@@ -202,14 +203,14 @@ export default function CriticsPage() {
                 )}
                 
                 <div className="p-6">
-                  <h3 className="font-medium text-lg mb-2 line-clamp-1">
+                  <h2 className="font-medium text-lg mb-2 line-clamp-1">
                     <Link 
                       href={`/critics/${critic.id}`} 
                       className="hover:text-foreground transition-colors"
                     >
                       {critic.title}
                     </Link>
-                  </h3>
+                  </h2>
                   
                   <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
                     {critic.content.replace(/<[^>]*>/g, '').substring(0, 100) + '...'}
@@ -237,7 +238,7 @@ export default function CriticsPage() {
                     <span className="text-sm font-medium">
                       {critic.authorName}
                     </span>
-                    <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                    <span className="text-xs bg-muted text-foreground px-2 py-1 rounded">
                       {critic.topic}
                     </span>
                   </div>
