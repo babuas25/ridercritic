@@ -11,6 +11,9 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/compone
 import { getAllBrands } from '@/lib/brands-types'
 import { Brand } from '@/lib/brands-types'
 import { cn } from '@/lib/utils'
+import { getAllMotorcycles } from '@/lib/motorcycles'
+import { type MotorcycleFormData } from '@/types/motorcycle'
+import { getAllCritics, type CriticData } from '@/lib/critics'
 
 type SpeechRecognitionAlternativeLike = { transcript: string; confidence?: number }
 type SpeechRecognitionResultLike = { length: number; [index: number]: SpeechRecognitionAlternativeLike }
@@ -42,6 +45,14 @@ export default function Home() {
   const [loadingBrands, setLoadingBrands] = useState(true)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
+  const [motorcycles, setMotorcycles] = useState<MotorcycleFormData[]>([])
+  const [loadingMotorcycles, setLoadingMotorcycles] = useState(true)
+  const [critics, setCritics] = useState<CriticData[]>([])
+  const [loadingCritics, setLoadingCritics] = useState(true)
+  const [canScrollLeftMotor, setCanScrollLeftMotor] = useState(false)
+  const [canScrollRightMotor, setCanScrollRightMotor] = useState(true)
+  const [canScrollLeftCritic, setCanScrollLeftCritic] = useState(false)
+  const [canScrollRightCritic, setCanScrollRightCritic] = useState(true)
   const [suggestions, setSuggestions] = useState<Array<{id:string;title:string;subtitle?:string;image?:string;href:string;type:'motorcycle'|'brand'|'review'}>>([])
   const [showSuggest, setShowSuggest] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
@@ -135,7 +146,63 @@ export default function Home() {
       const clientWidth = container.clientWidth
       
       setCanScrollLeft(scrollLeft > 0)
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10)
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth)
+    }
+  }
+
+  const scrollMotorcycles = (direction: 'left' | 'right') => {
+    const container = document.getElementById('motorcycles-scroll-container')
+    if (container) {
+      const scrollAmount = 300
+      const currentScroll = container.scrollLeft
+      const newPosition = direction === 'left'
+        ? currentScroll - scrollAmount
+        : currentScroll + scrollAmount
+
+      container.scrollTo({
+        left: newPosition,
+        behavior: 'smooth'
+      })
+    }
+  }
+
+  const handleMotorcyclesScroll = () => {
+    const container = document.getElementById('motorcycles-scroll-container')
+    if (container) {
+      const scrollLeft = container.scrollLeft
+      const scrollWidth = container.scrollWidth
+      const clientWidth = container.clientWidth
+
+      setCanScrollLeftMotor(scrollLeft > 0)
+      setCanScrollRightMotor(scrollLeft < scrollWidth - clientWidth)
+    }
+  }
+
+  const scrollCritics = (direction: 'left' | 'right') => {
+    const container = document.getElementById('critics-scroll-container')
+    if (container) {
+      const scrollAmount = 300
+      const currentScroll = container.scrollLeft
+      const newPosition = direction === 'left'
+        ? currentScroll - scrollAmount
+        : currentScroll + scrollAmount
+
+      container.scrollTo({
+        left: newPosition,
+        behavior: 'smooth'
+      })
+    }
+  }
+
+  const handleCriticsScroll = () => {
+    const container = document.getElementById('critics-scroll-container')
+    if (container) {
+      const scrollLeft = container.scrollLeft
+      const scrollWidth = container.scrollWidth
+      const clientWidth = container.clientWidth
+
+      setCanScrollLeftCritic(scrollLeft > 0)
+      setCanScrollRightCritic(scrollLeft < scrollWidth - clientWidth)
     }
   }
 
@@ -148,6 +215,54 @@ export default function Home() {
       }, 100)
     }
   }, [brands])
+
+  useEffect(() => {
+    const fetchMotorcycles = async () => {
+      try {
+        const data = await getAllMotorcycles(undefined, 20)
+        setMotorcycles(data)
+      } catch (error) {
+        console.error('Error fetching motorcycles:', error)
+      } finally {
+        setLoadingMotorcycles(false)
+      }
+    }
+
+    fetchMotorcycles()
+  }, [])
+
+  useEffect(() => {
+    const container = document.getElementById('motorcycles-scroll-container')
+    if (container && motorcycles.length > 0) {
+      setTimeout(() => {
+        handleMotorcyclesScroll()
+      }, 100)
+    }
+  }, [motorcycles])
+
+  useEffect(() => {
+    const fetchCritics = async () => {
+      try {
+        const data = await getAllCritics(20)
+        setCritics(data)
+      } catch (error) {
+        console.error('Error fetching critics:', error)
+      } finally {
+        setLoadingCritics(false)
+      }
+    }
+
+    fetchCritics()
+  }, [])
+
+  useEffect(() => {
+    const container = document.getElementById('critics-scroll-container')
+    if (container && critics.length > 0) {
+      setTimeout(() => {
+        handleCriticsScroll()
+      }, 100)
+    }
+  }, [critics])
 
   return (
     <div className="flex flex-col items-center justify-start px-4 pt-8 pb-12">
@@ -587,6 +702,192 @@ export default function Home() {
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <p>No brands available</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Motorcycles Section - Same Card Design */}
+      <div className="w-full mt-8">
+        <Card className="border border-gray-200 dark:border-gray-800">
+          <CardContent className="px-6 py-3">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Motorcycles
+                </h2>
+              </div>
+              <Link href="/motorcycle">
+                <Button variant="ghost" className="text-red-600 dark:text-red-500 hover:text-red-700 dark:hover:text-red-400">
+                  View All
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+
+            {loadingMotorcycles ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : motorcycles.length > 0 ? (
+              <div className="relative">
+                {canScrollLeftMotor && (
+                  <button
+                    onClick={() => scrollMotorcycles('left')}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full p-2 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    aria-label="Scroll left"
+                  >
+                    <ArrowLeft className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                  </button>
+                )}
+
+                <div
+                  id="motorcycles-scroll-container"
+                  onScroll={handleMotorcyclesScroll}
+                  className="flex gap-3 overflow-x-auto scroll-smooth pb-1 px-1 scrollbar-hide"
+                >
+                  {motorcycles.map((moto) => (
+                    <Link
+                      key={moto.id}
+                      href={moto.id ? `/motorcycle/${encodeURIComponent(moto.id)}` : '/motorcycle'}
+                      className="flex-shrink-0"
+                    >
+                      <div className="group p-2 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-red-600 dark:hover:border-red-500 hover:shadow-md transition-all duration-200 cursor-pointer bg-white dark:bg-gray-900 w-40 md:w-48">
+                        <div className="flex flex-col items-center justify-center text-center">
+                          <div className="w-24 h-24 md:w-28 md:h-28 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3 group-hover:bg-red-600/10 dark:group-hover:bg-red-500/10 transition-colors overflow-hidden">
+                            {moto.coverImage ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={moto.coverImage}
+                                alt={moto.modelName || 'Motorcycle'}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-xl md:text-2xl font-bold text-gray-700 dark:text-gray-300 group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors">
+                                {(moto.modelName || 'M')[0]?.toUpperCase()}
+                              </span>
+                            )}
+                          </div>
+                          <h3 className="font-semibold text-sm md:text-base text-gray-900 dark:text-white capitalize group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors line-clamp-2">
+                            {moto.brand ? `${moto.brand} ${moto.modelName}` : moto.modelName}
+                          </h3>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+
+                {canScrollRightMotor && (
+                  <button
+                    onClick={() => scrollMotorcycles('right')}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full p-2 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    aria-label="Scroll right"
+                  >
+                    <ArrowRight className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No motorcycles available</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Reviews / Critics Section - Same Card Design */}
+      <div className="w-full mt-8">
+        <Card className="border border-gray-200 dark:border-gray-800">
+          <CardContent className="px-6 py-3">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Reviews & Critics
+                </h2>
+              </div>
+              <Link href="/critics">
+                <Button variant="ghost" className="text-red-600 dark:text-red-500 hover:text-red-700 dark:hover:text-red-400">
+                  View All
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+
+            {loadingCritics ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : critics.length > 0 ? (
+              <div className="relative">
+                {canScrollLeftCritic && (
+                  <button
+                    onClick={() => scrollCritics('left')}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full p-2 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    aria-label="Scroll left"
+                  >
+                    <ArrowLeft className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                  </button>
+                )}
+
+                <div
+                  id="critics-scroll-container"
+                  onScroll={handleCriticsScroll}
+                  className="flex gap-3 overflow-x-auto scroll-smooth pb-1 px-1 scrollbar-hide"
+                >
+                  {critics.map((critic) => (
+                    <Link
+                      key={critic.id}
+                      href={critic.id ? `/critics/${encodeURIComponent(critic.id)}` : '/critics'}
+                      className="flex-shrink-0"
+                    >
+                      <div className="group p-2 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-red-600 dark:hover:border-red-500 hover:shadow-md transition-all duration-200 cursor-pointer bg-white dark:bg-gray-900 w-64 md:w-72">
+                        <div className="flex flex-col text-left">
+                          <div className="w-full h-24 md:h-28 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3 group-hover:bg-red-600/10 dark:group-hover:bg-red-500/10 transition-colors overflow-hidden">
+                            {critic.images && critic.images.length > 0 ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={critic.images[0]}
+                                alt={critic.title}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-xl md:text-2xl font-bold text-gray-700 dark:text-gray-300 group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors">
+                                {critic.title?.[0]?.toUpperCase() || 'R'}
+                              </span>
+                            )}
+                          </div>
+                          <h3 className="font-semibold text-sm md:text-base text-gray-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors line-clamp-2 mb-1">
+                            {critic.title}
+                          </h3>
+                          <p className="text-xs md:text-sm text-muted-foreground line-clamp-2 mb-1">
+                            {critic.topic}
+                          </p>
+                          {'rating' in critic && (
+                            <div className="text-xs text-amber-500 font-medium">
+                              Rating: {critic.rating.toFixed(1)} / 5
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+
+                {canScrollRightCritic && (
+                  <button
+                    onClick={() => scrollCritics('right')}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full p-2 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    aria-label="Scroll right"
+                  >
+                    <ArrowRight className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No reviews available</p>
               </div>
             )}
           </CardContent>
