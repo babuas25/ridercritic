@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils'
 import { getAllMotorcycles } from '@/lib/motorcycles'
 import { type MotorcycleFormData } from '@/types/motorcycle'
 import { getAllCritics, type CriticData } from '@/lib/critics'
+import { getRecentComparisons, type SavedComparison } from '@/lib/comparisons'
 
 type SpeechRecognitionAlternativeLike = { transcript: string; confidence?: number }
 type SpeechRecognitionResultLike = { length: number; [index: number]: SpeechRecognitionAlternativeLike }
@@ -53,6 +54,10 @@ export default function Home() {
   const [canScrollRightMotor, setCanScrollRightMotor] = useState(true)
   const [canScrollLeftCritic, setCanScrollLeftCritic] = useState(false)
   const [canScrollRightCritic, setCanScrollRightCritic] = useState(true)
+  const [comparisons, setComparisons] = useState<SavedComparison[]>([])
+  const [loadingComparisons, setLoadingComparisons] = useState(true)
+  const [canScrollLeftComparison, setCanScrollLeftComparison] = useState(false)
+  const [canScrollRightComparison, setCanScrollRightComparison] = useState(true)
   const [suggestions, setSuggestions] = useState<Array<{id:string;title:string;subtitle?:string;image?:string;href:string;type:'motorcycle'|'brand'|'review'}>>([])
   const [showSuggest, setShowSuggest] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
@@ -206,6 +211,34 @@ export default function Home() {
     }
   }
 
+  const scrollComparisons = (direction: 'left' | 'right') => {
+    const container = document.getElementById('comparisons-scroll-container')
+    if (container) {
+      const scrollAmount = 300
+      const currentScroll = container.scrollLeft
+      const newPosition = direction === 'left'
+        ? currentScroll - scrollAmount
+        : currentScroll + scrollAmount
+
+      container.scrollTo({
+        left: newPosition,
+        behavior: 'smooth'
+      })
+    }
+  }
+
+  const handleComparisonsScroll = () => {
+    const container = document.getElementById('comparisons-scroll-container')
+    if (container) {
+      const scrollLeft = container.scrollLeft
+      const scrollWidth = container.scrollWidth
+      const clientWidth = container.clientWidth
+
+      setCanScrollLeftComparison(scrollLeft > 0)
+      setCanScrollRightComparison(scrollLeft < scrollWidth - clientWidth)
+    }
+  }
+
   useEffect(() => {
     const container = document.getElementById('brands-scroll-container')
     if (container && brands.length > 0) {
@@ -254,6 +287,30 @@ export default function Home() {
 
     fetchCritics()
   }, [])
+
+  useEffect(() => {
+    const fetchComparisons = async () => {
+      try {
+        const data = await getRecentComparisons(12)
+        setComparisons(data)
+      } catch (error) {
+        console.error('Error fetching comparisons:', error)
+      } finally {
+        setLoadingComparisons(false)
+      }
+    }
+
+    fetchComparisons()
+  }, [])
+
+  useEffect(() => {
+    const container = document.getElementById('comparisons-scroll-container')
+    if (container && comparisons.length > 0) {
+      setTimeout(() => {
+        handleComparisonsScroll()
+      }, 100)
+    }
+  }, [comparisons])
 
   useEffect(() => {
     const container = document.getElementById('critics-scroll-container')
@@ -791,6 +848,127 @@ export default function Home() {
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <p>No motorcycles available</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Comparisons Section */}
+      <div className="w-full mt-8">
+        <Card className="border border-gray-200 dark:border-gray-800">
+          <CardContent className="px-6 py-3">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Comparisons
+                </h2>
+              </div>
+              <Link href="/comparisons">
+                <Button variant="ghost" className="text-red-600 dark:text-red-500 hover:text-red-700 dark:hover:text-red-400">
+                  View All
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+
+            {loadingComparisons ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : comparisons.length > 0 ? (
+              <div className="relative">
+                {canScrollLeftComparison && (
+                  <button
+                    onClick={() => scrollComparisons('left')}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full p-2 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    aria-label="Scroll left"
+                  >
+                    <ArrowLeft className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                  </button>
+                )}
+
+                <div
+                  id="comparisons-scroll-container"
+                  onScroll={handleComparisonsScroll}
+                  className="flex gap-3 overflow-x-auto scroll-smooth pb-1 px-1 scrollbar-hide"
+                >
+                  {comparisons.map((comp) => {
+                    const [a, b] = comp.motorcycles
+                    return (
+                      <div
+                        key={comp.id}
+                        className="flex-shrink-0 group p-2 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-red-600 dark:hover:border-red-500 hover:shadow-md transition-all duration-200 cursor-pointer bg-white dark:bg-gray-900 w-60 md:w-72"
+                      >
+                        <div className="flex flex-col">
+                          <div className="grid grid-cols-2 gap-2 mb-3">
+                            {[a, b].map((moto, index) => (
+                              <div key={moto?.id || index} className="text-center">
+                                <div className="w-full h-20 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-2 overflow-hidden">
+                                  {moto?.coverImage ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                      src={moto.coverImage}
+                                      alt={`${moto.brand} ${moto.modelName}`}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                      {moto?.brand} {moto?.modelName}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-xs font-semibold text-gray-900 dark:text-white capitalize line-clamp-2">
+                                  {moto?.brand} {moto?.modelName}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="flex items-center justify-between mt-1">
+                            <div className="text-[11px] text-gray-500 dark:text-gray-400">
+                              {comp.createdAt && (
+                                <span>
+                                  Saved {new Date(comp.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex gap-2">
+                              {a?.id && (
+                                <Link href={`/motorcycle/${encodeURIComponent(a.id)}`}>
+                                  <Button size="sm" variant="outline" className="text-[11px] px-2">
+                                    {a.brand}
+                                  </Button>
+                                </Link>
+                              )}
+                              {b?.id && (
+                                <Link href={`/motorcycle/${encodeURIComponent(b.id)}`}>
+                                  <Button size="sm" variant="outline" className="text-[11px] px-2">
+                                    {b.brand}
+                                  </Button>
+                                </Link>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {canScrollRightComparison && (
+                  <button
+                    onClick={() => scrollComparisons('right')}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full p-2 shadow-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    aria-label="Scroll right"
+                  >
+                    <ArrowRight className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No comparisons available</p>
               </div>
             )}
           </CardContent>
