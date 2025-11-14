@@ -172,6 +172,17 @@ export default function MotorcyclesPageClient() {
     setCurrentPage(1)
   }, [selectedBrand, selectedType, searchQuery])
 
+  // Preselect motorcycles when coming from a saved comparison
+  useEffect(() => {
+    if (!compareMode) return
+    const id1 = searchParams.get('id1')
+    const id2 = searchParams.get('id2')
+    const ids = [id1, id2].filter((id): id is string => Boolean(id))
+    if (ids.length && selectedIds.length === 0) {
+      setSelectedIds(ids)
+    }
+  }, [compareMode, searchParams, selectedIds.length])
+
   const toggleSelect = (id?: string) => {
     if (!id) return
     setSelectedIds(prev =>

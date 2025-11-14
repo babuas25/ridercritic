@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
@@ -10,6 +11,7 @@ import { getRecentComparisons, SavedComparison } from "@/lib/comparisons"
 export default function ComparisonsPageClient() {
   const [comparisons, setComparisons] = useState<SavedComparison[]>([])
   const [loading, setLoading] = useState(true)
+  const router = useRouter()
 
   useEffect(() => {
     const fetchComparisons = async () => {
@@ -54,8 +56,16 @@ export default function ComparisonsPageClient() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {comparisons.map((comp) => {
             const [a, b] = comp.motorcycles
+            const handleOpenComparison = () => {
+              if (!a?.id || !b?.id) return
+              router.push(`/motorcycle?compare=true&id1=${encodeURIComponent(a.id)}&id2=${encodeURIComponent(b.id)}`)
+            }
             return (
-              <Card key={comp.id} className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900">
+              <Card
+                key={comp.id}
+                className="border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 cursor-pointer hover:shadow-md transition-shadow"
+                onClick={handleOpenComparison}
+              >
                 <CardContent className="p-4">
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     {[a, b].map((moto, index) => (
@@ -97,14 +107,24 @@ export default function ComparisonsPageClient() {
                     <div className="flex gap-2">
                       {a?.id && (
                         <Link href={`/motorcycle/${encodeURIComponent(a.id)}`}>
-                          <Button size="sm" variant="outline" className="text-xs px-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-xs px-2"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             {a.brand} {a.modelName}
                           </Button>
                         </Link>
                       )}
                       {b?.id && (
                         <Link href={`/motorcycle/${encodeURIComponent(b.id)}`}>
-                          <Button size="sm" variant="outline" className="text-xs px-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-xs px-2"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             {b.brand} {b.modelName}
                           </Button>
                         </Link>
