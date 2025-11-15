@@ -18,6 +18,11 @@ export const metadata: Metadata = {
   authors: [{ name: 'ridercritic Team' }],
   creator: 'ridercritic',
   publisher: 'ridercritic',
+  icons: {
+    icon: '/icon/favicon.svg',
+    shortcut: '/icon/favicon.svg',
+    apple: '/icon/apple-touch-icon.png',
+  },
   robots: {
     index: true,
     follow: true
