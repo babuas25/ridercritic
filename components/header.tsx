@@ -92,7 +92,12 @@ export default function Header() {
                   {session ? (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                        <Button
+                          variant="ghost"
+                          className="relative h-8 w-8 rounded-full"
+                          aria-label="Open user menu"
+                          title="Open user menu"
+                        >
                           <Avatar className="h-8 w-8">
                             <AvatarImage src={session.user.image || undefined} alt={session.user.name || 'User'} />
                             <AvatarFallback>
@@ -180,7 +185,12 @@ export default function Header() {
             {session ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Button
+                    variant="ghost"
+                    className="relative h-8 w-8 rounded-full"
+                    aria-label="Open user menu"
+                    title="Open user menu"
+                  >
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={session.user.image || undefined} alt={session.user.name || 'User'} />
                       <AvatarFallback>
@@ -233,7 +243,12 @@ export default function Header() {
             {session ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Button
+                    variant="ghost"
+                    className="relative h-8 w-8 rounded-full"
+                    aria-label="Open user menu"
+                    title="Open user menu"
+                  >
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={session.user.image || undefined} alt={session.user.name || 'User'} />
                       <AvatarFallback>

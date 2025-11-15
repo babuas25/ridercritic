@@ -621,7 +621,7 @@ export default function Home() {
               <div className="p-3 rounded-full bg-red-600/10 dark:bg-red-500/10 mb-2">
                 <GitCompare className="h-6 w-6 md:h-7 md:w-7 text-red-600 dark:text-red-500" />
               </div>
-              <h3 className="font-semibold text-sm md:text-base">Compare</h3>
+              <p className="font-semibold text-sm md:text-base">Compare</p>
             </CardContent>
           </Card>
 
@@ -636,7 +636,7 @@ export default function Home() {
               <div className="p-3 rounded-full bg-red-600/10 dark:bg-red-500/10 mb-2">
                 <Calculator className="h-6 w-6 md:h-7 md:w-7 text-red-600 dark:text-red-500" />
               </div>
-              <h3 className="font-semibold text-sm md:text-base">EMI Calculator</h3>
+              <p className="font-semibold text-sm md:text-base">EMI Calculator</p>
             </CardContent>
           </Card>
 
@@ -651,7 +651,7 @@ export default function Home() {
               <div className="p-3 rounded-full bg-red-600/10 dark:bg-red-500/10 mb-2">
                 <CreditCard className="h-6 w-6 md:h-7 md:w-7 text-red-600 dark:text-red-500" />
               </div>
-              <h3 className="font-semibold text-sm md:text-base">Loan Available</h3>
+              <p className="font-semibold text-sm md:text-base">Loan Available</p>
             </CardContent>
           </Card>
 
@@ -666,7 +666,7 @@ export default function Home() {
               <div className="p-3 rounded-full bg-red-600/10 dark:bg-red-500/10 mb-2">
                 <Users className="h-6 w-6 md:h-7 md:w-7 text-red-600 dark:text-red-500" />
               </div>
-              <h3 className="font-semibold text-sm md:text-base">Join Community</h3>
+              <p className="font-semibold text-sm md:text-base">Join Community</p>
             </CardContent>
           </Card>
         </div>
