@@ -899,6 +899,10 @@ export default function Home() {
                       <div
                         key={comp.id}
                         className="flex-shrink-0 group p-2 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-red-600 dark:hover:border-red-500 hover:shadow-md transition-all duration-200 cursor-pointer bg-white dark:bg-gray-900 w-60 md:w-72"
+                        onClick={() => {
+                          if (!a?.id || !b?.id) return
+                          router.push(`/motorcycle?compare=true&id1=${encodeURIComponent(a.id)}&id2=${encodeURIComponent(b.id)}`)
+                        }}
                       >
                         <div className="flex flex-col">
                           <div className="grid grid-cols-2 gap-2 mb-3">
