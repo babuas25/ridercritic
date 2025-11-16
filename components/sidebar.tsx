@@ -21,6 +21,7 @@ import {
   Tags, 
   Grid,
   GitCompare,
+  DoorOpen,
 } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 
@@ -77,7 +78,7 @@ export default function Sidebar() {
           { title: "User Management", icon: Users, href: "/dashboard/admin" },
           { title: "Critic Management", icon: Star, href: "/dashboard/critics" },
           { title: "Motorcycles", icon: Bike, href: "/dashboard/motorcycles" },
-          { title: "Loan Offers", icon: Bike, href: "/dashboard/loans" },
+          { title: "Loan Offers", icon: DoorOpen, href: "/dashboard/loans" },
           { title: "Comparisons", icon: GitCompare, href: "/dashboard/comparisons" },
           { title: "Brands", icon: Tags, href: "/dashboard/brands" },
           { title: "Types", icon: Grid, href: "/dashboard/types" }
@@ -89,7 +90,7 @@ export default function Sidebar() {
           { title: "User Management", icon: Users, href: "/dashboard/admin" },
           { title: "Critic Management", icon: Star, href: "/dashboard/critics" },
           { title: "Motorcycles", icon: Bike, href: "/dashboard/motorcycles" },
-          { title: "Loan Offers", icon: Bike, href: "/dashboard/loans" },
+          { title: "Loan Offers", icon: DoorOpen, href: "/dashboard/loans" },
           { title: "Comparisons", icon: GitCompare, href: "/dashboard/comparisons" },
           { title: "Analytics", icon: Activity, href: "#" },
           { title: "Settings", icon: Settings, href: "#" }

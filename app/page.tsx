@@ -629,7 +629,7 @@ export default function Home() {
             className="cursor-pointer hover:shadow-md transition-shadow duration-200 border hover:border-red-600/50 dark:hover:border-red-500/50"
             onClick={() => {
               // Add EMI calculator functionality
-              router.push('/emi-calculator')
+              router.push('/loan-calculator')
             }}
           >
             <CardContent className="flex flex-col items-center justify-center p-4 text-center">
@@ -818,7 +818,7 @@ export default function Home() {
                               <img
                                 src={moto.coverImage}
                                 alt={moto.modelName || 'Motorcycle'}
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-contain"
                               />
                             ) : (
                               <span className="text-xl md:text-2xl font-bold text-gray-700 dark:text-gray-300 group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors">
@@ -1032,7 +1032,7 @@ export default function Home() {
                               <img
                                 src={critic.images[0]}
                                 alt={critic.title}
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-contain"
                               />
                             ) : (
                               <span className="text-xl md:text-2xl font-bold text-gray-700 dark:text-gray-300 group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors">
