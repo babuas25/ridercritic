@@ -3,7 +3,7 @@
 import { useState, FormEvent, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Search, Mic, MicOff, GitCompare, Calculator, CreditCard, Users, ArrowRight, ArrowLeft, Loader2, Pause, Play } from 'lucide-react'
+import { Search, Mic, MicOff, GitCompare, Calculator, Users, ArrowRight, ArrowLeft, Loader2, Pause, Play, Fuel } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -636,22 +636,22 @@ export default function Home() {
               <div className="p-3 rounded-full bg-red-600/10 dark:bg-red-500/10 mb-2">
                 <Calculator className="h-6 w-6 md:h-7 md:w-7 text-red-600 dark:text-red-500" />
               </div>
-              <p className="font-semibold text-sm md:text-base">EMI Calculator</p>
+              <p className="font-semibold text-sm md:text-base">Loan Calculator</p>
             </CardContent>
           </Card>
 
           <Card 
             className="cursor-pointer hover:shadow-md transition-shadow duration-200 border hover:border-red-600/50 dark:hover:border-red-500/50"
             onClick={() => {
-              // Add loan available functionality
-              router.push('/loan')
+              // Add fuel calculator functionality
+              router.push('/fuel-calculator')
             }}
           >
             <CardContent className="flex flex-col items-center justify-center p-4 text-center">
               <div className="p-3 rounded-full bg-red-600/10 dark:bg-red-500/10 mb-2">
-                <CreditCard className="h-6 w-6 md:h-7 md:w-7 text-red-600 dark:text-red-500" />
+                <Fuel className="h-6 w-6 md:h-7 md:w-7 text-red-600 dark:text-red-500" />
               </div>
-              <p className="font-semibold text-sm md:text-base">Loan Available</p>
+              <p className="font-semibold text-sm md:text-base">Fuel Calculator</p>
             </CardContent>
           </Card>
 
