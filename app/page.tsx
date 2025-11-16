@@ -1,5 +1,6 @@
-'use client'
+"use client"
 
+import Image from 'next/image'
 import { useState, FormEvent, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -285,7 +286,12 @@ export default function Home() {
       }
     }
 
-    fetchCritics()
+    // Slightly defer critics fetch to avoid competing with initial paint
+    const timer = setTimeout(() => {
+      void fetchCritics()
+    }, 400)
+
+    return () => clearTimeout(timer)
   }, [])
 
   useEffect(() => {
@@ -300,7 +306,12 @@ export default function Home() {
       }
     }
 
-    fetchComparisons()
+    // Slightly defer comparisons fetch as it is fully below the fold
+    const timer = setTimeout(() => {
+      void fetchComparisons()
+    }, 600)
+
+    return () => clearTimeout(timer)
   }, [])
 
   useEffect(() => {
@@ -507,20 +518,21 @@ export default function Home() {
           </div>
 
           {/* Voice listening modal */}
-          <Dialog open={voiceOpen} onOpenChange={(open) => {
-            setVoiceOpen(open)
-            if (!open && listening) {
-              recognitionRef.current?.stop()
-              setListening(false)
-              setIsMuted(false)
-            }
-          }}>
-            <DialogContent className="sm:max-w-[720px] border-0 bg-black text-white p-0 overflow-hidden" aria-describedby="voice-desc">
-              <DialogTitle className="sr-only">Voice Search</DialogTitle>
-              <DialogDescription id="voice-desc" className="sr-only">Speak your query. Use pause to mute, and the red button to stop.</DialogDescription>
-              <div className="grid grid-cols-1 md:grid-cols-2">
-                {/* Left: saying indicator */}
-                <div className="relative p-8 flex flex-col gap-6">
+          {(voiceOpen || listening) && (
+            <Dialog open={voiceOpen} onOpenChange={(open) => {
+              setVoiceOpen(open)
+              if (!open && listening) {
+                recognitionRef.current?.stop()
+                setListening(false)
+                setIsMuted(false)
+              }
+            }}>
+              <DialogContent className="sm:max-w-[720px] border-0 bg-black text-white p-0 overflow-hidden" aria-describedby="voice-desc">
+                <DialogTitle className="sr-only">Voice Search</DialogTitle>
+                <DialogDescription id="voice-desc" className="sr-only">Speak your query. Use pause to mute, and the red button to stop.</DialogDescription>
+                <div className="grid grid-cols-1 md:grid-cols-2">
+                  {/* Left: saying indicator */}
+                  <div className="relative p-8 flex flex-col gap-6">
                   <div className="text-sm opacity-70">Saying</div>
                   <div className="flex items-center gap-3">
                     <span className="h-7 w-10 rounded-full bg-white/15" />
@@ -531,8 +543,8 @@ export default function Home() {
                   <div className="mt-auto text-xs opacity-60">You can change this later</div>
                 </div>
 
-                {/* Right: listening bubble + controls */}
-                <div className="relative p-8 flex flex-col items-center justify-center bg-black/95">
+                  {/* Right: listening bubble + controls */}
+                  <div className="relative p-8 flex flex-col items-center justify-center bg-black/95">
                   <div className="relative w-44 h-44">
                     <div className="absolute inset-0 rounded-full bg-white/10 animate-pulse" />
                     <div className="absolute inset-6 rounded-full bg-white/10 animate-[pulse_2s_ease-in-out_infinite]" />
@@ -586,8 +598,9 @@ export default function Home() {
                   <div className="mt-3 text-xs opacity-60">Tap to {isMuted ? 'resume' : 'stop'}</div>
                 </div>
               </div>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+          )}
 
           {/* Search Buttons */}
           <div className="flex items-center justify-center gap-4 mt-6">
@@ -724,10 +737,11 @@ export default function Home() {
                         <div className="flex flex-col items-center justify-center text-center">
                           <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3 group-hover:bg-red-600/10 dark:group-hover:bg-red-500/10 transition-colors overflow-hidden">
                             {brand.logoUrl ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
+                              <Image
                                 src={brand.logoUrl}
                                 alt={`${brand.name} logo`}
+                                width={80}
+                                height={80}
                                 className="w-full h-full object-contain p-2"
                               />
                             ) : (
@@ -814,10 +828,11 @@ export default function Home() {
                         <div className="flex flex-col items-center justify-center text-center">
                           <div className="w-24 h-24 md:w-28 md:h-28 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3 group-hover:bg-red-600/10 dark:group-hover:bg-red-500/10 transition-colors overflow-hidden">
                             {moto.coverImage ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
+                              <Image
                                 src={moto.coverImage}
                                 alt={moto.modelName || 'Motorcycle'}
+                                width={160}
+                                height={160}
                                 className="w-full h-full object-contain"
                               />
                             ) : (
@@ -910,10 +925,11 @@ export default function Home() {
                               <div key={moto?.id || index} className="text-center">
                                 <div className="w-full h-20 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-2 overflow-hidden">
                                   {moto?.coverImage ? (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img
+                                    <Image
                                       src={moto.coverImage}
                                       alt={`${moto.brand} ${moto.modelName}`}
+                                      width={160}
+                                      height={80}
                                       className="w-full h-full object-cover"
                                     />
                                   ) : (
@@ -1028,10 +1044,11 @@ export default function Home() {
                         <div className="flex flex-col text-left">
                           <div className="w-full h-24 md:h-28 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-3 group-hover:bg-red-600/10 dark:group-hover:bg-red-500/10 transition-colors overflow-hidden">
                             {critic.images && critic.images.length > 0 ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
+                              <Image
                                 src={critic.images[0]}
                                 alt={critic.title}
+                                width={220}
+                                height={110}
                                 className="w-full h-full object-contain"
                               />
                             ) : (
