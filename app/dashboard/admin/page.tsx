@@ -76,8 +76,10 @@ export default function AdminDashboard() {
       return
     }
     
+    const userRole = session.user.role as UserRole | undefined
+
     // Check if user has admin rights
-    if (!canManageRoles(session.user.role)) {
+    if (!userRole || !canManageRoles(userRole)) {
       router.push('/dashboard/user')
       return
     }
@@ -85,7 +87,9 @@ export default function AdminDashboard() {
 
   // Fetch real users from API
   useEffect(() => {
-    if (!session || status !== 'authenticated' || !canManageRoles(session.user.role)) {
+    const userRole = session?.user?.role as UserRole | undefined
+
+    if (!session || status !== 'authenticated' || !userRole || !canManageRoles(userRole)) {
       return
     }
     
@@ -144,7 +148,9 @@ export default function AdminDashboard() {
     return null
   }
 
-  if (!canManageRoles(session.user.role)) {
+  const currentUserRole = session.user.role as UserRole | undefined
+
+  if (!currentUserRole || !canManageRoles(currentUserRole)) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
@@ -320,25 +326,25 @@ export default function AdminDashboard() {
         {/* Users Table */}
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
                 <CardTitle>All Users</CardTitle>
                 <CardDescription>
                   Manage user accounts and permissions
                 </CardDescription>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="relative">
+              <div className="flex flex-col gap-2 w-full md:flex-row md:items-center md:gap-2 md:w-auto">
+                <div className="relative w-full md:w-64">
                   <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search users..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-8 w-64"
+                    className="pl-8 w-full"
                   />
                 </div>
                 <Select value={selectedRole} onValueChange={setSelectedRole}>
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="w-full md:w-40">
                     <Filter className="w-4 h-4 mr-2" />
                     <SelectValue />
                   </SelectTrigger>
@@ -453,7 +459,7 @@ export default function AdminDashboard() {
                   <SelectTrigger className="col-span-3">
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[10000]">
                     <SelectItem value="User Admin">User Admin</SelectItem>
                     <SelectItem value="Admin">Admin</SelectItem>
                     <SelectItem value="Sponsor Admin">Sponsor Admin</SelectItem>
@@ -514,7 +520,7 @@ export default function AdminDashboard() {
                     <SelectTrigger className="col-span-3">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-[10000]">
                       <SelectItem value="User Admin">User Admin</SelectItem>
                       <SelectItem value="Admin">Admin</SelectItem>
                       <SelectItem value="Sponsor Admin">Sponsor Admin</SelectItem>
@@ -538,7 +544,7 @@ export default function AdminDashboard() {
                     <SelectTrigger className="col-span-3">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-[10000]">
                       <SelectItem value="NewStar">NewStar</SelectItem>
                       <SelectItem value="CriticStar">CriticStar</SelectItem>
                       <SelectItem value="CriticMaster">CriticMaster</SelectItem>

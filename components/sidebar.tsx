@@ -32,7 +32,7 @@ interface SidebarItem {
 }
 
 // Helper function to get dashboard URL based on user role and subrole
-const getDashboardUrl = (userRole: string | undefined, userSubRole: string | undefined) => {
+export const getDashboardUrl = (userRole: string | undefined, userSubRole: string | undefined) => {
   if (userRole === 'Super Admin') return '/dashboard/super-admin'
   if (userRole === 'Admin') return '/dashboard/admin'
   if (userRole === 'Sponsor Admin') return '/dashboard/sponsor'
@@ -53,6 +53,7 @@ export default function Sidebar() {
   const { data: session } = useSession()
 
   const isDashboard = pathname?.startsWith('/dashboard')
+  const isHome = pathname === '/'
   const userRole = session?.user?.role
   const userSubRole = session?.user?.subRole
 
@@ -62,8 +63,8 @@ export default function Sidebar() {
 
   // Get sidebar items based on context
   const getSidebarItems = (): SidebarItem[] => {
-    // If on dashboard pages, show role-specific items
-    if (isDashboard && session) {
+    // If on dashboard pages or home with a logged-in user, show role-specific items
+    if ((isDashboard || (isHome && session)) && session) {
       const items: SidebarItem[] = [
         {
           title: "Dashboard",

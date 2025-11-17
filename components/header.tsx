@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Moon, Sun, Search, Menu, Home, Star, Bike, Settings, ChevronLeft, LogOut, User } from 'lucide-react'
 import { useSession, signOut } from 'next-auth/react'
+
 import {
   Sheet,
   SheetContent,
@@ -24,13 +25,23 @@ import {
   SheetDescription
 } from "@/components/ui/sheet"
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Logo } from '@/components/ui/logo'
+import { getDashboardUrl } from '@/components/sidebar'
 
 export default function Header() {
   const { theme, setTheme } = useTheme()
   const { data: session } = useSession()
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [isMobileCollapsed] = useState(false)
+  const pathname = usePathname()
+
+  const userRole = session?.user?.role
+  const userSubRole = session?.user?.subRole
+  const dashboardUrl = session ? getDashboardUrl(userRole, userSubRole) : '/dashboard'
+
+  const isDashboard = pathname?.startsWith('/dashboard')
+  const isHome = pathname === '/'
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -61,18 +72,89 @@ export default function Header() {
               </SheetHeader>
               <div className="p-4">
                 <nav className="flex flex-col gap-1">
-                  <Link href="/" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
-                    <Home className="h-4 w-4" />
-                    <span>Home</span>
-                  </Link>
-                  <Link href="/motorcycle" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
-                    <Bike className="h-4 w-4" />
-                    <span>Motorcycles</span>
-                  </Link>
-                  <Link href="/critics" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
-                    <Star className="h-4 w-4" />
-                    <span>Critics</span>
-                  </Link>
+                  {session && (isDashboard || isHome) ? (
+                    <>
+                      {/* Role-specific mobile items, mirroring Sidebar */}
+                      <Link href={dashboardUrl} className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                        <Home className="h-4 w-4" />
+                        <span>Dashboard</span>
+                      </Link>
+
+                      {userRole === 'Super Admin' && (
+                        <>
+                          <Link href="/dashboard/admin" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                            <User className="h-4 w-4" />
+                            <span>User Management</span>
+                          </Link>
+                          <Link href="/dashboard/critics" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                            <Star className="h-4 w-4" />
+                            <span>Critic Management</span>
+                          </Link>
+                          <Link href="/dashboard/motorcycles" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                            <Bike className="h-4 w-4" />
+                            <span>Motorcycles</span>
+                          </Link>
+                          <Link href="/dashboard/loans" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                            <Settings className="h-4 w-4" />
+                            <span>Loan Offers</span>
+                          </Link>
+                          <Link href="/dashboard/comparisons" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                            <Settings className="h-4 w-4" />
+                            <span>Comparisons</span>
+                          </Link>
+                          <Link href="/dashboard/brands" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                            <Settings className="h-4 w-4" />
+                            <span>Brands</span>
+                          </Link>
+                          <Link href="/dashboard/types" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                            <Settings className="h-4 w-4" />
+                            <span>Types</span>
+                          </Link>
+                        </>
+                      )}
+
+                      {userRole === 'Admin' && (
+                        <>
+                          <Link href="/dashboard/admin" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                            <User className="h-4 w-4" />
+                            <span>User Management</span>
+                          </Link>
+                          <Link href="/dashboard/critics" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                            <Star className="h-4 w-4" />
+                            <span>Critic Management</span>
+                          </Link>
+                          <Link href="/dashboard/motorcycles" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                            <Bike className="h-4 w-4" />
+                            <span>Motorcycles</span>
+                          </Link>
+                          <Link href="/dashboard/loans" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                            <Settings className="h-4 w-4" />
+                            <span>Loan Offers</span>
+                          </Link>
+                          <Link href="/dashboard/comparisons" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                            <Settings className="h-4 w-4" />
+                            <span>Comparisons</span>
+                          </Link>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {/* Public/simple mobile menu */}
+                      <Link href={session ? dashboardUrl : "/"} className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                        <Home className="h-4 w-4" />
+                        <span>Home</span>
+                      </Link>
+                      <Link href="/motorcycle" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                        <Bike className="h-4 w-4" />
+                        <span>Motorcycles</span>
+                      </Link>
+                      <Link href="/critics" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                        <Star className="h-4 w-4" />
+                        <span>Critics</span>
+                      </Link>
+                    </>
+                  )}
                 </nav>
               </div>
               <div className="absolute bottom-0 left-0 right-0 p-4 border-t">
@@ -115,7 +197,7 @@ export default function Header() {
                         </div>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem asChild>
-                          <Link href="/dashboard" className="cursor-pointer">
+                          <Link href={dashboardUrl} className="cursor-pointer">
                             <Settings className="mr-2 h-4 w-4" />
                             <span>Dashboard</span>
                           </Link>
@@ -208,7 +290,7 @@ export default function Header() {
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="cursor-pointer">
+                    <Link href={dashboardUrl} className="cursor-pointer">
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Dashboard</span>
                     </Link>

@@ -1,19 +1,19 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { getAllCritics, CriticData } from '@/lib/critics'
+import type { CriticData } from '@/lib/critics'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Star } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 
-export default function CriticsPage() {
-  const [critics, setCritics] = useState<CriticData[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
-  const router = useRouter()
+interface CriticsPageProps {
+  initialCritics: CriticData[]
+}
+
+export default function CriticsPage({ initialCritics }: CriticsPageProps) {
+  const [critics] = useState<CriticData[]>(initialCritics)
 
   // JSON-LD structured data for the critics collection
   const generateJsonLd = () => {
@@ -48,31 +48,6 @@ export default function CriticsPage() {
     }
   }
 
-  useEffect(() => {
-    const fetchCritics = async () => {
-      try {
-        const criticsData = await getAllCritics(20)
-        // Process the critics to handle Firestore timestamps properly
-        const processedCritics = criticsData.map(critic => ({
-          ...critic,
-          createdAt: critic.createdAt instanceof Date ? critic.createdAt : 
-                    critic.createdAt && typeof critic.createdAt === 'object' && 'toDate' in critic.createdAt ? 
-                    (critic.createdAt as unknown as { toDate: () => Date }).toDate() : 
-                    critic.createdAt ? new Date(critic.createdAt as string) : null,
-          rating: typeof critic.rating === 'number' ? critic.rating : 0
-        }))
-        setCritics(processedCritics)
-      } catch (err) {
-        console.error('Error fetching critics:', err)
-        setError("Failed to load critics")
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchCritics()
-  }, [])
-
   // Format date for display
   const formatDate = (date: Date | string | null) => {
     if (!date) return 'Unknown date'
@@ -102,52 +77,6 @@ export default function CriticsPage() {
     } catch {
       return 'Unknown date'
     }
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="container py-16 md:py-24">
-          <div className="text-center mb-16">
-            <div className="h-10 w-64 bg-muted rounded animate-pulse mx-auto mb-4"></div>
-            <div className="h-6 w-96 bg-muted rounded animate-pulse mx-auto"></div>
-          </div>
-          
-          <div className="grid gap-8 md:gap-10 md:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Card key={i} className="overflow-hidden border-border/50">
-                <div className="h-48 bg-muted animate-pulse"></div>
-                <div className="p-6">
-                  <div className="h-6 bg-muted rounded animate-pulse mb-3"></div>
-                  <div className="h-4 bg-muted rounded animate-pulse mb-2 w-3/4"></div>
-                  <div className="h-4 bg-muted rounded animate-pulse mb-4 w-1/2"></div>
-                  <div className="flex justify-between items-center">
-                    <div className="h-4 bg-muted rounded animate-pulse w-1/3"></div>
-                    <div className="h-4 bg-muted rounded animate-pulse w-1/4"></div>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center p-8">
-          <p className="text-destructive mb-4">{error}</p>
-          <Button 
-            onClick={() => router.refresh()} 
-            variant="outline"
-          >
-            Retry
-          </Button>
-        </div>
-      </div>
-    )
   }
 
   return (

@@ -2,9 +2,10 @@ import { getCritic } from '@/lib/critics'
 import { CriticData } from '@/lib/critics'
 
 // Generate metadata for the critic detail page
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+export async function generateMetadata({ params }: { params: { id: string } }) {
   try {
-    const { id } = await params
+    const { id } = params
+
     const critic = await getCritic(id) as CriticData
     
     if (!critic) {
