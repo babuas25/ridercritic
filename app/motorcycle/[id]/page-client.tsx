@@ -191,37 +191,61 @@ export default function MotorcycleDetailPage({ params }: { params: Promise<{ id:
   console.log('Gallery images:', motorcycle.galleryImages)
   console.log('Cover image:', motorcycle.coverImage)
 
-  // JSON-LD Structured Data
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    "name": `${motorcycle.brand} ${motorcycle.modelName}`,
-    "image": [
-      getValidCoverImage(),
-      ...getValidGalleryImages()
-    ].filter(Boolean),
-    "description": motorcycle.description,
-    "brand": {
-      "@type": "Brand",
-      "name": motorcycle.brand
-    },
-    "offers": {
-      "@type": "Offer",
-      "priceCurrency": "BDT",
-      "price": motorcycle.exShowroomPrice ? parseFloat(motorcycle.exShowroomPrice.replace(/[^0-9.]/g, '')) : undefined,
-      "availability": "InStock"
-    },
-    "review": {
-      "@type": "Review",
-      "reviewRating": {
-        "@type": "Rating",
-        "ratingValue": "4.8",
-        "reviewCount": "127",
-        "bestRating": "5",
-        "worstRating": "1"
+  // JSON-LD Structured Data (Product + BreadcrumbList)
+  const jsonLd = (() => {
+    const baseUrl = 'https://ridercritic.com'
+    const productUrl = motorcycle.id ? `${baseUrl}/motorcycle/${encodeURIComponent(motorcycle.id)}` : `${baseUrl}/motorcycle`
+
+    const product = {
+      "@type": "Product",
+      "@id": productUrl,
+      "name": `${motorcycle.brand} ${motorcycle.modelName}`,
+      "image": [
+        getValidCoverImage(),
+        ...getValidGalleryImages()
+      ].filter(Boolean),
+      "description": motorcycle.description,
+      "brand": {
+        "@type": "Brand",
+        "name": motorcycle.brand
+      },
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "BDT",
+        "price": motorcycle.exShowroomPrice ? parseFloat(motorcycle.exShowroomPrice.replace(/[^0-9.]/g, '')) : undefined,
+        "availability": "InStock"
       }
     }
-  };
+
+    const breadcrumb = {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": baseUrl
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Motorcycles",
+          "item": `${baseUrl}/motorcycle`
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": `${motorcycle.brand} ${motorcycle.modelName}`,
+          "item": productUrl
+        }
+      ]
+    }
+
+    return {
+      "@context": "https://schema.org",
+      "@graph": [product, breadcrumb]
+    }
+  })();
 
   return (
     <div className="container py-8 max-w-6xl mx-auto px-4">

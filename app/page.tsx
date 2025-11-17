@@ -671,8 +671,7 @@ export default function Home() {
           <Card 
             className="cursor-pointer hover:shadow-md transition-shadow duration-200 border hover:border-red-600/50 dark:hover:border-red-500/50"
             onClick={() => {
-              // Add join community functionality
-              router.push('/community')
+              window.open('https://www.facebook.com/groups/ridercritic', '_blank', 'noopener,noreferrer')
             }}
           >
             <CardContent className="flex flex-col items-center justify-center p-4 text-center">
@@ -742,7 +741,7 @@ export default function Home() {
                                 alt={`${brand.name} logo`}
                                 width={80}
                                 height={80}
-                                className="w-full h-full object-contain p-2"
+                                className="w-full h-auto object-contain p-2"
                               />
                             ) : (
                               <span className="text-xl md:text-2xl font-bold text-gray-700 dark:text-gray-300 group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors">
@@ -930,7 +929,7 @@ export default function Home() {
                                       alt={`${moto.brand} ${moto.modelName}`}
                                       width={160}
                                       height={80}
-                                      className="w-full h-full object-cover"
+                                      className="w-full h-auto object-cover"
                                     />
                                   ) : (
                                     <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -1049,7 +1048,7 @@ export default function Home() {
                                 alt={critic.title}
                                 width={220}
                                 height={110}
-                                className="w-full h-full object-contain"
+                                className="w-full h-auto object-contain"
                               />
                             ) : (
                               <span className="text-xl md:text-2xl font-bold text-gray-700 dark:text-gray-300 group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors">

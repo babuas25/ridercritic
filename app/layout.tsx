@@ -58,18 +58,39 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // JSON-LD structured data
+  // JSON-LD structured data for rich results
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "ridercritic",
-    "alternateName": "রাইডারক্রিটিক",
-    "url": "https://ridercritic.com",
-    "description": "ridercritic is a motorcycle review and rider lifestyle platform — built for bikers, by bikers. More than a ride, it's an emotion.",
-    "sameAs": [
-      "https://facebook.com/ridercritic",
-      "https://twitter.com/ridercritic",
-      "https://instagram.com/ridercritic"
+    "@graph": [
+      {
+        "@type": "Organization",
+        "name": "ridercritic",
+        "alternateName": "রাইডারক্রিটিক",
+        "url": "https://ridercritic.com",
+        "description": "ridercritic is a motorcycle review and rider lifestyle platform — built for bikers, by bikers. More than a ride, it's an emotion.",
+        "sameAs": [
+          "https://facebook.com/ridercritic",
+          "https://twitter.com/ridercritic",
+          "https://instagram.com/ridercritic"
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "name": "ridercritic",
+        "url": "https://ridercritic.com",
+        "potentialAction": [
+          {
+            "@type": "SearchAction",
+            "target": "https://ridercritic.com/motorcycle?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          },
+          {
+            "@type": "SearchAction",
+            "target": "https://ridercritic.com/critics?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        ]
+      }
     ]
   };
 
@@ -84,6 +105,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+
         <Providers>
           <div className="min-h-screen flex flex-col">
             <Header />

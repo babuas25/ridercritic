@@ -28,11 +28,22 @@ export default function CriticDetailClient({ critic, initialComments }: CriticDe
   const [commentError, setCommentError] = useState("")
   const { data: session } = useSession()
 
-  // JSON-LD structured data for the critic
+  // JSON-LD structured data for the critic (Review + Breadcrumbs + optional Video)
   const generateJsonLd = (critic: CriticData) => {
-    return {
-      "@context": "https://schema.org",
+    const baseUrl = 'https://ridercritic.com'
+    const criticUrl = critic.id ? `${baseUrl}/critics/${encodeURIComponent(critic.id)}` : `${baseUrl}/critics`
+
+    const publishedIso = critic.createdAt instanceof Date
+      ? critic.createdAt.toISOString()
+      : typeof critic.createdAt === 'object' && critic.createdAt && 'toDate' in critic.createdAt
+        ? (critic.createdAt as unknown as { toDate: () => Date }).toDate().toISOString()
+        : critic.createdAt
+          ? new Date(critic.createdAt as string).toISOString()
+          : new Date().toISOString()
+
+    const review = {
       "@type": "Review",
+      "url": criticUrl,
       "itemReviewed": {
         "@type": "Product",
         "name": critic.topic,
@@ -44,25 +55,67 @@ export default function CriticDetailClient({ critic, initialComments }: CriticDe
         "worstRating": "1",
       },
       "name": critic.title,
+      "image": critic.images && critic.images.length > 0 ? critic.images[0] : undefined,
       "reviewBody": critic.content
-        ? critic.content.replace(/<[^>]*>/g, '').substring(0, 200)
+        ? critic.content.replace(/<[^>]*>/g, '').substring(0, 500)
         : "",
       "author": {
         "@type": "Person",
         "name": critic.authorName,
       },
-      "datePublished": critic.createdAt instanceof Date
-        ? critic.createdAt.toISOString()
-        : typeof critic.createdAt === 'object' && critic.createdAt && 'toDate' in critic.createdAt
-          ? (critic.createdAt as unknown as { toDate: () => Date }).toDate().toISOString()
-          : critic.createdAt
-            ? new Date(critic.createdAt as string).toISOString()
-            : new Date().toISOString(),
+      "datePublished": publishedIso,
       "publisher": {
         "@type": "Organization",
         "name": "ridercritic",
         "sameAs": "https://ridercritic.com",
       },
+    }
+
+    const breadcrumb = {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": baseUrl,
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Critics",
+          "item": `${baseUrl}/critics`,
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": critic.title,
+          "item": criticUrl,
+        },
+      ],
+    }
+
+    const graph: unknown[] = [review, breadcrumb]
+
+    if (critic.youtubeLink) {
+      const videoId = extractYouTubeId(critic.youtubeLink)
+      if (videoId) {
+        graph.push({
+          "@type": "VideoObject",
+          "name": critic.title,
+          "description": critic.content
+            ? critic.content.replace(/<[^>]*>/g, '').substring(0, 200)
+            : critic.topic,
+          "uploadDate": publishedIso,
+          "thumbnailUrl": critic.images && critic.images.length > 0 ? [critic.images[0]] : undefined,
+          "embedUrl": `https://www.youtube.com/embed/${videoId}`,
+        })
+      }
+    }
+
+    return {
+      "@context": "https://schema.org",
+      "@graph": graph,
     }
   }
 

@@ -16,16 +16,35 @@ export default function MainNav() {
             Home
           </Link>
           <Link
-            href="/critics"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-          >
-            Critics
-          </Link>
-          <Link
             href="/motorcycle"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
           >
             Motorcycles
+          </Link>
+          <Link
+            href="/critics"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+          >
+            Critics / Reviews
+          </Link>
+          <Link
+            href="/comparisons"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+          >
+            Comparisons
+          </Link>
+          <Link
+            href="/offers"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+          >
+            Offers
+          </Link>
+          <Link
+            href="/accessories"
+            rel="nofollow"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+          >
+            Accessories (Coming Soon)
           </Link>
           <Link
             href="/about"

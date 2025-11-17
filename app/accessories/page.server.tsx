@@ -26,6 +26,10 @@ export async function generateMetadata() {
       description,
       images: ['https://ridercritic.com/og-accessories.jpg'],
     },
+    robots: {
+      index: false,
+      follow: false
+    },
     alternates: {
       canonical: 'https://ridercritic.com/accessories'
     }
