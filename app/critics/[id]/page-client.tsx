@@ -33,13 +33,27 @@ export default function CriticDetailClient({ critic, initialComments }: CriticDe
     const baseUrl = 'https://ridercritic.com'
     const criticUrl = critic.id ? `${baseUrl}/critics/${encodeURIComponent(critic.id)}` : `${baseUrl}/critics`
 
-    const publishedIso = critic.createdAt instanceof Date
-      ? critic.createdAt.toISOString()
-      : typeof critic.createdAt === 'object' && critic.createdAt && 'toDate' in critic.createdAt
-        ? (critic.createdAt as unknown as { toDate: () => Date }).toDate().toISOString()
-        : critic.createdAt
-          ? new Date(critic.createdAt as string).toISOString()
-          : new Date().toISOString()
+    let publishedIso: string | undefined
+
+    if (critic.createdAt instanceof Date) {
+      if (!isNaN(critic.createdAt.getTime())) {
+        publishedIso = critic.createdAt.toISOString()
+      }
+    } else if (
+      typeof critic.createdAt === 'object' &&
+      critic.createdAt !== null &&
+      'toDate' in (critic.createdAt as unknown as { toDate?: () => Date })
+    ) {
+      const date = (critic.createdAt as unknown as { toDate: () => Date }).toDate()
+      if (!isNaN(date.getTime())) {
+        publishedIso = date.toISOString()
+      }
+    } else if (typeof critic.createdAt === 'string' && critic.createdAt) {
+      const date = new Date(critic.createdAt)
+      if (!isNaN(date.getTime())) {
+        publishedIso = date.toISOString()
+      }
+    }
 
     const review = {
       "@type": "Review",
@@ -63,7 +77,11 @@ export default function CriticDetailClient({ critic, initialComments }: CriticDe
         "@type": "Person",
         "name": critic.authorName,
       },
-      "datePublished": publishedIso,
+      ...(publishedIso
+        ? {
+            datePublished: publishedIso,
+          }
+        : {}),
       "publisher": {
         "@type": "Organization",
         "name": "ridercritic",
@@ -106,7 +124,11 @@ export default function CriticDetailClient({ critic, initialComments }: CriticDe
           "description": critic.content
             ? critic.content.replace(/<[^>]*>/g, '').substring(0, 200)
             : critic.topic,
-          "uploadDate": publishedIso,
+          ...(publishedIso
+            ? {
+                uploadDate: publishedIso,
+              }
+            : {}),
           "thumbnailUrl": critic.images && critic.images.length > 0 ? [critic.images[0]] : undefined,
           "embedUrl": `https://www.youtube.com/embed/${videoId}`,
         })
