@@ -5,7 +5,7 @@ export default function Footer() {
   return (
     <footer className="w-full border-t bg-background mt-auto">
       <div className="container mx-auto px-4 py-2">
-        <div className="flex justify-between items-center flex-wrap gap-2">
+        <div className="flex justify-between items-center flex-wrap gap-4">
           {/* Social Media Links */}
           <div className="flex items-center gap-3">
             <a 
@@ -44,6 +44,53 @@ export default function Footer() {
               <Users className="h-4 w-4" />
               <span className="sr-only">Facebook Group</span>
             </a>
+          </div>
+
+          {/* Explore / Internal Links */}
+          <div className="flex flex-wrap items-center gap-3 text-sm">
+            <span className="text-muted-foreground">Explore:</span>
+            <Link 
+              href="/motorcycle"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Motorcycles
+            </Link>
+            <Link 
+              href="/critics"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Critics
+            </Link>
+            <Link 
+              href="/comparisons"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Comparisons
+            </Link>
+            <Link 
+              href="/offers"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Offers
+            </Link>
+            <Link 
+              href="/brands"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Brands
+            </Link>
+            <Link 
+              href="/about"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              About
+            </Link>
+            <Link 
+              href="/contact"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Contact
+            </Link>
           </div>
 
           {/* Policy Links */}

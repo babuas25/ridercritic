@@ -4,6 +4,8 @@ import { adminDb } from '@/lib/firebase-admin'
 type BrandUpdatePayload = {
   name?: string
   distributor?: string
+  brandUrl?: string
+  distributorUrl?: string
   logoUrl?: string
   updatedAt: Date
 }
@@ -11,6 +13,8 @@ type BrandUpdatePayload = {
 type NewBrandPayload = {
   name: string
   distributor: string
+  brandUrl?: string
+  distributorUrl?: string
   logoUrl?: string
   createdAt: Date
   updatedAt: Date
@@ -62,12 +66,14 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, distributor, logoUrl } = body
+    const { name, distributor, logoUrl, brandUrl, distributorUrl } = body
 
     const updateData: BrandUpdatePayload = { updatedAt: new Date() }
     if (typeof name === 'string') updateData.name = name
     if (typeof distributor === 'string') updateData.distributor = distributor
     if (typeof logoUrl === 'string') updateData.logoUrl = logoUrl
+    if (typeof brandUrl === 'string') updateData.brandUrl = brandUrl
+    if (typeof distributorUrl === 'string') updateData.distributorUrl = distributorUrl
 
     await adminDb.collection('brands').doc(id).update(updateData)
 
@@ -104,7 +110,13 @@ export async function POST(request: NextRequest) {
     }
     
     const body = await request.json()
-    const { name, distributor, logoUrl } = body
+    const { name, distributor, logoUrl, brandUrl, distributorUrl } = body as {
+      name: string
+      distributor: string
+      logoUrl?: string
+      brandUrl?: string
+      distributorUrl?: string
+    }
     
     if (!name || !distributor) {
       return NextResponse.json(
@@ -119,6 +131,8 @@ export async function POST(request: NextRequest) {
       createdAt: new Date(),
       updatedAt: new Date(),
       ...(typeof logoUrl === 'string' ? { logoUrl } : {}),
+      ...(typeof brandUrl === 'string' ? { brandUrl } : {}),
+      ...(typeof distributorUrl === 'string' ? { distributorUrl } : {}),
     }
     
     const docRef = await adminDb.collection('brands').add(newBrand)

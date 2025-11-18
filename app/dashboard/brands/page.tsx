@@ -23,6 +23,8 @@ export default function BrandsPage() {
   }>>([])
   const [newBrand, setNewBrand] = useState('')
   const [newDistributor, setNewDistributor] = useState('')
+  const [newBrandUrl, setNewBrandUrl] = useState('')
+  const [newDistributorUrl, setNewDistributorUrl] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [newLogoFile, setNewLogoFile] = useState<File | null>(null)
   const [isUploadingLogo, setIsUploadingLogo] = useState(false)
@@ -61,16 +63,28 @@ export default function BrandsPage() {
         logoUrl = await uploadImage(newLogoFile, `brands/${newBrand.trim().toLowerCase()}`)
         setIsUploadingLogo(false)
       }
+
+      const payload: Record<string, string> = {
+        name: newBrand,
+        distributor: newDistributor,
+      }
+
+      if (logoUrl) payload.logoUrl = logoUrl
+      if (newBrandUrl.trim()) payload.brandUrl = newBrandUrl.trim()
+      if (newDistributorUrl.trim()) payload.distributorUrl = newDistributorUrl.trim()
+
       const response = await fetch('/api/brands', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newBrand, distributor: newDistributor, ...(logoUrl ? { logoUrl } : {}) })
+        body: JSON.stringify(payload)
       })
       
       if (!response.ok) throw new Error('Failed to add brand')
       
       setNewBrand('')
       setNewDistributor('')
+      setNewBrandUrl('')
+      setNewDistributorUrl('')
       setNewLogoFile(null)
       fetchBrands()
     } catch (error) {
@@ -104,6 +118,16 @@ export default function BrandsPage() {
           placeholder="Distributor"
           value={newDistributor}
           onChange={(e) => setNewDistributor(e.target.value)}
+        />
+        <Input
+          placeholder="Brand URL (e.g. /brands/yamaha)"
+          value={newBrandUrl}
+          onChange={(e) => setNewBrandUrl(e.target.value)}
+        />
+        <Input
+          placeholder="Distributor URL (optional)"
+          value={newDistributorUrl}
+          onChange={(e) => setNewDistributorUrl(e.target.value)}
         />
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium">Logo (optional)</label>

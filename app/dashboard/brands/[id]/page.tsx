@@ -14,6 +14,8 @@ export default function EditBrandPage() {
 
   const [name, setName] = useState("")
   const [distributor, setDistributor] = useState("")
+  const [brandUrl, setBrandUrl] = useState("")
+  const [distributorUrl, setDistributorUrl] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -33,6 +35,8 @@ export default function EditBrandPage() {
         const data = await res.json()
         setName(data.name || "")
         setDistributor(data.distributor || "")
+        setBrandUrl(data.brandUrl || "")
+        setDistributorUrl(data.distributorUrl || "")
         setLogoUrl(data.logoUrl || "")
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e))
@@ -60,6 +64,8 @@ export default function EditBrandPage() {
         body: JSON.stringify({ 
           name: name.trim(), 
           distributor: distributor.trim(), 
+          ...(brandUrl.trim() ? { brandUrl: brandUrl.trim() } : {}),
+          ...(distributorUrl.trim() ? { distributorUrl: distributorUrl.trim() } : {}),
           ...(uploadedLogoUrl ? { logoUrl: uploadedLogoUrl } : {})
         })
       })
@@ -87,6 +93,22 @@ export default function EditBrandPage() {
           <div className="space-y-2">
             <label className="text-sm font-medium">Distributor</label>
             <Input value={distributor} onChange={(e) => setDistributor(e.target.value)} placeholder="e.g. ACI Motors" />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Brand URL</label>
+            <Input
+              value={brandUrl}
+              onChange={(e) => setBrandUrl(e.target.value)}
+              placeholder="e.g. /brands/yamaha"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Distributor URL</label>
+            <Input
+              value={distributorUrl}
+              onChange={(e) => setDistributorUrl(e.target.value)}
+              placeholder="Optional URL for distributor page"
+            />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Brand Logo</label>
