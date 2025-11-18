@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, ArrowRight, Save, Eye, Loader2 } from 'lucide-react'
-import { MotorcycleFormData } from '@/types/motorcycle'
+import { MotorcycleFormData, VariantData } from '@/types/motorcycle'
 import { getMotorcycle, updateMotorcycle } from '@/lib/motorcycles'
 
 // Import all 13 modular step components
@@ -65,6 +65,29 @@ export default function EditMotorcyclePage() {
               step12: []
             }
           }
+
+          // Ensure pricing-related collections and variant fields are initialized
+          if (!data.competitorModels) {
+            data.competitorModels = []
+          }
+
+          const defaultVariant: VariantData = {
+            variantName: '',
+            price: '',
+            color: '',
+            status: 'Available',
+            specialFeatures: ''
+          }
+
+          if (!data.variants) {
+            data.variants = []
+          } else {
+            data.variants = data.variants.map((variant: VariantData) => ({
+              ...defaultVariant,
+              ...variant
+            }))
+          }
+
           setFormData(data)
         } else {
           alert('Motorcycle not found')

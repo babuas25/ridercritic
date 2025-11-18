@@ -206,26 +206,26 @@ export default function PricingMarketDataStep({
                       <td className="px-4 py-2">
                         <Input
                           placeholder="Variant name"
-                          value={variant.variantName}
+                          value={variant.variantName || ''}
                           onChange={(e) => updateVariant(index, 'variantName', e.target.value)}
                         />
                       </td>
                       <td className="px-4 py-2">
                         <Input
                           placeholder="Price"
-                          value={variant.price}
+                          value={variant.price || ''}
                           onChange={(e) => updateVariant(index, 'price', e.target.value)}
                         />
                       </td>
                       <td className="px-4 py-2">
                         <Input
                           placeholder="Color"
-                          value={variant.color}
+                          value={variant.color || ''}
                           onChange={(e) => updateVariant(index, 'color', e.target.value)}
                         />
                       </td>
                       <td className="px-4 py-2">
-                        <Select value={variant.status} onValueChange={(value) => updateVariant(index, 'status', value)}>
+                        <Select value={variant.status || 'Available'} onValueChange={(value) => updateVariant(index, 'status', value)}>
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
@@ -239,7 +239,7 @@ export default function PricingMarketDataStep({
                       <td className="px-4 py-2">
                         <Input
                           placeholder="Special features"
-                          value={variant.specialFeatures}
+                          value={variant.specialFeatures || ''}
                           onChange={(e) => updateVariant(index, 'specialFeatures', e.target.value)}
                         />
                       </td>
