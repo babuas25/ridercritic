@@ -43,6 +43,13 @@ export default function CriticsPage({ initialCritics }: CriticsPageProps) {
             "@type": "Product",
             "name": critic.topic,
             "image": critic.images && critic.images.length > 0 ? critic.images[0] : undefined,
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": critic.rating,
+              "reviewCount": 1,
+              "bestRating": "5",
+              "worstRating": "1",
+            },
           },
           "datePublished": critic.createdAt instanceof Date ? critic.createdAt.toISOString() : 
                          typeof critic.createdAt === 'object' && critic.createdAt && 'toDate' in critic.createdAt ? 

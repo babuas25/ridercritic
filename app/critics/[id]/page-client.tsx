@@ -77,6 +77,13 @@ export default function CriticDetailClient({ critic, initialComments }: CriticDe
         "@type": "Product",
         "name": critic.topic,
         "image": critic.images && critic.images.length > 0 ? critic.images[0] : undefined,
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": critic.rating,
+          "reviewCount": 1,
+          "bestRating": "5",
+          "worstRating": "1",
+        },
       },
       ...(publishedIso
         ? {
