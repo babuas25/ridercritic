@@ -58,10 +58,6 @@ export default function CriticDetailClient({ critic, initialComments }: CriticDe
     const review = {
       "@type": "Review",
       "url": criticUrl,
-      "itemReviewed": {
-        "@type": "Product",
-        "name": critic.topic,
-      },
       "reviewRating": {
         "@type": "Rating",
         "ratingValue": critic.rating,
@@ -89,6 +85,16 @@ export default function CriticDetailClient({ critic, initialComments }: CriticDe
       },
     }
 
+    const product = {
+      "@type": "Product",
+      "name": critic.topic,
+      "image": critic.images && critic.images.length > 0 ? critic.images[0] : undefined,
+      "description": critic.content
+        ? critic.content.replace(/<[^>]*>/g, '').substring(0, 500)
+        : undefined,
+      "review": review,
+    }
+
     const breadcrumb = {
       "@type": "BreadcrumbList",
       "itemListElement": [
@@ -113,7 +119,7 @@ export default function CriticDetailClient({ critic, initialComments }: CriticDe
       ],
     }
 
-    const graph: unknown[] = [review, breadcrumb]
+    const graph: unknown[] = [product, review, breadcrumb]
 
     if (critic.youtubeLink) {
       const videoId = extractYouTubeId(critic.youtubeLink)
