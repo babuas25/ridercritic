@@ -73,6 +73,11 @@ export default function CriticDetailClient({ critic, initialComments }: CriticDe
         "@type": "Person",
         "name": critic.authorName,
       },
+      "itemReviewed": {
+        "@type": "Product",
+        "name": critic.topic,
+        "image": critic.images && critic.images.length > 0 ? critic.images[0] : undefined,
+      },
       ...(publishedIso
         ? {
             datePublished: publishedIso,

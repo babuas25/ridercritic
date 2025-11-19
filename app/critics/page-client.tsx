@@ -39,6 +39,11 @@ export default function CriticsPage({ initialCritics }: CriticsPageProps) {
             "@type": "Person",
             "name": critic.authorName
           },
+          "itemReviewed": {
+            "@type": "Product",
+            "name": critic.topic,
+            "image": critic.images && critic.images.length > 0 ? critic.images[0] : undefined,
+          },
           "datePublished": critic.createdAt instanceof Date ? critic.createdAt.toISOString() : 
                          typeof critic.createdAt === 'object' && critic.createdAt && 'toDate' in critic.createdAt ? 
                          (critic.createdAt as unknown as { toDate: () => Date }).toDate().toISOString() : 
