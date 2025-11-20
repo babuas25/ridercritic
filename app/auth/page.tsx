@@ -84,6 +84,7 @@ function AuthForm() {
     setError('')
 
     try {
+      const callbackUrlFromQuery = searchParams.get('callbackUrl') || '/dashboard/user'
       // Sign in with Firebase
       const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password)
       
@@ -95,14 +96,14 @@ function AuthForm() {
         email: data.email,
         password: data.password,
         redirect: false,
-        callbackUrl: '/dashboard/user',
+        callbackUrl: callbackUrlFromQuery,
       })
 
       if (result?.error) {
         setError('Invalid email or password')
       } else {
         // Redirect to the callback URL
-        const callbackUrl = result?.url || '/dashboard/user'
+        const callbackUrl = result?.url || callbackUrlFromQuery
         router.push(callbackUrl)
       }
     } catch (error: any) {
@@ -118,6 +119,7 @@ function AuthForm() {
     setSuccess('')
 
     try {
+      const callbackUrlFromQuery = searchParams.get('callbackUrl') || '/dashboard/user'
       // Create user with Firebase
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password)
       const user = userCredential.user
@@ -146,7 +148,7 @@ function AuthForm() {
           password: data.password,
           redirect: false,
         }).then(() => {
-          router.push('/dashboard/user')
+          router.push(callbackUrlFromQuery)
         })
       }, 1500)
 
@@ -160,7 +162,8 @@ function AuthForm() {
   const handleGoogleSignIn = async () => {
     setIsLoading(true)
     try {
-      await signIn('google', { callbackUrl: '/dashboard/user' })
+      const callbackUrlFromQuery = searchParams.get('callbackUrl') || '/dashboard/user'
+      await signIn('google', { callbackUrl: callbackUrlFromQuery })
     } catch {
       setError('Failed to sign in with Google')
       setIsLoading(false)

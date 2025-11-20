@@ -141,10 +141,11 @@ export default function Header() {
                   ) : (
                     <>
                       {/* Public/simple mobile menu */}
-                      <Link href={session ? dashboardUrl : "/"} className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                      <Link href={session ? dashboardUrl : "/critics/write"} className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
                         <Home className="h-4 w-4" />
-                        <span>Home</span>
+                        <span>New Critic</span>
                       </Link>
+
                       <Link href="/motorcycle" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
                         <Bike className="h-4 w-4" />
                         <span>Motorcycles</span>

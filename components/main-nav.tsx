@@ -7,13 +7,13 @@ export default function MainNav() {
       <div className="container flex h-14 items-center">
         <div className="flex gap-6">
           <Link
-            href="/"
+            href="/critics/write"
             className={cn(
               "text-sm font-medium transition-colors hover:text-primary",
               "text-primary"
             )}
           >
-            Home
+            New Critic
           </Link>
           <Link
             href="/motorcycle"

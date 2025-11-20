@@ -15,9 +15,22 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith('/accessories') ||
       pathname.startsWith('/motorcycle') ||
       pathname.startsWith('/products') ||
-      pathname.startsWith('/critics') && !pathname.startsWith('/critics/write') ||
+      (pathname.startsWith('/critics') && !pathname.startsWith('/critics/write')) ||
       pathname.startsWith('/login') ||
       pathname.startsWith('/register')) {
+    return NextResponse.next()
+  }
+
+  // Require auth for critic writing page
+  if (pathname.startsWith('/critics/write')) {
+    const token = await getToken({ req: request })
+
+    if (!token) {
+      const url = new URL('/auth', request.url)
+      url.searchParams.set('callbackUrl', '/critics/write')
+      return NextResponse.redirect(url)
+    }
+
     return NextResponse.next()
   }
 
@@ -92,6 +105,7 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/dashboard/:path*',
+    '/critics/write',
     '/auth',
     '/api/auth/:path*'
   ]
