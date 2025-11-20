@@ -14,6 +14,7 @@ import { getAllBrands, getAllTypes } from '@/lib/brands-types'
 import { MotorcycleFormData } from '@/types/motorcycle'
 import { Brand, MotorcycleType } from '@/lib/brands-types'
 import { saveComparison } from '@/lib/comparisons'
+import { trackEvent } from '@/lib/ga4'
 
 // Safe Image Component with error handling
 // Uses native img tag for better error handling when unoptimized
@@ -162,6 +163,17 @@ export default function MotorcyclesPageClient() {
     return matchesBrand && matchesType && matchesSearch
   })
 
+  // Track search results visibility
+  useEffect(() => {
+    trackEvent('search_results_viewed', {
+      location: 'motorcycle_list',
+      results_count: filteredMotorcycles.length,
+      brand: selectedBrand || 'all',
+      type: selectedType || 'all',
+      query: searchQuery || '',
+    })
+  }, [filteredMotorcycles.length])
+
   // Pagination
   const totalPages = Math.ceil(filteredMotorcycles.length / motorcyclesPerPage)
   const startIndex = (currentPage - 1) * motorcyclesPerPage
@@ -225,7 +237,15 @@ export default function MotorcyclesPageClient() {
               name="motorcycleSearch"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value
+                setSearchQuery(value)
+                trackEvent('filter_applied', {
+                  type: 'search_query',
+                  filter_value: value,
+                  location: 'motorcycle_list',
+                })
+              }}
             />
           </div>
           
@@ -235,7 +255,15 @@ export default function MotorcyclesPageClient() {
             name="brand"
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
             value={selectedBrand || ''}
-            onChange={(e) => setSelectedBrand(e.target.value || null)}
+            onChange={(e) => {
+              const value = e.target.value || null
+              setSelectedBrand(value)
+              trackEvent('filter_applied', {
+                type: 'brand',
+                filter_value: value || 'all',
+                location: 'motorcycle_list',
+              })
+            }}
           >
             <option value="">All Brands</option>
             {brands.map(brand => (
@@ -251,7 +279,15 @@ export default function MotorcyclesPageClient() {
             name="type"
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
             value={selectedType || ''}
-            onChange={(e) => setSelectedType(e.target.value || null)}
+            onChange={(e) => {
+              const value = e.target.value || null
+              setSelectedType(value)
+              trackEvent('filter_applied', {
+                type: 'type',
+                filter_value: value || 'all',
+                location: 'motorcycle_list',
+              })
+            }}
           >
             <option value="">All Types</option>
             {types.map(type => (
@@ -269,6 +305,10 @@ export default function MotorcyclesPageClient() {
                 setSelectedBrand(null)
                 setSelectedType(null)
                 setSearchQuery('')
+                trackEvent('filter_applied', {
+                  type: 'clear_all',
+                  location: 'motorcycle_list',
+                })
               }}
               className="flex items-center gap-2"
             >

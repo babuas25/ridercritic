@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import type { CriticData } from '@/lib/critics'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Star } from 'lucide-react'
+import { trackEvent } from '@/lib/ga4'
 
 interface CriticsPageProps {
   initialCritics: CriticData[]
@@ -14,6 +15,14 @@ interface CriticsPageProps {
 
 export default function CriticsPage({ initialCritics }: CriticsPageProps) {
   const [critics] = useState<CriticData[]>(initialCritics)
+
+  // Track critics list size when page loads
+  useEffect(() => {
+    trackEvent('search_results_viewed', {
+      location: 'critics_list',
+      results_count: critics.length,
+    })
+  }, [critics.length])
 
   // JSON-LD structured data for the critics collection
   const generateJsonLd = () => {
@@ -200,6 +209,13 @@ export default function CriticsPage({ initialCritics }: CriticsPageProps) {
                 key={category} 
                 variant="outline" 
                 className="rounded-full px-5 py-2 h-auto text-sm border-border/50 hover:bg-muted/50"
+                onClick={() => {
+                  trackEvent('filter_applied', {
+                    type: 'category_chip',
+                    filter_value: category,
+                    location: 'critics_list',
+                  })
+                }}
               >
                 {category}
               </Button>

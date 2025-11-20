@@ -5,6 +5,7 @@ import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +29,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Logo } from '@/components/ui/logo'
 import { getDashboardUrl } from '@/components/sidebar'
+import { trackEvent } from '@/lib/ga4'
 
 export default function Header() {
   const { theme, setTheme } = useTheme()
@@ -164,7 +166,14 @@ export default function Header() {
                     variant="ghost" 
                     size="icon" 
                     className="h-8 w-8"
-                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                    onClick={() => {
+                      const nextTheme = theme === 'dark' ? 'light' : 'dark'
+                      setTheme(nextTheme)
+                      trackEvent('theme_changed', {
+                        theme: nextTheme,
+                        location: 'header_mobile',
+                      })
+                    }}
                     title="Toggle theme"
                   >
                     <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -255,7 +264,14 @@ export default function Header() {
             variant="ghost"
             size="icon"
             className="h-8 w-8 md:hidden"
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            onClick={() => {
+              const nextTheme = theme === 'dark' ? 'light' : 'dark'
+              setTheme(nextTheme)
+              trackEvent('theme_changed', {
+                theme: nextTheme,
+                location: 'header_mobile',
+              })
+            }}
             title="Toggle theme"
           >
             <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -315,7 +331,14 @@ export default function Header() {
               variant="ghost"
               size="icon"
               className="h-8 w-8"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              onClick={() => {
+                const nextTheme = theme === 'dark' ? 'light' : 'dark'
+                setTheme(nextTheme)
+                trackEvent('theme_changed', {
+                  theme: nextTheme,
+                  location: 'header_desktop',
+                })
+              }}
               title="Toggle theme"
             >
               <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />

@@ -10,6 +10,7 @@ import { getAllMotorcycles } from '@/lib/motorcycles'
 import { Brand } from '@/lib/brands-types'
 import { MotorcycleFormData } from '@/types/motorcycle'
 import { Input } from '@/components/ui/input'
+import { trackEvent } from '@/lib/ga4'
 
 export default function BrandsPageClient() {
   const [brands, setBrands] = useState<Brand[]>([])
@@ -52,6 +53,15 @@ export default function BrandsPageClient() {
     )
   })
 
+  // Track brand search results
+  useEffect(() => {
+    trackEvent('search_results_viewed', {
+      location: 'brands_list',
+      results_count: filteredBrands.length,
+      query: searchQuery || '',
+    })
+  }, [filteredBrands.length])
+
   if (loading) {
     return (
       <div className="container py-8 max-w-6xl mx-auto px-4 flex items-center justify-center min-h-screen">
@@ -81,7 +91,15 @@ export default function BrandsPageClient() {
             name="q"
             placeholder="Search brands..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value
+              setSearchQuery(value)
+              trackEvent('filter_applied', {
+                type: 'search_query',
+                filter_value: value,
+                location: 'brands_list',
+              })
+            }}
             className="pl-10"
           />
         </div>

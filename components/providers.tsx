@@ -2,6 +2,7 @@
 
 import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider } from '@/components/theme-provider'
+import { ThemeAnalytics } from '@/components/theme-analytics'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -12,6 +13,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         enableSystem
         disableTransitionOnChange
       >
+        <ThemeAnalytics />
         {children}
       </ThemeProvider>
     </SessionProvider>

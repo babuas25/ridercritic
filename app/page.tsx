@@ -16,6 +16,7 @@ import { getAllMotorcycles } from '@/lib/motorcycles'
 import { type MotorcycleFormData } from '@/types/motorcycle'
 import { getAllCritics, type CriticData } from '@/lib/critics'
 import { getRecentComparisons, type SavedComparison } from '@/lib/comparisons'
+import { trackEvent } from '@/lib/ga4'
 
 type SpeechRecognitionAlternativeLike = { transcript: string; confidence?: number }
 type SpeechRecognitionResultLike = { length: number; [index: number]: SpeechRecognitionAlternativeLike }
@@ -74,8 +75,16 @@ export default function Home() {
   const handleSearch = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (searchQuery.trim()) {
+      trackEvent('search_performed', {
+        query: searchQuery.trim(),
+        origin: 'home_hero',
+      })
       router.push(`/motorcycle?q=${encodeURIComponent(searchQuery.trim())}`)
     } else {
+      trackEvent('search_performed', {
+        query: '',
+        origin: 'home_hero',
+      })
       router.push('/motorcycle')
     }
   }

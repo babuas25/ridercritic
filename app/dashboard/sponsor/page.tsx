@@ -5,6 +5,7 @@ import DashboardLayout from '@/components/layouts/DashboardLayout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { trackEvent } from '@/lib/ga4'
 import {
   Building2,
   Users,
@@ -103,15 +104,41 @@ export default function SponsorAdminDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button className="w-full">
+              <Button
+                className="w-full"
+                onClick={() =>
+                  trackEvent('sponsor_action_click', {
+                    action: 'new_sponsorship',
+                    location: 'dashboard_sponsor',
+                  })
+                }
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 New Sponsorship
               </Button>
-              <Button variant="outline" className="w-full">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() =>
+                  trackEvent('sponsor_action_click', {
+                    action: 'manage_partners',
+                    location: 'dashboard_sponsor',
+                  })
+                }
+              >
                 <Building2 className="w-4 h-4 mr-2" />
                 Manage Partners
               </Button>
-              <Button variant="outline" className="w-full">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() =>
+                  trackEvent('sponsor_action_click', {
+                    action: 'campaign_analytics',
+                    location: 'dashboard_sponsor',
+                  })
+                }
+              >
                 <Target className="w-4 h-4 mr-2" />
                 Campaign Analytics
               </Button>
@@ -126,15 +153,42 @@ export default function SponsorAdminDashboard() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button variant="outline" className="w-full">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() =>
+                  trackEvent('sponsor_action_click', {
+                    action: 'revenue_reports',
+                    location: 'dashboard_sponsor',
+                  })
+                }
+              >
                 <DollarSign className="w-4 h-4 mr-2" />
                 Revenue Reports
               </Button>
-              <Button variant="outline" className="w-full">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() =>
+                  trackEvent('sponsor_action_click', {
+                    action: 'performance_metrics',
+                    location: 'dashboard_sponsor',
+                  })
+                }
+              >
                 <TrendingUp className="w-4 h-4 mr-2" />
                 Performance Metrics
               </Button>
-              <Button variant="outline" className="w-full">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() =>
+                  trackEvent('sponsor_action_click', {
+                    action: 'schedule_reports',
+                    location: 'dashboard_sponsor',
+                  })
+                }
+              >
                 <Calendar className="w-4 h-4 mr-2" />
                 Schedule Reports
               </Button>
@@ -209,22 +263,58 @@ export default function SponsorAdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Button variant="outline" className="h-20 flex-col gap-2">
+              <Button
+                variant="outline"
+                className="h-20 flex-col gap-2"
+                onClick={() =>
+                  trackEvent('sponsor_quick_action_click', {
+                    action: 'new_campaign',
+                    location: 'dashboard_sponsor',
+                  })
+                }
+              >
                 <Plus className="h-6 w-6" />
                 New Campaign
               </Button>
 
-              <Button variant="outline" className="h-20 flex-col gap-2">
+              <Button
+                variant="outline"
+                className="h-20 flex-col gap-2"
+                onClick={() =>
+                  trackEvent('sponsor_quick_action_click', {
+                    action: 'partner_portal',
+                    location: 'dashboard_sponsor',
+                  })
+                }
+              >
                 <Users className="h-6 w-6" />
                 Partner Portal
               </Button>
 
-              <Button variant="outline" className="h-20 flex-col gap-2">
+              <Button
+                variant="outline"
+                className="h-20 flex-col gap-2"
+                onClick={() =>
+                  trackEvent('sponsor_quick_action_click', {
+                    action: 'analytics',
+                    location: 'dashboard_sponsor',
+                  })
+                }
+              >
                 <TrendingUp className="h-6 w-6" />
                 Analytics
               </Button>
 
-              <Button variant="outline" className="h-20 flex-col gap-2">
+              <Button
+                variant="outline"
+                className="h-20 flex-col gap-2"
+                onClick={() =>
+                  trackEvent('sponsor_quick_action_click', {
+                    action: 'revenue',
+                    location: 'dashboard_sponsor',
+                  })
+                }
+              >
                 <DollarSign className="h-6 w-6" />
                 Revenue
               </Button>

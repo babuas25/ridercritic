@@ -1,5 +1,6 @@
 import './globals.css';
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { fonts } from './fonts';
 import { Providers } from '@/components/providers';
 import Header from '@/components/header';
@@ -10,6 +11,8 @@ import { cn } from '@/lib/utils';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Analytics } from '@vercel/analytics/next';
 import { LogRocketProvider } from '@/components/logrocket-provider';
+import { GA4Tracker } from '@/components/ga4-tracker';
+import { GA4UserTracker } from '@/components/ga4-user-tracker';
 
 export const metadata: Metadata = {
   title: 'ridercritic — It\'s Not Just a Ride, It\'s an Emotion',
@@ -58,6 +61,8 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_MEASUREMENT_ID;
+
   // JSON-LD structured data for rich results
   const jsonLd = {
     "@context": "https://schema.org",
@@ -96,7 +101,24 @@ export default function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning className={fonts.geist.className}>
-      <head />
+      <head>
+        {GA_MEASUREMENT_ID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga4-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${GA_MEASUREMENT_ID}');
+              `}
+            </Script>
+          </>
+        )}
+      </head>
       <body className={cn(
         "min-h-screen bg-background antialiased",
         fonts.nordique.variable
@@ -116,8 +138,10 @@ export default function RootLayout({
               <main className="flex-1 p-4 md:p-6 overflow-y-auto">{children}</main>
             </div>
             <Footer />
+            <GA4UserTracker />
           </div>
         </Providers>
+        <GA4Tracker />
         <LogRocketProvider />
         <SpeedInsights />
         <Analytics />
