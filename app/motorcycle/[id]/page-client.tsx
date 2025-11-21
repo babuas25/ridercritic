@@ -1,49 +1,23 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+
 import Link from "next/link"
 import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Loader2, ArrowLeft, Star, Gauge, Zap, Settings, Weight } from 'lucide-react'
-import { getMotorcycle } from '@/lib/motorcycles'
+import { ArrowLeft, Star, Gauge, Zap, Settings, Weight } from 'lucide-react'
+
 import { listFolderImages, listImagesFromFolders, sanitizeStoragePath } from '@/lib/storage'
 import { MotorcycleFormData } from '@/types/motorcycle'
 
-export default function MotorcycleDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const [motorcycle, setMotorcycle] = useState<MotorcycleFormData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+export default function MotorcycleDetailPage({ motorcycle }: { motorcycle: MotorcycleFormData | null }) {
   const [derivedGallery, setDerivedGallery] = useState<string[]>([])
   const [derivedSteps, setDerivedSteps] = useState<string[]>([])
+
   // Toggle for showing step image galleries below specs
   const showStepImageGalleries = false
-
-  // Fetch motorcycle data
-  useEffect(() => {
-    const fetchMotorcycle = async () => {
-      try {
-        setLoading(true)
-        // Resolve the params promise
-        const resolvedParams = await params;
-        const data = await getMotorcycle(resolvedParams.id)
-        console.log('Fetched motorcycle data:', data) // Debug log
-        if (data) {
-          setMotorcycle(data)
-        } else {
-          setError('Motorcycle not found')
-        }
-      } catch (err) {
-        console.error('Error fetching motorcycle:', err)
-        setError('Failed to load motorcycle details')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchMotorcycle()
-  }, [params])
 
   // If gallery/step images are missing in Firestore, try to load from Storage
   useEffect(() => {
@@ -120,7 +94,7 @@ export default function MotorcycleDetailPage({ params }: { params: Promise<{ id:
     if (derivedSteps.length > 0) return derivedSteps[0]
     return null
   }
-  
+
   // Function to get valid gallery images with fallbacks
   const getValidGalleryImages = () => {
     const gallery = (motorcycle?.galleryImages?.filter(Boolean) ?? []).concat(derivedGallery)
@@ -144,34 +118,26 @@ export default function MotorcycleDetailPage({ params }: { params: Promise<{ id:
     ].filter(Boolean)
     return fromSteps.length > 0 ? fromSteps : derivedSteps
   }
-  
+
   // Function to render credit line for Honda images
   const renderCreditLine = (imageUrl: string) => {
     if (!imageUrl || !motorcycle?.brand) return null
-    
+
     // Check if it's a Honda motorcycle (show credit line for ALL Honda motorcycles)
     const isHonda = motorcycle.brand.toLowerCase() === 'honda'
-    
+
     if (isHonda) {
       return (
         <div className="text-xs text-gray-600 dark:text-gray-300 mt-2 text-center py-1 px-2 bg-gray-100 dark:bg-gray-800 rounded">
-          Image © Honda Bangladesh (used under fair review purpose)
+          Image &copy; Honda Bangladesh (used under fair review purpose)
         </div>
       )
     }
-    
+
     return null
   }
 
-  if (loading) {
-    return (
-      <div className="container py-8 max-w-6xl mx-auto px-4 flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin" />
-      </div>
-    )
-  }
-
-  if (error || !motorcycle) {
+  if (!motorcycle) {
     console.log('Motorcycle data not found or error occurred')
     return (
       <div className="container py-8 max-w-6xl mx-auto px-4">
