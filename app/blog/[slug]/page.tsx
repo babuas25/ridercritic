@@ -11,6 +11,8 @@ interface BlogPost {
   excerpt?: string
   body?: PortableTextBlock[]
   publishedAt?: string
+  coverImageUrl?: string
+  tags?: string[]
 }
 
 interface BlogPostPageProps {
@@ -27,7 +29,9 @@ async function getPost(slug: string): Promise<BlogPost | null> {
       "slug": slug.current,
       excerpt,
       body,
-      publishedAt
+      publishedAt,
+      "coverImageUrl": coverImage.asset->url,
+      tags
     }`,
     { slug }
   )
@@ -71,28 +75,58 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     notFound()
   }
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    description: post.excerpt,
+    url: `https://ridercritic.com/blog/${post.slug}`,
+    datePublished: post.publishedAt ?? undefined,
+    dateModified: post.publishedAt ?? undefined,
+    image: post.coverImageUrl ?? undefined,
+    keywords: post.tags && post.tags.length > 0 ? post.tags.join(', ') : undefined,
+    author: {
+      '@type': 'Organization',
+      name: 'ridercritic',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'ridercritic',
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://ridercritic.com/blog/${post.slug}`,
+    },
+  }
+
   return (
-    <div className="container py-8">
-      <div className="max-w-3xl mx-auto space-y-6">
-        <header>
-          <h1 className="text-3xl md:text-4xl font-bold mb-3">{post.title}</h1>
-          {post.publishedAt && (
-            <p className="text-xs text-muted-foreground">
-              {new Date(post.publishedAt).toLocaleDateString()}
-            </p>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div className="container py-8">
+        <div className="max-w-3xl mx-auto space-y-6">
+          <header>
+            <h1 className="text-3xl md:text-4xl font-bold mb-3">{post.title}</h1>
+            {post.publishedAt && (
+              <p className="text-xs text-muted-foreground">
+                {new Date(post.publishedAt).toLocaleDateString()}
+              </p>
+            )}
+          </header>
+
+          {post.excerpt && (
+            <p className="text-lg text-muted-foreground">{post.excerpt}</p>
           )}
-        </header>
 
-        {post.excerpt && (
-          <p className="text-lg text-muted-foreground">{post.excerpt}</p>
-        )}
-
-        {post.body && (
-          <div className="prose prose-neutral dark:prose-invert max-w-none">
-            <PortableText value={post.body} />
-          </div>
-        )}
+          {post.body && (
+            <div className="prose prose-neutral dark:prose-invert max-w-none">
+              <PortableText value={post.body} />
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   )
 }

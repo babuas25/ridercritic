@@ -1,8 +1,9 @@
 import type { MetadataRoute } from 'next'
+import { sanityClient } from '@/lib/sanity.client'
 
 const BASE_URL = 'https://ridercritic.com'
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date()
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -19,11 +20,29 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/products',
     '/about',
     '/contact',
-    '/brands'
+    '/brands',
+    '/terms',
+    '/privacy'
   ].map((path) => ({
     url: `${BASE_URL}${path}`,
     lastModified: now,
   }))
 
-  return staticRoutes
+  // Include individual blog posts from Sanity
+  const blogPosts = await sanityClient.fetch<
+    { slug?: { current?: string | null } | null }[]
+  >(
+    `*[_type == "post" && defined(slug.current)]{
+      "slug": slug
+    }`
+  )
+
+  const blogRoutes: MetadataRoute.Sitemap = blogPosts
+    .filter((post) => post.slug?.current)
+    .map((post) => ({
+      url: `${BASE_URL}/blog/${post.slug!.current}`,
+      lastModified: now,
+    }))
+
+  return [...staticRoutes, ...blogRoutes]
 }

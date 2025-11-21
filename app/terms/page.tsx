@@ -177,10 +177,7 @@ export default function TermsOfServicePage() {
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">11. Governing Law</h2>
           <p className="mb-4">
-            These Terms shall be governed by and construed in accordance with the laws of [Your Jurisdiction], without regard to its conflict of law provisions. Any disputes arising from these Terms or the Service shall be subject to the exclusive jurisdiction of the courts in [Your Jurisdiction].
-          </p>
-          <p className="mb-4 text-sm text-gray-600">
-            <strong>Note:</strong> Please replace [Your Jurisdiction] with your actual jurisdiction (e.g., "Bangladesh" or "the State of [Your State]").
+            These Terms shall be governed by and construed in accordance with the laws of Bangladesh, without regard to its conflict of law provisions. Any disputes arising from these Terms or the Service shall be subject to the exclusive jurisdiction of the courts in Bangladesh.
           </p>
         </section>
 
