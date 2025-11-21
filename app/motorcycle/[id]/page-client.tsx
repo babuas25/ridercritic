@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 import Link from "next/link"
 import Image from "next/image"
@@ -15,35 +15,34 @@ import { MotorcycleFormData } from '@/types/motorcycle'
 export default function MotorcycleDetailPage({ motorcycle }: { motorcycle: MotorcycleFormData | null }) {
   const [derivedGallery, setDerivedGallery] = useState<string[]>([])
   const [derivedSteps, setDerivedSteps] = useState<string[]>([])
+  const [isLoadingExtraImages, setIsLoadingExtraImages] = useState(false)
+  const [hasLoadedExtraImages, setHasLoadedExtraImages] = useState(false)
 
   // Toggle for showing step image galleries below specs
   const showStepImageGalleries = false
 
-  // If gallery/step images are missing in Firestore, try to load from Storage
-  useEffect(() => {
-    const fetchFromStorageIfMissing = async () => {
-      if (!motorcycle?.brand || !motorcycle?.modelName) return
+  const loadExtraImagesFromStorage = async () => {
+    if (!motorcycle?.brand || !motorcycle?.modelName) return
+    if (isLoadingExtraImages || hasLoadedExtraImages) return
+
+    setIsLoadingExtraImages(true)
+    try {
       const basePathRaw = `motorcycles/${motorcycle.brand}/${motorcycle.modelName}`
       const basePathSan = sanitizeStoragePath(basePathRaw)
       const uniq = (arr: string[]) => Array.from(new Set(arr.filter(Boolean)))
 
-      // Load gallery if missing
       if (!motorcycle.galleryImages || motorcycle.galleryImages.length === 0) {
         const [g1, g2] = await Promise.all([
           listFolderImages(`${basePathRaw}/gallery`),
           listFolderImages(`${basePathSan}/gallery`)
         ])
         setDerivedGallery(uniq([...g1, ...g2]))
-      } else {
-        setDerivedGallery([])
       }
 
-      // Load step images if missing
       const hasAnyStep =
         !!motorcycle.stepImages &&
         Object.values(motorcycle.stepImages).some(arr => Array.isArray(arr) && arr.length > 0)
       if (!hasAnyStep) {
-        // Use known step folders that match uploaders
         const order = [
           'brakes-wheels',
           'chassis',
@@ -59,12 +58,13 @@ export default function MotorcycleDetailPage({ motorcycle }: { motorcycle: Motor
           listImagesFromFolders(basePathSan, order)
         ])
         setDerivedSteps(uniq([...s1, ...s2]))
-      } else {
-        setDerivedSteps([])
       }
+
+      setHasLoadedExtraImages(true)
+    } finally {
+      setIsLoadingExtraImages(false)
     }
-    fetchFromStorageIfMissing()
-  }, [motorcycle])
+  }
 
   // Function to get valid cover image with fallbacks
   const getValidCoverImage = () => {
@@ -258,40 +258,54 @@ export default function MotorcycleDetailPage({ motorcycle }: { motorcycle: Motor
           {renderCreditLine(motorcycle.coverImage)}
 
           {/* Gallery Thumbnails */}
-          <div className="grid grid-cols-4 gap-3">
-            {(() => {
-              const galleryImages = getValidGalleryImages()
-              console.log('Rendering gallery images:', galleryImages)
-              return galleryImages.length > 0 ? (
-                galleryImages.slice(0, 4).map((img, i) => {
-                  console.log(`Rendering gallery image ${i}:`, img)
-                  return (
-                    <div key={`${img}-${i}`}>
-                      <div className="aspect-square relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
-                        <Image 
-                          src={img} 
-                          alt={`View ${i + 1}`} 
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 25vw, 10vw"
-                          quality={80}
-                          unoptimized
-                          loading="lazy"
-                        />
+          <div className="space-y-3">
+            <div className="grid grid-cols-4 gap-3">
+              {(() => {
+                const galleryImages = getValidGalleryImages()
+                console.log('Rendering gallery images:', galleryImages)
+                return galleryImages.length > 0 ? (
+                  galleryImages.slice(0, 4).map((img, i) => {
+                    console.log(`Rendering gallery image ${i}:`, img)
+                    return (
+                      <div key={`${img}-${i}`}>
+                        <div className="aspect-square relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+                          <Image 
+                            src={img} 
+                            alt={`View ${i + 1}`} 
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 25vw, 10vw"
+                            quality={80}
+                            unoptimized
+                            loading="lazy"
+                          />
+                        </div>
+                        {/* Credit line outside the image container */}
+                        {renderCreditLine(img)}
                       </div>
-                      {/* Credit line outside the image container */}
-                      {renderCreditLine(img)}
+                    )
+                  })
+                ) : (
+                  [1, 2, 3, 4].map((i) => (
+                    <div key={i} className="aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">View {i}</span>
                     </div>
-                  )
-                })
-              ) : (
-                [1, 2, 3, 4].map((i) => (
-                  <div key={i} className="aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">View {i}</span>
-                  </div>
-                ))
-              )
-            })()}
+                  ))
+                )
+              })()}
+            </div>
+            {(!motorcycle.galleryImages || motorcycle.galleryImages.length === 0) && !hasLoadedExtraImages && (
+              <div className="flex justify-start">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={loadExtraImagesFromStorage}
+                  disabled={isLoadingExtraImages}
+                >
+                  {isLoadingExtraImages ? 'Loading photos…' : 'Load extra photos'}
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Basic Info Card */}

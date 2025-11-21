@@ -179,6 +179,9 @@ export default function PerformanceMetricsStep({
       {/* Image Upload */}
       <div className="space-y-2 mt-6">
         <Label>Upload Performance Images (Optional)</Label>
+        <p className="text-xs text-gray-500">
+          Recommended: WebP, 600–800px width per image, up to ~120KB each.
+        </p>
         <ImageUploader
           storagePath={sanitizeStoragePath(`motorcycles/${formData.brand}/${formData.modelName}/performance`)}
           currentImages={stepImages}

@@ -110,6 +110,10 @@ export default function ColorOptionsStep({
       {/* Color Images */}
       <div className="space-y-4">
         <Label>Color-Specific Images</Label>
+        <p className="text-xs text-gray-500">
+          Recommended: WebP, 400600px width per image, up to ~80KB each.
+        </p>
+
         {formData.availableColors.length > 0 ? (
           <div className="space-y-4">
             {formData.availableColors.map((color, index) => (
@@ -153,6 +157,9 @@ export default function ColorOptionsStep({
       {/* General Color Images */}
       <div className="space-y-2">
         <Label>Upload General Color Images (Optional)</Label>
+        <p className="text-xs text-gray-500">
+          Recommended: WebP, 400600px width per image, up to ~80KB each.
+        </p>
         <ImageUploader
           storagePath={sanitizeStoragePath(`motorcycles/${formData.brand}/${formData.modelName}/colors/general`)}
           currentImages={stepImages}

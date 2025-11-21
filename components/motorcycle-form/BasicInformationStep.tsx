@@ -190,6 +190,9 @@ export default function BasicInformationStep({
         <div className="space-y-6">
           <div className="space-y-2">
             <Label>Upload Cover Image *</Label>
+            <p className="text-xs text-gray-500">
+              Recommended: WebP or JPEG, 1200–1400px width (16:9), up to ~250KB.
+            </p>
             <ImageUploader
               storagePath={sanitizeStoragePath(`motorcycles/${formData.brand}/${formData.modelName}/cover`)}
               currentImages={formData.coverImage ? [formData.coverImage] : []}
@@ -202,6 +205,9 @@ export default function BasicInformationStep({
 
           <div className="space-y-2">
             <Label>Upload Gallery (Multiple Images)</Label>
+            <p className="text-xs text-gray-500">
+              Recommended: WebP, 400–600px width per image, up to ~80KB each.
+            </p>
             {(() => {
               // Ensure brand and model name are properly formatted for storage paths
               const brand = formData.brand || 'unknown-brand';
