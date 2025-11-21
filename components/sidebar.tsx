@@ -22,6 +22,11 @@ import {
   Grid,
   GitCompare,
   DoorOpen,
+  BookOpen,
+  Newspaper,
+  CalendarClock,
+  PenSquare,
+  Mail,
 } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 
@@ -128,9 +133,14 @@ export default function Sidebar() {
       },
       { title: "Critics", icon: Star, href: "/critics/write" },
       { title: "Motorcycles", icon: Bike, href: "/motorcycle" },
+      { title: "Tips & guides", icon: BookOpen, href: "/tips" },
+      { title: "News", icon: Newspaper, href: "/news" },
+      { title: "Upcoming", icon: CalendarClock, href: "/upcoming" },
+      { title: "Blog", icon: PenSquare, href: "/blog" },
       { title: "Products", icon: ShoppingBag, href: "/products" },
       { title: "Accessories", icon: Package, href: "/accessories" },
       { title: "About", icon: Settings, href: "/about" },
+      { title: "Contact", icon: Mail, href: "/contact" },
     ]
   }
 

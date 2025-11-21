@@ -12,6 +12,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/comparisons',
     '/offers',
     '/accessories',
+    '/tips',
+    '/news',
+    '/upcoming',
+    '/blog',
+    '/products',
     '/about',
     '/contact',
     '/brands'

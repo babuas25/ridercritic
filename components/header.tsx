@@ -156,6 +156,22 @@ export default function Header() {
                         <Star className="h-4 w-4" />
                         <span>Critics</span>
                       </Link>
+                      <Link href="/tips" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                        <Settings className="h-4 w-4" />
+                        <span>Tips &amp; guides</span>
+                      </Link>
+                      <Link href="/news" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                        <Settings className="h-4 w-4" />
+                        <span>News</span>
+                      </Link>
+                      <Link href="/upcoming" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                        <Settings className="h-4 w-4" />
+                        <span>Upcoming</span>
+                      </Link>
+                      <Link href="/blog" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                        <Settings className="h-4 w-4" />
+                        <span>Blog</span>
+                      </Link>
                     </>
                   )}
                 </nav>

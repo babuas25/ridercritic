@@ -10,7 +10,7 @@ export default function ContactPageClient() {
     return {
       "@context": "https://schema.org",
       "@type": "ContactPage",
-      "name": "Contact RiderCritic",
+      "name": "Contact ridercritic",
       "description": "Get in touch with us for motorcycle reviews, critics, and riding culture insights.",
       "url": "https://ridercritic.com/contact",
       "publisher": {
@@ -22,19 +22,19 @@ export default function ContactPageClient() {
         {
           "@type": "ContactPoint",
           "contactType": "General Inquiries",
-          "email": "info@ridercritic.com"
+          "email": "ridercritics@gmail.com"
         },
         {
           "@type": "ContactPoint",
           "contactType": "Phone Support",
-          "telephone": "+1 (555) 123-4567"
+          "telephone": "+880 1771552844"
         }
       ],
       "address": {
         "@type": "PostalAddress",
-        "streetAddress": "123 Motorcycle Ave",
-        "addressLocality": "Rider City",
-        "postalCode": "RC 12345"
+        "streetAddress": "1467-00 Shah Abdul Karim Road, Kharki",
+        "addressLocality": "Jashore",
+        "postalCode": "7400"
       }
     }
   }
@@ -126,7 +126,7 @@ export default function ContactPageClient() {
                 <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <div className="font-medium">General Inquiries</div>
-                  <div className="text-sm text-muted-foreground">info@ridercritic.com</div>
+                  <div className="text-sm text-muted-foreground">ridercritics@gmail.com</div>
                 </div>
               </div>
 
@@ -134,7 +134,7 @@ export default function ContactPageClient() {
                 <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
                 <div>
                   <div className="font-medium">Phone Support</div>
-                  <div className="text-sm text-muted-foreground">+1 (555) 123-4567</div>
+                  <div className="text-sm text-muted-foreground">+880 1771552844</div>
                 </div>
               </div>
 
@@ -143,8 +143,8 @@ export default function ContactPageClient() {
                 <div>
                   <div className="font-medium">Business Address</div>
                   <div className="text-sm text-muted-foreground">
-                    123 Motorcycle Ave<br />
-                    Rider City, RC 12345
+                    1467-00 Shah Abdul Karim Road, Kharki<br />
+                    Jashore, BD 7400
                   </div>
                 </div>
               </div>

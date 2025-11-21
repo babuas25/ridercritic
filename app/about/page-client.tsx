@@ -7,7 +7,7 @@ export default function AboutPageClient() {
     return {
       "@context": "https://schema.org",
       "@type": "AboutPage",
-      "name": "About RiderCritic",
+      "name": "About ridercritic",
       "description": "Your ultimate destination for motorcycle critics, community insights, and everything related to the world of two wheels.",
       "url": "https://ridercritic.com/about",
       "publisher": {
@@ -26,7 +26,7 @@ export default function AboutPageClient() {
       />
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">About RiderCritic</h1>
+          <h1 className="text-4xl font-bold mb-4">About ridercritic</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Your ultimate destination for motorcycle critics, community insights,
             and everything related to the world of two wheels.

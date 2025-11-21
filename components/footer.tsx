@@ -47,47 +47,95 @@ export default function Footer() {
           </div>
 
           {/* Explore / Internal Links */}
-          <div className="flex flex-wrap items-center gap-3 text-sm">
-            <span className="text-muted-foreground">Explore:</span>
+          <div className="flex items-center gap-3 text-sm overflow-x-auto whitespace-nowrap scrollbar-thin">
+            <span className="text-muted-foreground flex-shrink-0">Explore:</span>
+            <Link 
+              href="/"
+              className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+            >
+              Home
+            </Link>
+            <Link 
+              href="/critics/write"
+              className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+            >
+              New Critic
+            </Link>
             <Link 
               href="/motorcycle"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
             >
               Motorcycles
             </Link>
             <Link 
               href="/critics"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
             >
               Critics
             </Link>
             <Link 
+              href="/tips"
+              className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+            >
+              Tips &amp; guides
+            </Link>
+            <Link 
+              href="/news"
+              className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+            >
+              News
+            </Link>
+            <Link 
+              href="/upcoming"
+              className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+            >
+              Upcoming
+            </Link>
+            <Link 
+              href="/blog"
+              className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+            >
+              Blog
+            </Link>
+            <Link 
+              href="/products"
+              className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+            >
+              Products
+            </Link>
+            <Link 
+              href="/accessories"
+              className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+            >
+              Accessories
+            </Link>
+            <Link 
               href="/comparisons"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
             >
               Comparisons
             </Link>
             <Link 
               href="/offers"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
             >
               Offers
             </Link>
             <Link 
               href="/brands"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
             >
               Brands
             </Link>
             <Link 
               href="/about"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
             >
               About
             </Link>
             <Link 
               href="/contact"
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
             >
               Contact
             </Link>
