@@ -44,10 +44,23 @@ export async function middleware(request: NextRequest) {
     }
 
     const role = token.role as string
-    // subRole is not used in this middleware
+    const subRole = token.subRole as string | undefined
 
     // Allow User Admin with any subrole to access critic writing page
     if (pathname.startsWith('/critics/write') && role === 'User Admin') {
+      return NextResponse.next()
+    }
+
+    // Restrict blog dashboard routes to specific roles
+    if (pathname.startsWith('/dashboard/blog')) {
+      const allowedBlogRoles = ['Super Admin', 'Admin', 'Freelancer Admin']
+      const isCriticMasterUser = role === 'User Admin' && subRole === 'CriticMaster'
+
+      if (!allowedBlogRoles.includes(role) && !isCriticMasterUser) {
+        const url = new URL('/dashboard/user', request.url)
+        return NextResponse.redirect(url)
+      }
+
       return NextResponse.next()
     }
 

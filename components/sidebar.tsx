@@ -87,7 +87,8 @@ export default function Sidebar() {
           { title: "Loan Offers", icon: DoorOpen, href: "/dashboard/loans" },
           { title: "Comparisons", icon: GitCompare, href: "/dashboard/comparisons" },
           { title: "Brands", icon: Tags, href: "/dashboard/brands" },
-          { title: "Types", icon: Grid, href: "/dashboard/types" }
+          { title: "Types", icon: Grid, href: "/dashboard/types" },
+          { title: "Blog", icon: PenSquare, href: "/dashboard/blog" }
         )
       }
       // Items for Admin
@@ -98,6 +99,7 @@ export default function Sidebar() {
           { title: "Motorcycles", icon: Bike, href: "/dashboard/motorcycles" },
           { title: "Loan Offers", icon: DoorOpen, href: "/dashboard/loans" },
           { title: "Comparisons", icon: GitCompare, href: "/dashboard/comparisons" },
+          { title: "Blog", icon: PenSquare, href: "/dashboard/blog" },
           { title: "Analytics", icon: Activity, href: "#" },
           { title: "Settings", icon: Settings, href: "#" }
         )
@@ -112,9 +114,27 @@ export default function Sidebar() {
             href: "/dashboard/user/critics",
           })
         }
+
+        // CriticMaster users also see Blog
+        if (userSubRole === 'CriticMaster') {
+          items.push({
+            title: "Blog",
+            icon: PenSquare,
+            href: "/dashboard/blog",
+          })
+        }
       }
       // Items for other admin roles
       else {
+        // Freelancer Admin gets access to Blog module
+        if (userRole === 'Freelancer Admin') {
+          items.push({
+            title: "Blog",
+            icon: PenSquare,
+            href: "/dashboard/blog",
+          })
+        }
+
         items.push(
           { title: "Analytics", icon: Activity, href: "#" },
           { title: "Settings", icon: Settings, href: "#" }

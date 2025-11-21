@@ -1,35 +1,51 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
+import { sanityClient } from '@/lib/sanity.client'
+
+type BlogPost = {
+  _id: string
+  title: string
+  slug: string
+  excerpt?: string
+  publishedAt?: string
+}
 
 export const metadata: Metadata = {
   title: 'Blog | ridercritic',
   description: 'Stories, editorials, and deep dives from the ridercritic community.',
 }
 
-export default function BlogPage() {
+async function getPosts(): Promise<BlogPost[]> {
+  const posts = await sanityClient.fetch<BlogPost[]>(
+    `*[_type == "post" && defined(slug.current) && defined(publishedAt)]
+      | order(publishedAt desc) {
+        _id,
+        title,
+        "slug": slug.current,
+        excerpt,
+        publishedAt
+      }`
+  )
+
+  return posts
+}
+
+export default async function BlogPage() {
+  const posts = await getPosts()
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Blog",
     "name": "ridercritic blog",
     "description": metadata.description,
     "url": "https://ridercritic.com/blog",
-    "blogPost": [],
-    "breadcrumb": {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://ridercritic.com"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Blog",
-          "item": "https://ridercritic.com/blog"
-        }
-      ]
-    }
+    "blogPost": posts.map((post) => ({
+      "@type": "BlogPosting",
+      "headline": post.title,
+      "url": `https://ridercritic.com/blog/${post.slug}`,
+      "datePublished": post.publishedAt,
+      "description": post.excerpt,
+    })),
   }
 
   return (
@@ -46,10 +62,34 @@ export default function BlogPage() {
           </p>
         </header>
 
-        <p className="text-muted-foreground">
-          ridercritic blog posts are coming soon. Expect in-depth stories from real
-          riders, event coverage, and opinion pieces about the future of motorcycling.
-        </p>
+        {posts.length === 0 ? (
+          <p className="text-muted-foreground">
+            No blog posts published yet. Please check back soon.
+          </p>
+        ) : (
+          <div className="space-y-6">
+            {posts.map((post) => (
+              <article key={post._id} className="border rounded-lg p-4 hover:bg-accent transition">
+                <h2 className="text-xl font-semibold mb-1">
+                  <Link href={`/blog/${post.slug}`} className="hover:underline">
+                    {post.title}
+                  </Link>
+                </h2>
+                {post.publishedAt && (
+                  <p className="text-xs text-muted-foreground mb-2">
+                    {new Date(post.publishedAt).toLocaleDateString()}
+                  </p>
+                )}
+                {post.excerpt && (
+                  <p className="text-sm text-muted-foreground mb-2">{post.excerpt}</p>
+                )}
+                <Link href={`/blog/${post.slug}`} className="text-sm font-medium text-primary hover:underline">
+                  Read more
+                </Link>
+              </article>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
