@@ -17,6 +17,7 @@ export default function MotorcycleDetailPage({ motorcycle }: { motorcycle: Motor
   const [derivedSteps, setDerivedSteps] = useState<string[]>([])
   const [isLoadingExtraImages, setIsLoadingExtraImages] = useState(false)
   const [hasLoadedExtraImages, setHasLoadedExtraImages] = useState(false)
+  const [activeImage, setActiveImage] = useState<string | null>(null)
 
   // Toggle for showing step image galleries below specs
   const showStepImageGalleries = false
@@ -233,26 +234,34 @@ export default function MotorcycleDetailPage({ motorcycle }: { motorcycle: Motor
         <div className="space-y-6">
           {/* Main Image */}
           <div className="w-full aspect-video relative overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800">
-            {getValidCoverImage() ? (
-              <Image 
-                src={getValidCoverImage() as string} 
-                alt={motorcycle.modelName}
-                fill
-                className="object-cover"
-                priority
-                sizes="(max-width: 768px) 100vw, 50vw"
-                quality={85}
-                loading="eager"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-2xl font-bold mb-1 capitalize text-gray-900 dark:text-white">{motorcycle.brand}</div>
-                  <div className="text-lg text-gray-700 dark:text-gray-300">{motorcycle.modelName}</div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">{motorcycle.modelYear} • {motorcycle.category}</div>
+            {(() => {
+              const fallbackCover = getValidCoverImage()
+              const mainImage = activeImage || fallbackCover
+              if (mainImage) {
+                const mainAlt = `${motorcycle.brand} ${motorcycle.modelName} motorcycle main view`
+                return (
+                  <Image 
+                    src={mainImage as string} 
+                    alt={mainAlt}
+                    fill
+                    className="object-cover"
+                    priority
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    quality={85}
+                    loading="eager"
+                  />
+                )
+              }
+              return (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold mb-1 capitalize text-gray-900 dark:text-white">{motorcycle.brand}</div>
+                    <div className="text-lg text-gray-700 dark:text-gray-300">{motorcycle.modelName}</div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">{motorcycle.modelYear} • {motorcycle.category}</div>
+                  </div>
                 </div>
-              </div>
-            )}
+              )
+            })()}
           </div>
           {/* Credit line outside the image container */}
           {renderCreditLine(motorcycle.coverImage)}
@@ -267,13 +276,18 @@ export default function MotorcycleDetailPage({ motorcycle }: { motorcycle: Motor
                   galleryImages.slice(0, 4).map((img, i) => {
                     console.log(`Rendering gallery image ${i}:`, img)
                     return (
-                      <div key={`${img}-${i}`}>
+                      <button
+                        key={`${img}-${i}`}
+                        type="button"
+                        className="text-left focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 rounded-lg"
+                        onClick={() => setActiveImage(img)}
+                      >
                         <div className="aspect-square relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
                           <Image 
                             src={img} 
-                            alt={`View ${i + 1}`} 
+                            alt={`${motorcycle.brand} ${motorcycle.modelName} gallery view ${i + 1}`}
                             fill
-                            className="object-cover"
+                            className="object-contain"
                             sizes="(max-width: 768px) 25vw, 10vw"
                             quality={80}
                             unoptimized
@@ -282,7 +296,7 @@ export default function MotorcycleDetailPage({ motorcycle }: { motorcycle: Motor
                         </div>
                         {/* Credit line outside the image container */}
                         {renderCreditLine(img)}
-                      </div>
+                      </button>
                     )
                   })
                 ) : (

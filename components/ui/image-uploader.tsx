@@ -157,7 +157,7 @@ export function ImageUploader({
               <div className="aspect-video bg-gray-100 relative">
                 <Image 
                   src={url} 
-                  alt={`Upload ${index + 1}`}
+                  alt={`Preview of uploaded image ${index + 1}`}
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 50vw, 25vw"
