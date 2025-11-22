@@ -12,6 +12,11 @@ const nextConfig = {
         hostname: 'www.bdhonda.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn.sanity.io',
+        pathname: '/**',
+      },
     ],
     // Configure image qualities to avoid warnings
     minimumCacheTTL: 60,
