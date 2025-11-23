@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { sanityClient } from '@/lib/sanity.client'
-import { trackEvent } from '@/lib/ga4'
+import { BlogTrackingLink } from '@/components/blog-tracking-link'
 
 type BlogPost = {
   _id: string
@@ -126,43 +126,35 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                 </p>
                 <ul className="mt-2 space-y-1 text-sm">
                   <li>
-                    <Link
+                    <BlogTrackingLink
                       href="/blog"
                       className={
                         activeCategory
                           ? 'text-muted-foreground hover:text-foreground'
                           : 'font-medium text-foreground'
                       }
-                      onClick={() =>
-                        trackEvent('blog_category_select', {
-                          category_title: 'All',
-                          source: 'sidebar',
-                        })
-                      }
+                      eventName="blog_category_select"
+                      eventParams={{ category_title: 'All', source: 'sidebar' }}
                     >
                       All
-                    </Link>
+                    </BlogTrackingLink>
                   </li>
                   {categories.map((category) => {
                     const isActive = category.title === activeCategory
                     return (
                       <li key={category._id}>
-                        <Link
+                        <BlogTrackingLink
                           href={`/blog?category=${encodeURIComponent(category.title)}`}
                           className={
                             isActive
                               ? 'font-medium text-foreground'
                               : 'text-muted-foreground hover:text-foreground'
                           }
-                          onClick={() =>
-                            trackEvent('blog_category_select', {
-                              category_title: category.title,
-                              source: 'sidebar',
-                            })
-                          }
+                          eventName="blog_category_select"
+                          eventParams={{ category_title: category.title, source: 'sidebar' }}
                         >
                           {category.title}
-                        </Link>
+                        </BlogTrackingLink>
                       </li>
                     )
                   })}
@@ -177,24 +169,20 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                 <h2 className="text-base font-semibold">Blog</h2>
               </div>
               <div className="flex gap-2 overflow-x-auto pb-1">
-                <Link
+                <BlogTrackingLink
                   href="/blog"
                   className={`whitespace-nowrap rounded-full border px-3 py-1 text-xs ${
                     activeCategory
                       ? 'text-muted-foreground'
                       : 'bg-foreground text-background border-foreground'
                   }`}
-                  onClick={() =>
-                    trackEvent('blog_category_select', {
-                      category_title: 'All',
-                      source: 'chip',
-                    })
-                  }
+                  eventName="blog_category_select"
+                  eventParams={{ category_title: 'All', source: 'chip' }}
                 >
                   All
-                </Link>
+                </BlogTrackingLink>
                 {categories.map((category) => (
-                  <Link
+                  <BlogTrackingLink
                     key={category._id}
                     href={`/blog?category=${encodeURIComponent(category.title)}`}
                     className={`whitespace-nowrap rounded-full border px-3 py-1 text-xs ${
@@ -202,15 +190,11 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                         ? 'bg-foreground text-background border-foreground'
                         : 'text-muted-foreground'
                     }`}
-                    onClick={() =>
-                      trackEvent('blog_category_select', {
-                        category_title: category.title,
-                        source: 'chip',
-                      })
-                    }
+                    eventName="blog_category_select"
+                    eventParams={{ category_title: category.title, source: 'chip' }}
                   >
                     {category.title}
-                  </Link>
+                  </BlogTrackingLink>
                 ))}
               </div>
             </div>
@@ -288,18 +272,14 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                         </p>
                       )}
                       <div className="mt-2">
-                        <Link
+                        <BlogTrackingLink
                           href={`/blog/${post.slug}`}
                           className="text-xs font-medium text-primary hover:underline"
-                          onClick={() =>
-                            trackEvent('read_more_click', {
-                              post_slug: post.slug,
-                              post_title: post.title,
-                            })
-                          }
+                          eventName="read_more_click"
+                          eventParams={{ post_slug: post.slug, post_title: post.title }}
                         >
                           Read more
-                        </Link>
+                        </BlogTrackingLink>
                       </div>
                     </div>
                   </article>
