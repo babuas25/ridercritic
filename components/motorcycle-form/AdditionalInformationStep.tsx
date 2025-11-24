@@ -300,24 +300,37 @@ export default function AdditionalInformationStep({
             Add Tag
           </Button>
         </div>
+        <div className="flex items-center gap-2">
+          <Input
+            placeholder="Add a tag or keyword (e.g., yamaha, scooter)"
+            value={newTag}
+            onChange={(e) => setNewTag(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && addTag()}
+            className="flex-1"
+          />
+          <Button type="button" onClick={addTag} size="sm">
+            <Plus className="w-4 h-4 mr-1" />
+            Add
+          </Button>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {formData.tags.map((tag, index) => (
             <div key={index} className="flex gap-2">
-              <Input
-                placeholder="e.g., sports bike, 160cc"
-                value={tag}
-                onChange={(e) => updateTag(index, e.target.value)}
-                className="flex-1"
-              />
-              <Button
-                type="button"
-                variant="destructive"
-                size="sm"
-                onClick={() => removeTag(index)}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
+            <Input
+              placeholder="e.g., sports bike, 160cc"
+              value={tag}
+              onChange={(e) => updateTag(index, e.target.value)}
+              className="flex-1"
+            />
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={() => removeTag(index)}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
           ))}
         </div>
       </div>
@@ -329,6 +342,19 @@ export default function AdditionalInformationStep({
           <Button type="button" onClick={addRelatedModel} size="sm" variant="outline">
             <Plus className="w-4 h-4 mr-1" />
             Add Model
+          </Button>
+        </div>
+        <div className="flex items-center gap-2">
+          <Input
+            placeholder="Add a related model (e.g., Honda ADV 150)"
+            value={newRelatedModel}
+            onChange={(e) => setNewRelatedModel(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && addRelatedModel()}
+            className="flex-1"
+          />
+          <Button type="button" onClick={addRelatedModel} size="sm">
+            <Plus className="w-4 h-4 mr-1" />
+            Add
           </Button>
         </div>
         {formData.relatedModels.map((model, index) => (

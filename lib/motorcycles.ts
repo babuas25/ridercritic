@@ -19,6 +19,27 @@ import { MotorcycleFormData } from '@/types/motorcycle'
 
 const MOTORCYCLES_COLLECTION = 'motorcycles'
 
+// Helper to ensure we never send Firestore-unsupported nested arrays
+function sanitizeMotorcycleForFirestore<T extends Partial<MotorcycleFormData> | MotorcycleFormData>(
+  data: T
+): T {
+  const clone: Partial<MotorcycleFormData> = { ...data }
+
+  // colorImages is typed as string[][] in the form model, but Firestore
+  // does not support nested arrays. For now, ensure we never send it
+  // as a nested array. You can later refactor this field to a supported
+  // structure (e.g., array of objects) if you want to persist it.
+  if (Array.isArray(clone.colorImages)) {
+    // If any element is an array, drop the whole field for Firestore write.
+    const hasNestedArray = clone.colorImages.some((item: unknown) => Array.isArray(item))
+    if (hasNestedArray) {
+      delete clone.colorImages
+    }
+  }
+
+  return clone as T
+}
+
 /**
  * Create a new motorcycle document
  * @param motorcycleData - Motorcycle form data
@@ -33,8 +54,10 @@ export async function createMotorcycle(
     const motorcyclesRef = collection(db, MOTORCYCLES_COLLECTION)
     const newDocRef = doc(motorcyclesRef)
     
+    const sanitizedData = sanitizeMotorcycleForFirestore(motorcycleData)
+
     const motorcycleWithMetadata = {
-      ...motorcycleData,
+      ...sanitizedData,
       id: newDocRef.id,
       createdBy: userId,
       createdAt: serverTimestamp(),
@@ -93,9 +116,11 @@ export async function updateMotorcycle(
     console.log('Gallery images in update data:', motorcycleData.galleryImages); // Specific debug for gallery images
     
     const motorcycleRef = doc(db, MOTORCYCLES_COLLECTION, motorcycleId);
-    
+
+    const sanitizedData = sanitizeMotorcycleForFirestore(motorcycleData)
+
     const updateData = {
-      ...motorcycleData,
+      ...sanitizedData,
       updatedAt: serverTimestamp(),
       lastUpdatedBy: userId,
       lastUpdatedDate: new Date().toISOString()
