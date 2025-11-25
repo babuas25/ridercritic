@@ -3,6 +3,10 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'News | ridercritic',
   description: 'Motorcycle news, launches, and updates relevant to riders in Bangladesh and beyond.',
+  robots: {
+    index: false,
+    follow: false,
+  },
 }
 
 export default function NewsPage() {

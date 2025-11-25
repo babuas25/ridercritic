@@ -1,7 +1,7 @@
 // Generate metadata for the critics listing page
 export async function generateMetadata() {
   const title = 'Motorcycle Critics & Reviews - ridercritic'
-  const description = 'রাইডারদের জন্য বাইক রিভিউ এবং মোটরসাইকেল গাইড। Discover expert bike reviews, comparisons, prices & riding culture in Bangladesh and beyond.'
+  const description = 'Browse curated motorcycle critic articles, long-term reviews, and opinion pieces from the ridercritic community.'
 
   return {
     title,

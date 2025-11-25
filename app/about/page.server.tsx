@@ -1,7 +1,7 @@
 // Generate metadata for the about page
 export async function generateMetadata() {
   const title = 'About RiderCritic - Motorcycle Reviews & Community'
-  const description = 'রাইডারদের জন্য বাইক রিভিউ এবং মোটরসাইকেল গাইড। Discover expert bike reviews, comparisons, prices & riding culture in Bangladesh and beyond.'
+  const description = 'Learn how ridercritic helps Bangladeshi riders with in-depth motorcycle reviews, comparisons, and community-driven insights.'
 
   return {
     title,

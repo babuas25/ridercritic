@@ -3,6 +3,10 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Tips & guides | ridercritic',
   description: 'Practical motorcycle tips, riding guides, and maintenance checklists from the ridercritic team.',
+  robots: {
+    index: false,
+    follow: false,
+  },
 }
 
 export default function TipsPage() {

@@ -3,6 +3,10 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Upcoming bikes | ridercritic',
   description: 'Upcoming motorcycles and scooters expected in the Bangladeshi market.',
+  robots: {
+    index: false,
+    follow: false,
+  },
 }
 
 export default function UpcomingPage() {

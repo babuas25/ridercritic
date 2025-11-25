@@ -27,6 +27,10 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: ['https://ridercritic.com/og-offers.jpg'],
     },
+    robots: {
+      index: false,
+      follow: false,
+    },
     alternates: {
       canonical: 'https://ridercritic.com/offers',
     },

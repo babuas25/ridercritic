@@ -74,52 +74,16 @@ export default function Footer() {
               Critics
             </Link>
             <Link 
-              href="/tips"
-              className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
-            >
-              Tips &amp; guides
-            </Link>
-            <Link 
-              href="/news"
-              className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
-            >
-              News
-            </Link>
-            <Link 
-              href="/upcoming"
-              className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
-            >
-              Upcoming
-            </Link>
-            <Link 
               href="/blog"
               className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
             >
               Blog
             </Link>
             <Link 
-              href="/products"
-              className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
-            >
-              Products
-            </Link>
-            <Link 
-              href="/accessories"
-              className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
-            >
-              Accessories
-            </Link>
-            <Link 
               href="/comparisons"
               className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
             >
               Comparisons
-            </Link>
-            <Link 
-              href="/offers"
-              className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
-            >
-              Offers
             </Link>
             <Link 
               href="/brands"

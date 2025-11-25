@@ -5,7 +5,7 @@ import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
@@ -175,7 +175,7 @@ function AuthForm() {
       <div className="max-w-md w-full space-y-8">
         <Card>
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">Welcome to RiderCritic</CardTitle>
+            <h1 className="text-2xl text-center font-semibold">Welcome to RiderCritic</h1>
             <CardDescription className="text-center">
               Sign in to your account or create a new one
             </CardDescription>

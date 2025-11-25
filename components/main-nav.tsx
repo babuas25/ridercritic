@@ -28,53 +28,28 @@ export default function MainNav() {
             Critics / Reviews
           </Link>
           <Link
-            href="/tips"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-          >
-            Tips &amp; guides
-          </Link>
-          <Link
-            href="/news"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-          >
-            News
-          </Link>
-          <Link
-            href="/upcoming"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-          >
-            Upcoming
-          </Link>
-          <Link
             href="/blog"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
           >
             Blog
           </Link>
           <Link
-            href="/products"
+            href="/loan-calculator"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
           >
-            Products
+            Loan Calculator
+          </Link>
+          <Link
+            href="/fuel-calculator"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+          >
+            Fuel Calculator
           </Link>
           <Link
             href="/comparisons"
             className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
           >
             Comparisons
-          </Link>
-          <Link
-            href="/offers"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-          >
-            Offers
-          </Link>
-          <Link
-            href="/accessories"
-            rel="nofollow"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-          >
-            Accessories (Coming Soon)
           </Link>
           <Link
             href="/about"

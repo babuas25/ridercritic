@@ -1,7 +1,7 @@
 // Generate metadata for the products listing page
 export async function generateMetadata() {
   const title = 'Motorcycle Products & Gear - ridercritic'
-  const description = 'রাইডারদের জন্য বাইক রিভিউ এবং মোটরসাইকেল গাইড। Discover expert bike reviews, comparisons, prices & riding culture in Bangladesh and beyond.'
+  const description = 'Find helmets, jackets, gloves, and essential motorcycle gear recommendations tailored for riders in Bangladesh.'
 
   return {
     title,
@@ -25,6 +25,10 @@ export async function generateMetadata() {
       title,
       description,
       images: ['https://ridercritic.com/og-products.jpg'],
+    },
+    robots: {
+      index: false,
+      follow: false,
     },
     alternates: {
       canonical: 'https://ridercritic.com/products'

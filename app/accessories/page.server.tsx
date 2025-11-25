@@ -1,7 +1,7 @@
 // Generate metadata for the accessories listing page
 export async function generateMetadata() {
   const title = 'Motorcycle Accessories & Customization - ridercritic'
-  const description = 'রাইডারদের জন্য বাইক রিভিউ এবং মোটরসাইকেল গাইড। Discover expert bike reviews, comparisons, prices & riding culture in Bangladesh and beyond.'
+  const description = 'Explore motorcycle accessories, luggage, and customization ideas to make your bike more practical, comfortable, and stylish in Bangladesh.'
 
   return {
     title,
@@ -28,7 +28,7 @@ export async function generateMetadata() {
     },
     robots: {
       index: false,
-      follow: false
+      follow: false,
     },
     alternates: {
       canonical: 'https://ridercritic.com/accessories'
