@@ -118,6 +118,12 @@ export default function RootLayout({
             </Script>
           </>
         )}
+        <Script
+          src="https://analytics.ahrefs.com/analytics.js"
+          data-key="IoRzph14icFBr8LciJnCbQ"
+          async
+          strategy="afterInteractive"
+        />
       </head>
       <body className={cn(
         "min-h-screen bg-background antialiased",
