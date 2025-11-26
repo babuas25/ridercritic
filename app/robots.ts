@@ -1,8 +1,8 @@
 import type { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
-  const base = 'ridercritic.com'
-
+  const base = 'https://ridercritic.com'
+  
   return {
     rules: {
       userAgent: '*',
@@ -10,6 +10,6 @@ export default function robots(): MetadataRoute.Robots {
       // accessories page already uses page-level robots: noindex,nofollow
     },
     sitemap: `${base}/sitemap.xml`,
-    host: base,
+    host: 'ridercritic.com',
   }
 }
