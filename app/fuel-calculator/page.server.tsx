@@ -14,6 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title,
       description,
       type: 'website',
+      url: 'https://ridercritic.com/fuel-calculator',
       images: [
         {
           url: 'https://ridercritic.com/og-fuel-calculator.jpg',

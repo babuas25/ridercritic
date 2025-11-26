@@ -73,9 +73,9 @@ export default function BrandsPageClient() {
   return (
     <div className="container py-8 max-w-6xl mx-auto px-4">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
           All Motorcycle Brands
-        </h1>
+        </h2>
         <p className="text-gray-600 dark:text-gray-400">
           Explore all motorcycle brands available in Bangladesh
         </p>

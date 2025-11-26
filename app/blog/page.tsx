@@ -23,6 +23,9 @@ type BlogCategory = {
 export const metadata: Metadata = {
   title: 'Blog | ridercritic',
   description: 'Stories, editorials, and deep dives from the ridercritic community.',
+  alternates: {
+    canonical: 'https://ridercritic.com/blog',
+  },
 }
 
 const PAGE_SIZE = 6

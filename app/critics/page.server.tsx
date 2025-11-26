@@ -11,6 +11,7 @@ export async function generateMetadata() {
       title,
       description,
       type: 'website',
+      url: 'https://ridercritic.com/critics',
       images: [
         {
           url: 'https://ridercritic.com/og-critics.jpg',

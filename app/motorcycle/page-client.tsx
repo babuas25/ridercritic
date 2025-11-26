@@ -215,9 +215,9 @@ export default function MotorcyclesPageClient() {
   return (
     <div className="container py-8 max-w-6xl mx-auto px-4">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
           {compareMode ? 'Compare Motorcycles' : 'Motorcycle Reviews'}
-        </h1>
+        </h2>
         <p className="text-gray-600 dark:text-gray-400">
           {compareMode
             ? 'Select motorcycles below to compare their specifications side by side.'
