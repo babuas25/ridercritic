@@ -112,6 +112,10 @@ export default function Header() {
                             <Settings className="h-4 w-4" />
                             <span>Types</span>
                           </Link>
+                          <Link href="/dashboard/blog" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                            <Settings className="h-4 w-4" />
+                            <span>Blog Management</span>
+                          </Link>
                         </>
                       )}
 
@@ -138,6 +142,20 @@ export default function Header() {
                             <span>Comparisons</span>
                           </Link>
                         </>
+                      )}
+
+                      {userRole === 'Freelancer Admin' && (
+                        <Link href="/dashboard/blog" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                          <Settings className="h-4 w-4" />
+                          <span>Blog Management</span>
+                        </Link>
+                      )}
+
+                      {userRole === 'User Admin' && userSubRole === 'CriticMaster' && (
+                        <Link href="/dashboard/blog" className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-muted">
+                          <Settings className="h-4 w-4" />
+                          <span>Blog Management</span>
+                        </Link>
                       )}
                     </>
                   ) : (
